@@ -1,0 +1,58 @@
+You are to build a full-stack web application called “Preserving Indigenous Weaving Through Digital Platforms” using the following stack:
+- Frontend: React + Tailwind CSS + shadcn
+- Backend: Laravel (as API provider)
+- Database: MySQL
+- Deployment-ready code
+- Storage for media uploads (images/videos)
+
+The platform’s purpose is to preserve Cordillera weaving by enabling:
+1. E-commerce for selling weaving products.
+2. Digital storytelling through blogs, short films, and photo galleries.
+3. Online fundraising via crowdfunding campaigns.
+4. Visual media showcase with mobile photography and graphic design.
+
+=== Requirements ===
+**Frontend (React + Tailwind CSS + shadcn)**
+- Create pages:
+  - Home: Intro about Cordillera weaving + featured products + featured stories.
+  - Marketplace: Product listing with filters (type, price, popularity) and search.
+  - Product Details: Price, description, cultural background, and buy button.
+  - Storytelling: Blog/video gallery page with individual story detail view.
+  - Fundraising: Campaign listing with progress bars, donation forms.
+  - User Dashboard: Upload products, stories, and fundraising campaigns.
+- Use shadcn components for UI (cards, modals, buttons, forms, progress bars).
+- Fully responsive design with Cordillera-inspired colors and fonts.
+
+**Backend (Laravel)**
+- REST API endpoints for:
+  - User authentication (Laravel Sanctum)
+  - CRUD for products, stories, campaigns
+  - Orders and donations
+  - File upload for images/videos (Laravel storage)
+- Payment integration for sales and donations (Stripe/PayPal, with placeholder service for now)
+- Campaign progress auto-updates upon donation
+- API follows JSON:API structure
+
+**Database (MySQL)**
+Tables:
+- users: id, name, email, role (weaver, buyer, admin), password
+- products: id, name, price, category, description, image, user_id
+- stories: id, title, content, media_url, author_id
+- campaigns: id, title, description, goal_amount, current_amount, end_date
+- orders: id, product_id, buyer_id, status
+- donations: id, campaign_id, donor_id, amount
+
+**Additional Features**
+- Image/video gallery with zoom and fullscreen
+- Search & filter for products and stories
+- Share buttons for social media
+- Basic analytics for sellers (views, sales, donations)
+- Multilingual support structure (English, Tagalog, local dialects)
+
+**Deployment**
+- Frontend: Vercel/Netlify
+- Backend: Laravel Forge or DigitalOcean
+- Storage: AWS S3 or Laravel public storage
+- SSL and CDN: Cloudflare
+
+Generate code for the initial scaffold with clear folder structure and sample dummy data for products, stories, and campaigns so the UI is viewable immediately.
