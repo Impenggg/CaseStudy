@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { triggerAction } from '../lib/uiActions';
 import { Link } from 'react-router-dom';
 
 interface Story {
@@ -229,7 +230,6 @@ const StoriesPage: React.FC = () => {
   const totalStoryCount = allContent.filter(item => item.type === 'story').length;
   const totalCampaignCount = allContent.filter(item => item.type === 'campaign').length;
 
-
   // Clear all filters function
   const clearAllFilters = () => {
     setSearchTerm('');
@@ -252,7 +252,7 @@ const StoriesPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cordillera-olive">
-      {/* Compact header (similar to marketplace but without image) */}
+      {/* Compact header */}
       <section className="bg-cordillera-olive py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl md:text-5xl font-serif font-light text-cordillera-cream mb-2">Stories & Campaigns</h1>
@@ -262,289 +262,9 @@ const StoriesPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Featured Story - Full width with dark olive background */}
-      {featuredStory && (
-        <section className="relative py-12 bg-cordillera-olive">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-cordillera-olive border border-cordillera-gold/30 overflow-hidden">
-              <div className="grid md:grid-cols-2 gap-0">
-                <div className="aspect-video md:aspect-[4/5] overflow-hidden">
-                  <img
-                    src={featuredStory.media_url}
-                    alt={featuredStory.title}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                  />
-                </div>
-                <div className="p-8 flex flex-col justify-center">
-                  <span className="text-cordillera-gold text-sm font-medium uppercase tracking-wider mb-3">
-                    Featured Story
-                  </span>
-                  <h2 className="text-2xl md:text-3xl font-serif text-cordillera-cream mb-4 leading-tight">
-                    {featuredStory.title}
-                  </h2>
-                  <p className="text-cordillera-cream/80 mb-6 text-sm md:text-base leading-relaxed">
-                    {featuredStory.content}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <Link
-                      to={`/story/${featuredStory.id}`}
-                      className="group relative inline-flex items-center justify-center border-2 border-cordillera-cream text-cordillera-cream px-6 py-3 font-medium rounded-lg bg-cordillera-cream/10 backdrop-blur-sm shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:bg-cordillera-gold hover:text-cordillera-olive hover:border-cordillera-gold"
-                    >
-                      <svg className="w-5 h-5 mr-2 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                      Read Full Story
-                    </Link>
-                    <div className="text-right text-cordillera-cream/60 text-sm">
-                      <p>By {featuredStory.author}</p>
-                      <p>{featuredStory.readTime} min read</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Featured Campaign - Sage green background with gradient overlay */}
-      {featuredCampaign && (
-        <section className="relative py-20">
-          <div className="absolute inset-0">
-            <img
-              src={featuredCampaign.image}
-              alt={featuredCampaign.title}
-              className="w-full h-full object-cover"
-            />
-            {/* Sage green gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-cordillera-sage via-cordillera-sage/80 to-cordillera-sage/60"></div>
-          </div>
-          
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="max-w-4xl mx-auto">
-              <span className="text-cordillera-gold text-sm font-medium uppercase tracking-wider mb-3 inline-block">
-                Featured Campaign
-              </span>
-              <h2 className="text-5xl font-serif text-cordillera-olive mb-6 leading-tight">
-                {featuredCampaign.title}
-              </h2>
-              <p className="text-cordillera-olive/80 mb-8 text-xl leading-relaxed max-w-2xl mx-auto">
-                {featuredCampaign.description}
-              </p>
-              
-              {/* Progress Bar */}
-              <div className="mb-8 max-w-2xl mx-auto">
-                <div className="flex justify-between text-cordillera-olive/80 text-sm mb-3">
-                  <span>Progress: {getProgressPercentage(featuredCampaign.currentAmount, featuredCampaign.goalAmount).toFixed(0)}%</span>
-                  <span>₱{featuredCampaign.currentAmount.toLocaleString()} of ₱{featuredCampaign.goalAmount.toLocaleString()}</span>
-                </div>
-                <div className="h-3 bg-cordillera-olive/20 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-cordillera-gold rounded-full transition-all duration-500"
-                    style={{ width: `${getProgressPercentage(featuredCampaign.currentAmount, featuredCampaign.goalAmount)}%` }}
-                  ></div>
-                </div>
-                <div className="flex justify-between text-sm text-cordillera-olive/60 mt-2">
-                  <span>By {featuredCampaign.organizer}</span>
-                  <span>Ends {featuredCampaign.endDate}</span>
-                </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="group relative bg-cordillera-gold text-cordillera-olive px-10 py-4 text-lg font-semibold transition-all duration-300 overflow-hidden shadow-md hover:shadow-lg transform hover:-translate-y-0.5 rounded-lg">
-                  <span className="relative z-10 flex items-center justify-center">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    Support This Campaign
-                  </span>
-                  <div className="absolute inset-0 bg-cordillera-olive transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-                  <span className="absolute inset-0 flex items-center justify-center text-cordillera-cream opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 font-semibold">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    Support This Campaign
-                  </span>
-                </button>
-                
-                <button className="group relative border-2 border-cordillera-gold text-cordillera-olive px-8 py-4 text-lg font-medium transition-all duration-300 hover:bg-cordillera-gold/10 backdrop-blur-sm rounded-lg">
-                  <span className="flex items-center justify-center">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                    </svg>
-                    Share Campaign
-                  </span>
-              </button>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Content Section - Cream green background */}
+      {/* Content Grid */}
       <section className="py-20 bg-cordillera-cream">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Enhanced Filter Section */}
-          <div className="mb-12">
-            <div className="text-center mb-8">
-              <h2 className="text-4xl font-serif text-cordillera-olive mb-4">Heritage Content</h2>
-              <p className="text-cordillera-olive/60 max-w-2xl mx-auto mb-6">
-                Explore inspiring stories and support meaningful initiatives that preserve our cultural heritage
-              </p>
-              
-              {/* Search Bar */}
-              <div className="max-w-md mx-auto mb-8">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search stories and campaigns..."
-                    className="w-full px-6 py-4 pl-14 bg-white border-2 border-cordillera-sage/30 rounded-full text-cordillera-olive placeholder-cordillera-olive/50 focus:outline-none focus:border-cordillera-gold focus:ring-4 focus:ring-cordillera-gold/20 transition-all duration-300 shadow-md"
-                  />
-                  <svg className="absolute left-5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-cordillera-olive/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                  {searchTerm && (
-                    <button
-                      onClick={() => setSearchTerm('')}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 w-6 h-6 text-cordillera-olive/40 hover:text-cordillera-olive transition-colors"
-                    >
-                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Content Type Filter */}
-            <div className="flex justify-center mb-6">
-              <div className="bg-cordillera-sage/30 p-1 rounded-lg inline-flex">
-                <button
-                  onClick={() => setContentType('all')}
-                  className={`px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-md ${
-                    contentType === 'all'
-                      ? 'bg-cordillera-gold text-cordillera-olive shadow-md'
-                      : 'text-cordillera-olive hover:bg-cordillera-gold/20'
-                  }`}
-                >
-                  All Content ({filteredContent.length})
-                </button>
-                <button
-                  onClick={() => setContentType('stories')}
-                  className={`px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-md ${
-                    contentType === 'stories'
-                      ? 'bg-cordillera-gold text-cordillera-olive shadow-md'
-                      : 'text-cordillera-olive hover:bg-cordillera-gold/20'
-                  }`}
-                >
-                  Stories ({totalStoryCount})
-                </button>
-                <button
-                  onClick={() => setContentType('campaigns')}
-                  className={`px-6 py-3 text-sm font-semibold transition-all duration-300 rounded-md ${
-                    contentType === 'campaigns'
-                      ? 'bg-cordillera-gold text-cordillera-olive shadow-md'
-                      : 'text-cordillera-olive hover:bg-cordillera-gold/20'
-                  }`}
-                >
-                  Campaigns ({totalCampaignCount})
-                </button>
-              </div>
-            </div>
-
-            {/* Category Filter */}
-            <div className="flex flex-wrap justify-center gap-3">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`px-4 py-2 text-sm font-medium transition-all duration-300 rounded-full ${
-                    selectedCategory === category
-                      ? 'bg-cordillera-olive text-cordillera-cream shadow-md'
-                      : 'bg-cordillera-sage text-cordillera-olive hover:bg-cordillera-olive hover:text-cordillera-cream'
-                  }`}
-                >
-                  {category === 'all' ? 'All Categories' : category}
-                </button>
-              ))}
-        </div>
-
-            {/* Results Summary & Active Filters */}
-            <div className="border-t border-cordillera-sage/30 pt-6">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                <div className="flex items-center space-x-4">
-                  <div className="text-cordillera-olive">
-                    <span className="text-lg font-semibold">{filteredContent.length}</span>
-                    <span className="text-sm text-cordillera-olive/60 ml-1">
-                      {filteredContent.length === 1 ? 'result' : 'results'}
-                      {(searchTerm || selectedCategory !== 'all' || contentType !== 'all') && ' found'}
-                    </span>
-                  </div>
-                  {(searchTerm || selectedCategory !== 'all' || contentType !== 'all') && (
-                    <button
-                      onClick={clearAllFilters}
-                      className="text-sm text-cordillera-gold hover:text-cordillera-olive transition-colors flex items-center"
-                    >
-                      <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                      Clear all filters
-                    </button>
-                  )}
-                </div>
-                
-                {/* Active Filters Display */}
-                {(searchTerm || selectedCategory !== 'all' || contentType !== 'all') && (
-                  <div className="flex flex-wrap gap-2">
-                    {searchTerm && (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-cordillera-gold/20 text-cordillera-olive">
-                        Search: "{searchTerm}"
-                        <button
-                          onClick={() => setSearchTerm('')}
-                          className="ml-2 w-4 h-4 hover:text-cordillera-olive/60"
-                        >
-                          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </span>
-                    )}
-                    {contentType !== 'all' && (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-cordillera-sage/30 text-cordillera-olive">
-                        Type: {contentType === 'stories' ? 'Stories' : 'Campaigns'}
-                        <button
-                          onClick={() => setContentType('all')}
-                          className="ml-2 w-4 h-4 hover:text-cordillera-olive/60"
-                        >
-                          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </span>
-                    )}
-                    {selectedCategory !== 'all' && (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-cordillera-olive/20 text-cordillera-olive">
-                        Category: {selectedCategory}
-                        <button
-                          onClick={() => setSelectedCategory('all')}
-                          className="ml-2 w-4 h-4 hover:text-cordillera-olive/60"
-                        >
-                          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Combined Content Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {regularContent.map((item) => (
               <div key={`${item.type}-${item.id}`} className="group block bg-white shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden rounded-lg border border-cordillera-sage/20">
@@ -557,7 +277,6 @@ const StoriesPage: React.FC = () => {
                         alt={item.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
-                      {/* Story Badge */}
                       <div className="absolute top-4 left-4 bg-cordillera-olive/90 text-cordillera-cream px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur-sm rounded">
                         Story
                       </div>
@@ -587,12 +306,9 @@ const StoriesPage: React.FC = () => {
                         alt={item.title}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
-                      {/* Campaign Badge */}
                       <div className="absolute top-4 left-4 bg-cordillera-gold/90 text-cordillera-olive px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur-sm rounded">
                         Campaign
                       </div>
-                      {/* Hover Overlay */}
-                      <div className="absolute inset-0 bg-cordillera-sage/0 group-hover:bg-cordillera-sage/20 transition-colors duration-300"></div>
                     </div>
                     <div className="p-8">
                       <span className="text-cordillera-gold text-xs font-medium uppercase tracking-wider">
@@ -621,9 +337,12 @@ const StoriesPage: React.FC = () => {
                       </div>
 
                       <div className="flex justify-between items-center">
-                        <button className="bg-cordillera-gold text-cordillera-olive px-6 py-3 text-sm font-medium hover:bg-cordillera-gold/90 transition-colors rounded">
+                        <Link 
+                          to={`/campaign/${item.id}`}
+                          className="bg-cordillera-gold text-cordillera-olive px-6 py-3 text-sm font-medium hover:bg-cordillera-gold/90 transition-colors rounded cursor-pointer"
+                        >
                           Support Now
-                        </button>
+                        </Link>
                         <div className="text-right text-xs text-cordillera-olive/50">
                           <p>By {(item as Campaign).organizer}</p>
                           <p>Ends {(item as Campaign).endDate}</p>
@@ -635,91 +354,39 @@ const StoriesPage: React.FC = () => {
               </div>
             ))}
           </div>
-
-          {/* Enhanced Empty State */}
-          {regularContent.length === 0 && (
-            <div className="text-center py-20">
-              <div className="max-w-md mx-auto">
-                <div className="w-24 h-24 mx-auto mb-6 bg-cordillera-sage/20 rounded-full flex items-center justify-center">
-                  <svg className="w-12 h-12 text-cordillera-olive/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-serif text-cordillera-olive mb-4">
-                  No Content Found
-                </h3>
-                <p className="text-cordillera-olive/60 text-lg mb-8 leading-relaxed">
-                  We couldn't find any {contentType === 'stories' ? 'stories' : contentType === 'campaigns' ? 'campaigns' : 'content'} matching your criteria. 
-                  Try adjusting your filters or browse our full collection.
-                </p>
-                <button
-                  onClick={clearAllFilters}
-                  className="group relative bg-cordillera-gold text-cordillera-olive px-8 py-4 font-semibold hover:bg-cordillera-gold/90 transition-all duration-300 overflow-hidden shadow-md hover:shadow-lg transform hover:-translate-y-0.5 rounded-lg"
-                >
-                  <span className="relative z-10 flex items-center">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    View All Content
-                  </span>
-                  <div className="absolute inset-0 bg-cordillera-olive transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-                  <span className="absolute inset-0 flex items-center justify-center text-cordillera-cream opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 font-semibold">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    View All Content
-                  </span>
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </section>
 
-      {/* Enhanced Call to Action Section */}
+      {/* Call to Action Section */}
       <section className="py-14 bg-cordillera-sage">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-8 items-center">
-            {/* Share Your Story */}
             <div className="text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start mb-4">
-                <svg className="w-8 h-8 text-cordillera-gold mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                <h3 className="text-2xl font-serif text-cordillera-olive">Share Your Story</h3>
-              </div>
+              <h3 className="text-2xl font-serif text-cordillera-olive mb-4">Share Your Story</h3>
               <p className="text-cordillera-olive/80 text-base mb-5 leading-relaxed">
-                Are you a weaver with a story to tell? We'd love to feature your journey, 
-                techniques, and cultural insights to inspire others and preserve our heritage.
+                Are you a weaver with a story to tell? We'd love to feature your journey.
               </p>
-              <button className="group relative inline-flex items-center justify-center border-2 border-cordillera-olive text-cordillera-olive px-6 py-3 text-base font-medium rounded-lg bg-cordillera-cream/10 backdrop-blur-sm shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:bg-cordillera-gold hover:text-cordillera-olive hover:border-cordillera-gold">
-                <svg className="w-5 h-5 mr-2 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
+              <Link 
+                to="/submit-story"
+                className="group relative inline-flex items-center justify-center border-2 border-cordillera-olive text-cordillera-olive px-6 py-3 text-base font-medium rounded-lg bg-cordillera-cream/10 backdrop-blur-sm shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:bg-cordillera-gold hover:text-cordillera-olive hover:border-cordillera-gold"
+              >
                 Submit Your Story
-              </button>
-        </div>
+              </Link>
+            </div>
 
-            {/* Start Your Campaign */}
             <div className="text-center md:text-left">
-              <div className="flex items-center justify-center md:justify-start mb-4">
-                <svg className="w-8 h-8 text-cordillera-gold mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                <h3 className="text-2xl font-serif text-cordillera-olive">Start Your Campaign</h3>
-              </div>
+              <h3 className="text-2xl font-serif text-cordillera-olive mb-4">Start Your Campaign</h3>
               <p className="text-cordillera-olive/80 text-base mb-5 leading-relaxed">
-                Have a project that supports Cordillera weaving heritage? Launch your own campaign 
-                and rally community support for preserving our cultural traditions.
+                Have a project that supports Cordillera weaving heritage? Launch your own campaign.
               </p>
-              <button className="group relative inline-flex items-center justify-center border-2 border-cordillera-olive text-cordillera-olive px-6 py-3 text-base font-medium rounded-lg bg-cordillera-cream/10 backdrop-blur-sm shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:bg-cordillera-gold hover:text-cordillera-olive hover:border-cordillera-gold">
-                <svg className="w-5 h-5 mr-2 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+              <Link 
+                to="/create-campaign"
+                className="group relative inline-flex items-center justify-center border-2 border-cordillera-olive text-cordillera-olive px-6 py-3 text-base font-medium rounded-lg bg-cordillera-cream/10 backdrop-blur-sm shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:bg-cordillera-gold hover:text-cordillera-olive hover:border-cordillera-gold"
+              >
                 Create Campaign
-              </button>
-        </div>
-      </div>
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </div>

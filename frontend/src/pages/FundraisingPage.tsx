@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { triggerAction } from '../lib/uiActions';
 
 interface Campaign {
   id: number;
@@ -163,7 +164,7 @@ const FundraisingPage: React.FC = () => {
                 <p className="text-sm text-cordillera-olive/60 mt-2">Ends {featuredCampaign.endDate}</p>
               </div>
 
-              <button className="bg-cordillera-gold text-cordillera-olive px-10 py-4 text-lg font-medium hover:bg-cordillera-olive hover:text-cordillera-cream transition-all duration-200">
+              <button onClick={() => triggerAction('Support Featured Campaign')} className="bg-cordillera-gold text-cordillera-olive px-10 py-4 text-lg font-medium hover:bg-cordillera-olive hover:text-cordillera-cream transition-all duration-200">
                 Support This Campaign
               </button>
             </div>
@@ -238,7 +239,7 @@ const FundraisingPage: React.FC = () => {
                   </div>
 
                   <div className="flex justify-between items-center">
-                    <button className="bg-cordillera-gold text-cordillera-olive px-6 py-3 text-sm font-medium hover:bg-cordillera-gold/90 transition-colors">
+                    <button onClick={() => triggerAction(`Donate to ${campaign.title}`)} className="bg-cordillera-gold text-cordillera-olive px-6 py-3 text-sm font-medium hover:bg-cordillera-gold/90 transition-colors">
                       Donate Now
                     </button>
                     <div className="text-right text-xs text-cordillera-olive/50">
@@ -278,7 +279,7 @@ const FundraisingPage: React.FC = () => {
             Have a project that supports Cordillera weaving heritage? Launch your own fundraising campaign 
             and rally community support for preserving our cultural traditions.
           </p>
-          <button className="bg-cordillera-gold text-cordillera-olive px-8 py-4 text-lg font-medium hover:bg-cordillera-gold/90 transition-colors">
+              <button onClick={() => triggerAction('Create Campaign CTA')} className="bg-cordillera-gold text-cordillera-olive px-8 py-4 text-lg font-medium hover:bg-cordillera-gold/90 transition-colors">
             Create Campaign
           </button>
         </div>

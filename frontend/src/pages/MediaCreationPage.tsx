@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { triggerAction } from '../lib/uiActions';
 
 interface FeaturedCreation {
   id: number;
@@ -394,7 +395,7 @@ const MediaCreationPage: React.FC = () => {
                           New Image
                         </button>
                         <button 
-                          onClick={(e) => e.stopPropagation()}
+                          onClick={(e) => { e.stopPropagation(); triggerAction('Save Image'); }}
                           className="flex-1 border-2 border-cordillera-gold text-cordillera-olive px-4 py-3 rounded-md hover:bg-cordillera-gold/10 transition-colors flex items-center justify-center group"
                         >
                           <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

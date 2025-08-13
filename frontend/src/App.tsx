@@ -6,6 +6,9 @@ import MarketplacePage from './pages/MarketplacePage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import StoriesPage from './pages/StoriesPage';
 import StoryDetailPage from './pages/StoryDetailPage';
+import CampaignDetailPage from './pages/CampaignDetailPage';
+import StorySubmissionPage from './pages/StorySubmissionPage';
+import CampaignCreationPage from './pages/CampaignCreationPage';
 import MediaCreationPage from './pages/MediaCreationPage';
 
 // Error Boundary Component
@@ -62,6 +65,9 @@ const App: React.FC = () => {
           <Route path="/product/:id" element={<Layout><ProductDetailPage /></Layout>} />
           <Route path="/stories" element={<Layout><StoriesPage /></Layout>} />
           <Route path="/story/:id" element={<Layout><StoryDetailPage /></Layout>} />
+          <Route path="/campaign/:id" element={<Layout><CampaignDetailPage /></Layout>} />
+          <Route path="/submit-story" element={<Layout><StorySubmissionPage /></Layout>} />
+          <Route path="/create-campaign" element={<Layout><CampaignCreationPage /></Layout>} />
           <Route path="/media-creation" element={<Layout><MediaCreationPage /></Layout>} />
 
           {/* 404 Page */}

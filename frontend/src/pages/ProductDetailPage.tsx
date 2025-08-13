@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { triggerAction } from '../lib/uiActions';
 import { useParams, Link } from 'react-router-dom';
 
 interface Product {
@@ -233,7 +234,7 @@ const ProductDetailPage: React.FC = () => {
                 </span>
               </div>
 
-              <button className="w-full bg-cordillera-gold text-cordillera-olive py-4 text-lg font-medium hover:bg-cordillera-olive hover:text-cordillera-cream transition-all duration-200 tracking-wide">
+               <button onClick={() => triggerAction(`Add ${product.name} to cart`)} className="w-full bg-cordillera-gold text-cordillera-olive py-4 text-lg font-medium hover:bg-cordillera-olive hover:text-cordillera-cream transition-all duration-200 tracking-wide">
                 Add to Cart
               </button>
             </div>
