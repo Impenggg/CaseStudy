@@ -53,27 +53,18 @@ const StoryDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cordillera-olive">
-      {/* Hero Section with Story Image */}
-      <section className="relative h-96 overflow-hidden">
-        <img
-          src={story.media_url}
-          alt={story.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-cordillera-olive/60"></div>
-        
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center max-w-4xl px-4">
-            <h1 className="text-5xl md:text-6xl font-serif text-cordillera-cream mb-4 leading-tight">
-              {story.title}
-            </h1>
-            <div className="flex items-center justify-center space-x-4 text-cordillera-cream/80">
-              <span className="text-cordillera-gold font-medium">By {story.author}</span>
-              <span>•</span>
-              <span>{story.date}</span>
-              <span>•</span>
-              <span className="bg-cordillera-gold/20 px-3 py-1 text-sm">{story.category}</span>
-            </div>
+      {/* Compact Header (no image) */}
+      <section className="bg-cordillera-olive py-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-4xl md:text-5xl font-serif text-cordillera-cream mb-3 leading-tight">
+            {story.title}
+          </h1>
+          <div className="flex items-center space-x-4 text-cordillera-cream/80">
+            <span className="text-cordillera-gold font-medium">By {story.author}</span>
+            <span>•</span>
+            <span>{story.date}</span>
+            <span>•</span>
+            <span className="bg-cordillera-gold/20 px-3 py-1 text-sm">{story.category}</span>
           </div>
         </div>
       </section>
@@ -88,6 +79,15 @@ const StoryDetailPage: React.FC = () => {
             <span className="mx-2">/</span>
             <span className="text-cordillera-cream">{story.title}</span>
           </nav>
+          {/* Return Button */}
+          <div className="mt-3">
+            <Link to="/stories" className="inline-flex items-center border-2 border-cordillera-cream text-cordillera-cream px-4 py-2 rounded-lg hover:bg-cordillera-cream hover:text-cordillera-olive transition-all">
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Stories
+            </Link>
+          </div>
         </div>
       </div>
 
