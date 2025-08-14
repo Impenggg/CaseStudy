@@ -215,8 +215,8 @@ const HomePage: React.FC = () => {
               >
                 {featuredProducts.map((product) => (
                       <div key={product.id} className="w-full flex-shrink-0 px-2">
-                        <div className="bg-cordillera-cream rounded-xl shadow-2xl overflow-hidden h-[450px] transform transition-all duration-300 hover:scale-[1.02]">
-                          <div className="h-[315px] relative overflow-hidden">
+                        <div className="bg-cordillera-cream rounded-xl shadow-2xl overflow-hidden h-[380px] transform transition-all duration-300 hover:scale-[1.02]">
+                          <div className="h-[250px] relative overflow-hidden">
                       <img
                         src={product.image}
                         alt={product.name}
@@ -224,7 +224,7 @@ const HomePage: React.FC = () => {
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                           </div>
-                          <div className="p-4 flex flex-col h-[135px]">
+                          <div className="p-4 flex flex-col h-[130px]">
                             <h3 className="text-lg sm:text-xl font-serif text-cordillera-olive mb-2 font-medium">
                           {product.name}
                         </h3>
@@ -297,9 +297,9 @@ const HomePage: React.FC = () => {
                       <div key={story.id} className="w-full flex-shrink-0 px-2">
               <Link
                 to={`/story/${story.id}`}
-                          className="group block bg-cordillera-cream rounded-xl overflow-hidden hover:bg-cordillera-cream/95 transition-all duration-300 shadow-2xl transform hover:-translate-y-2 h-[450px]"
+                          className="group block bg-cordillera-cream rounded-xl overflow-hidden hover:bg-cordillera-cream/95 transition-all duration-300 shadow-2xl transform hover:-translate-y-2 h-[380px]"
               >
-                          <div className="h-[288px] overflow-hidden relative">
+                          <div className="h-[230px] overflow-hidden relative">
                   <img
                     src={story.media_url}
                     alt={story.title}
@@ -307,7 +307,7 @@ const HomePage: React.FC = () => {
                   />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
                 </div>
-                          <div className="p-6 flex flex-col h-[162px]">
+                          <div className="p-6 flex flex-col h-[150px]">
                             <h3 className="text-xl sm:text-2xl font-serif text-cordillera-olive mb-3 font-medium">
                     {story.title}
                   </h3>

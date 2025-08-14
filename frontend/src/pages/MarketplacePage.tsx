@@ -223,17 +223,36 @@ const MarketplacePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cordillera-cream">
-      {/* Floating mini-cart button */}
-      <button
-        onClick={() => setIsCartOpen(true)}
-        className="fixed right-4 bottom-4 z-40 bg-cordillera-gold text-cordillera-olive px-4 py-3 rounded-full shadow-lg hover:bg-cordillera-gold/90 transition-colors flex items-center gap-2"
-        aria-label="Open cart"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
-        </svg>
-        <span className="text-sm font-semibold">Cart ({cartCount})</span>
-      </button>
+             {/* Premium Cart Button */}
+       <div className="fixed right-6 bottom-6 z-50">
+         <button
+           onClick={() => setIsCartOpen(true)}
+           className="group relative bg-gradient-to-r from-cordillera-gold to-cordillera-gold/90 text-cordillera-olive px-6 py-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-500 flex items-center gap-3 border-2 border-cordillera-olive/20 hover:border-cordillera-olive transform hover:scale-110 backdrop-blur-sm"
+           aria-label="Open cart"
+         >
+                     <div className="relative">
+             <svg className="w-6 h-6 transition-all duration-300 group-hover:rotate-12 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
+             </svg>
+             {cartCount > 0 && (
+               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse shadow-lg border border-white">
+                 {cartCount}
+               </span>
+             )}
+           </div>
+           <div className="flex flex-col items-start">
+             <span className="text-sm font-bold tracking-wide">Cart</span>
+             <span className="text-xs opacity-90 font-medium">
+               {cartCount === 0 ? 'Empty' : `${cartCount} item${cartCount !== 1 ? 's' : ''}`}
+             </span>
+           </div>
+           {cartTotal > 0 && (
+             <div className="ml-2 pl-3 border-l border-cordillera-olive/30">
+               <span className="text-sm font-bold text-cordillera-olive">₱{cartTotal.toLocaleString()}</span>
+             </div>
+           )}
+        </button>
+      </div>
       {/* Enhanced Hero Section */}
       <section className="relative py-24 bg-cordillera-olive overflow-hidden">
         {/* Subtle Background Pattern */}
@@ -281,117 +300,117 @@ const MarketplacePage: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="flex flex-col lg:flex-row gap-12">
-          {/* Enhanced Sidebar Filters - Sage Green Background */}
-          <div className="lg:w-1/4">
-            <div className="bg-cordillera-sage p-8 sticky top-8 shadow-lg">
-              <div className="flex items-center mb-6">
-                <svg className="w-6 h-6 text-cordillera-gold mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                </svg>
-                <h3 className="text-2xl font-serif text-cordillera-olive">Refine Search</h3>
-              </div>
-              
-              {/* Enhanced Search */}
-              <div className="mb-6">
-                <label className="block text-cordillera-olive/80 text-sm font-semibold mb-3">
-                  Search Products
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search by name or description..."
-                    className="w-full px-4 py-3 pl-12 bg-white border-2 border-cordillera-olive/20 text-cordillera-olive placeholder-cordillera-olive/50 focus:outline-none focus:border-cordillera-gold focus:ring-2 focus:ring-cordillera-gold/20 transition-all duration-200 rounded-lg"
-                  />
-                  <svg className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-cordillera-olive/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-              </div>
+                     {/* Enhanced Sidebar Filters - Sage Green Background */}
+           <div className="lg:w-1/4">
+             <div className="bg-cordillera-sage p-6 sticky top-8 shadow-lg">
+               <div className="flex items-center mb-4">
+                 <svg className="w-5 h-5 text-cordillera-gold mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                 </svg>
+                 <h3 className="text-xl font-serif text-cordillera-olive">Refine Search</h3>
+               </div>
+               
+               {/* Enhanced Search */}
+               <div className="mb-4">
+                 <label className="block text-cordillera-olive/80 text-sm font-semibold mb-2">
+                   Search Products
+                 </label>
+                 <div className="relative">
+                   <input
+                     type="text"
+                     value={searchTerm}
+                     onChange={(e) => setSearchTerm(e.target.value)}
+                     placeholder="Search by name or description..."
+                     className="w-full px-3 py-2 pl-10 bg-white border-2 border-cordillera-olive/20 text-cordillera-olive placeholder-cordillera-olive/50 focus:outline-none focus:border-cordillera-gold focus:ring-2 focus:ring-cordillera-gold/20 transition-all duration-200 rounded-lg"
+                   />
+                   <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-cordillera-olive/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                   </svg>
+                 </div>
+               </div>
 
-              {/* Enhanced Category Filter */}
-              <div className="mb-6">
-                <label className="block text-cordillera-olive/80 text-sm font-semibold mb-3">
-                  Category
-                </label>
-                <div className="relative">
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full px-4 py-3 bg-white border-2 border-cordillera-olive/20 text-cordillera-olive focus:outline-none focus:border-cordillera-gold focus:ring-2 focus:ring-cordillera-gold/20 transition-all duration-200 rounded-lg appearance-none cursor-pointer"
-                  >
-                    <option value="">All Categories</option>
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
-                  <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-cordillera-olive/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
+               {/* Enhanced Category Filter */}
+               <div className="mb-4">
+                 <label className="block text-cordillera-olive/80 text-sm font-semibold mb-2">
+                   Category
+                 </label>
+                 <div className="relative">
+                   <select
+                     value={selectedCategory}
+                     onChange={(e) => setSelectedCategory(e.target.value)}
+                     className="w-full px-3 py-2 bg-white border-2 border-cordillera-olive/20 text-cordillera-olive focus:outline-none focus:border-cordillera-gold focus:ring-2 focus:ring-cordillera-gold/20 transition-all duration-200 rounded-lg appearance-none cursor-pointer"
+                   >
+                     <option value="">All Categories</option>
+                     {categories.map(category => (
+                       <option key={category} value={category}>{category}</option>
+                     ))}
+                   </select>
+                   <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-cordillera-olive/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                   </svg>
+                 </div>
+               </div>
 
-              {/* Enhanced Sort By */}
-              <div className="mb-8">
-                <label className="block text-cordillera-olive/80 text-sm font-semibold mb-3">
-                  Sort By
-                </label>
-                <div className="relative">
-                  <select
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full px-4 py-3 bg-white border-2 border-cordillera-olive/20 text-cordillera-olive focus:outline-none focus:border-cordillera-gold focus:ring-2 focus:ring-cordillera-gold/20 transition-all duration-200 rounded-lg appearance-none cursor-pointer"
-                  >
-                    <option value="">Default</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                    <option value="name">Name: A to Z</option>
-                  </select>
-                  <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-cordillera-olive/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                  </svg>
-                </div>
-              </div>
+               {/* Enhanced Sort By */}
+               <div className="mb-6">
+                 <label className="block text-cordillera-olive/80 text-sm font-semibold mb-2">
+                   Sort By
+                 </label>
+                 <div className="relative">
+                   <select
+                     value={sortBy}
+                     onChange={(e) => setSortBy(e.target.value)}
+                     className="w-full px-3 py-2 bg-white border-2 border-cordillera-olive/20 text-cordillera-olive focus:outline-none focus:border-cordillera-gold focus:ring-2 focus:ring-cordillera-gold/20 transition-all duration-200 rounded-lg appearance-none cursor-pointer"
+                   >
+                     <option value="">Default</option>
+                     <option value="price-low">Price: Low to High</option>
+                     <option value="price-high">Price: High to Low</option>
+                     <option value="name">Name: A to Z</option>
+                   </select>
+                   <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-cordillera-olive/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                   </svg>
+                 </div>
+               </div>
 
-              {/* Enhanced Clear Filters Button */}
-              <button
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedCategory('');
-                  setSortBy('');
-                  triggerAction('Clear Marketplace Filters');
-                }}
-                className="group relative w-full bg-cordillera-gold text-cordillera-olive py-4 font-semibold hover:bg-cordillera-gold/90 transition-all duration-300 overflow-hidden shadow-md hover:shadow-lg transform hover:-translate-y-0.5 rounded-lg"
-              >
-                <span className="relative z-10 flex items-center justify-center">
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Clear All Filters
-                </span>
-                <div className="absolute inset-0 bg-cordillera-olive transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-                <span className="absolute inset-0 flex items-center justify-center text-cordillera-cream opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 font-semibold">
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Clear All Filters
-                </span>
-              </button>
+               {/* Enhanced Clear Filters Button */}
+               <button
+                 onClick={() => {
+                   setSearchTerm('');
+                   setSelectedCategory('');
+                   setSortBy('');
+                   triggerAction('Clear Marketplace Filters');
+                 }}
+                 className="group relative w-full bg-cordillera-gold text-cordillera-olive py-3 font-semibold hover:bg-cordillera-gold/90 transition-all duration-300 overflow-hidden shadow-md hover:shadow-lg transform hover:-translate-y-0.5 rounded-lg"
+               >
+                 <span className="relative z-10 flex items-center justify-center">
+                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                   </svg>
+                   Clear All Filters
+                 </span>
+                 <div className="absolute inset-0 bg-cordillera-olive transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                 <span className="absolute inset-0 flex items-center justify-center text-cordillera-cream opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 font-semibold">
+                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                   </svg>
+                   Clear All Filters
+                 </span>
+               </button>
 
-              {/* Filter Summary */}
-              {(searchTerm || selectedCategory || sortBy) && (
-                <div className="mt-6 p-4 bg-cordillera-olive/10 rounded-lg">
-                  <h4 className="text-sm font-semibold text-cordillera-olive mb-2">Active Filters:</h4>
-                  <div className="space-y-1 text-xs text-cordillera-olive/70">
-                    {searchTerm && <div>Search: "{searchTerm}"</div>}
-                    {selectedCategory && <div>Category: {selectedCategory}</div>}
-                    {sortBy && <div>Sort: {sortBy.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+               {/* Filter Summary */}
+               {(searchTerm || selectedCategory || sortBy) && (
+                 <div className="mt-4 p-3 bg-cordillera-olive/10 rounded-lg">
+                   <h4 className="text-sm font-semibold text-cordillera-olive mb-2">Active Filters:</h4>
+                   <div className="space-y-1 text-xs text-cordillera-olive/70">
+                     {searchTerm && <div>Search: "{searchTerm}"</div>}
+                     {selectedCategory && <div>Category: {selectedCategory}</div>}
+                     {sortBy && <div>Sort: {sortBy.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>}
+                   </div>
+                 </div>
+               )}
+             </div>
+           </div>
 
           {/* Enhanced Product Grid - Cream Green Background */}
           <div className="lg:w-3/4">
@@ -424,8 +443,8 @@ const MarketplacePage: React.FC = () => {
                   className="group block"
                 >
                   {/* Enhanced Nikitin-style Product Card */}
-                  <div className="bg-white shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden rounded-lg border border-cordillera-sage/20">
-                    <div className="aspect-square overflow-hidden relative">
+                  <div className="bg-white shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden rounded-lg border border-cordillera-sage/20 h-full flex flex-col">
+                    <div className="aspect-[4/3] overflow-hidden relative">
                       <img
                         src={product.image}
                         alt={product.name}
@@ -434,20 +453,20 @@ const MarketplacePage: React.FC = () => {
                       {/* Hover Overlay */}
                       <div className="absolute inset-0 bg-cordillera-olive/0 group-hover:bg-cordillera-olive/10 transition-colors duration-300"></div>
                       {/* Category Badge */}
-                      <div className="absolute top-4 left-4 bg-cordillera-gold/90 text-cordillera-olive px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur-sm">
+                      <div className="absolute top-3 left-3 bg-cordillera-gold/90 text-cordillera-olive px-2 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur-sm">
                         {product.category}
                       </div>
                     </div>
-                    <div className="p-8">
-                      <h3 className="text-xl font-serif text-cordillera-olive mb-3 leading-tight group-hover:text-cordillera-gold transition-colors duration-300">
+                    <div className="p-5 flex flex-col flex-grow">
+                      <h3 className="text-lg font-serif text-cordillera-olive mb-2 leading-tight group-hover:text-cordillera-gold transition-colors duration-300 line-clamp-2">
                         {product.name}
                       </h3>
-                      <p className="text-cordillera-olive/60 text-sm mb-6 leading-relaxed line-clamp-2">
+                      <p className="text-cordillera-olive/60 text-sm mb-4 leading-relaxed line-clamp-2 flex-grow">
                         {product.description}
                       </p>
-                      <div className="flex justify-between items-end">
+                      <div className="flex justify-between items-end mt-auto">
                         <div>
-                          <span className="text-2xl font-light text-cordillera-gold block mb-1">
+                          <span className="text-xl font-light text-cordillera-gold block mb-1">
                             ₱{product.price.toLocaleString()}
                           </span>
                           <div className="flex items-center text-xs text-cordillera-olive/50">
@@ -462,11 +481,11 @@ const MarketplacePage: React.FC = () => {
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2">
                           <button
                             onClick={(e) => { e.preventDefault(); addToCart(product); }}
-                            className="bg-cordillera-olive text-cordillera-cream px-4 py-2 text-sm font-medium rounded hover:bg-cordillera-olive/90"
+                            className="bg-cordillera-olive text-cordillera-cream px-3 py-1.5 text-xs font-medium rounded hover:bg-cordillera-olive/90"
                           >
                             Add to Cart
                           </button>
-                          <div className="bg-cordillera-gold text-cordillera-olive px-4 py-2 text-sm font-medium rounded" onClick={(e) => { e.preventDefault(); triggerAction(`Quick view ${product.name}`); }}>
+                          <div className="bg-cordillera-gold text-cordillera-olive px-3 py-1.5 text-xs font-medium rounded" onClick={(e) => { e.preventDefault(); triggerAction(`Quick view ${product.name}`); }}>
                             Quick View
                           </div>
                         </div>
@@ -522,46 +541,141 @@ const MarketplacePage: React.FC = () => {
           </div>
         </div>
       </div>
-      {/* Mini-cart Side Panel */}
+      {/* Premium Cart Side Panel */}
       {isCartOpen && (
         <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setIsCartOpen(false)}></div>
-          <aside className="absolute top-0 right-0 h-full w-full sm:w-[420px] bg-white shadow-2xl p-6 overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-serif text-cordillera-olive">Your Cart ({cartCount})</h3>
-              <button onClick={() => setIsCartOpen(false)} className="text-cordillera-olive/60 hover:text-cordillera-olive">Close</button>
-            </div>
-            {cartItems.length === 0 ? (
-              <p className="text-cordillera-olive/60">Your cart is empty.</p>
-            ) : (
-              <div className="space-y-4">
-                {cartItems.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3 border-b pb-3">
-                    <img src={item.image} alt={item.name} className="w-14 h-14 object-cover rounded" />
-                    <div className="flex-1">
-                      <p className="text-cordillera-olive font-medium">{item.name}</p>
-                      <p className="text-cordillera-olive/60 text-sm">₱{item.price.toLocaleString()}</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <button onClick={() => decrementItem(item.id)} className="px-2 py-1 border text-sm">-</button>
-                        <span className="px-2">{item.quantity}</span>
-                        <button onClick={() => incrementItem(item.id)} className="px-2 py-1 border text-sm">+</button>
-                      </div>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setIsCartOpen(false)}></div>
+          <aside className="absolute top-0 right-0 h-full w-full sm:w-[520px] bg-gradient-to-br from-cordillera-cream via-white to-cordillera-sage/10 shadow-3xl overflow-hidden border-l border-cordillera-gold/20">
+            {/* Premium Cart Header */}
+            <div className="bg-gradient-to-r from-cordillera-olive to-cordillera-sage text-cordillera-cream p-8 border-b-2 border-cordillera-gold/30 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-cordillera-gold/10 to-transparent"></div>
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-cordillera-gold/20 rounded-xl backdrop-blur-sm">
+                      <svg className="w-8 h-8 text-cordillera-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
+                      </svg>
                     </div>
-                    <button onClick={() => removeItem(item.id)} className="text-sm text-red-600 hover:underline">Remove</button>
+                    <div>
+                      <h3 className="text-3xl font-serif font-light tracking-wide">Shopping Cart</h3>
+                      <p className="text-cordillera-cream/90 mt-1 font-medium">
+                        {cartCount === 0 ? 'Your cart is empty' : `${cartCount} item${cartCount !== 1 ? 's' : ''} in your cart`}
+                      </p>
+                    </div>
                   </div>
-                ))}
-                <div className="pt-2 border-t">
-                  <div className="flex justify-between text-cordillera-olive font-medium">
-                    <span>Total</span>
-                    <span>₱{cartTotal.toLocaleString()}</span>
-                  </div>
-                  <div className="mt-4 flex gap-3">
-                    <button onClick={handleCheckout} className="flex-1 bg-cordillera-gold text-cordillera-olive px-4 py-3 rounded hover:bg-cordillera-gold/90 transition-colors">Checkout</button>
-                    <button onClick={clearCart} className="px-4 py-3 border rounded text-cordillera-olive hover:bg-cordillera-olive/5 transition-colors">Clear</button>
-                  </div>
+                  <button 
+                    onClick={() => setIsCartOpen(false)} 
+                    className="p-3 hover:bg-cordillera-gold/20 rounded-xl transition-all duration-300 hover:scale-110"
+                  >
+                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
               </div>
-            )}
+            </div>
+
+            {/* Cart Content */}
+            <div className="flex flex-col h-full">
+              {cartItems.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                  <div className="w-24 h-24 bg-cordillera-sage/20 rounded-full flex items-center justify-center mb-6">
+                    <svg className="w-12 h-12 text-cordillera-olive/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
+                    </svg>
+                  </div>
+                  <h4 className="text-xl font-serif text-cordillera-olive mb-2">Your cart is empty</h4>
+                  <p className="text-cordillera-olive/60 mb-6">Start shopping to add items to your cart</p>
+                  <button 
+                    onClick={() => setIsCartOpen(false)}
+                    className="bg-cordillera-gold text-cordillera-olive px-6 py-3 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
+                  >
+                    Continue Shopping
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex-1 overflow-y-auto p-8">
+                    <div className="space-y-6">
+                      {cartItems.map((item) => (
+                        <div key={item.id} className="group bg-white rounded-2xl border-2 border-cordillera-sage/20 p-6 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
+                          <div className="flex items-center gap-6">
+                            <div className="relative">
+                              <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded-xl border-2 border-cordillera-sage/30 shadow-md" />
+                              <div className="absolute -top-2 -right-2 bg-cordillera-gold text-cordillera-olive text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg">
+                                {item.quantity}
+                              </div>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-lg font-semibold text-cordillera-olive truncate mb-2">{item.name}</h4>
+                              <p className="text-cordillera-gold font-bold text-xl mb-4">₱{item.price.toLocaleString()}</p>
+                              <div className="flex items-center gap-4">
+                                <div className="flex items-center border-2 border-cordillera-sage/40 rounded-xl overflow-hidden shadow-sm">
+                                  <button 
+                                    onClick={() => decrementItem(item.id)} 
+                                    className="px-4 py-2 bg-cordillera-sage/10 hover:bg-cordillera-sage/20 transition-all duration-300 text-cordillera-olive font-bold text-lg hover:scale-110"
+                                  >
+                                    -
+                                  </button>
+                                  <span className="px-6 py-2 text-cordillera-olive font-bold text-lg bg-white min-w-[3rem] text-center">{item.quantity}</span>
+                                  <button 
+                                    onClick={() => incrementItem(item.id)} 
+                                    className="px-4 py-2 bg-cordillera-sage/10 hover:bg-cordillera-sage/20 transition-all duration-300 text-cordillera-olive font-bold text-lg hover:scale-110"
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                                <button 
+                                  onClick={() => removeItem(item.id)} 
+                                  className="p-3 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all duration-300 hover:scale-110"
+                                >
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-cordillera-olive font-bold text-xl">₱{(item.price * item.quantity).toLocaleString()}</p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Premium Cart Footer */}
+                  <div className="border-t-2 border-cordillera-sage/30 bg-gradient-to-r from-white to-cordillera-cream/30 p-8">
+                    <div className="space-y-6">
+                      <div className="flex justify-between items-center py-4 border-b-2 border-cordillera-sage/30">
+                        <span className="text-xl font-semibold text-cordillera-olive">Subtotal</span>
+                        <span className="text-2xl font-bold text-cordillera-gold">₱{cartTotal.toLocaleString()}</span>
+                      </div>
+                      <div className="flex gap-4">
+                        <button 
+                          onClick={handleCheckout} 
+                          className="flex-1 bg-gradient-to-r from-cordillera-gold to-cordillera-gold/90 text-cordillera-olive py-5 px-8 rounded-2xl font-bold text-lg hover:from-cordillera-gold/90 hover:to-cordillera-gold transition-all duration-500 shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 hover:scale-105"
+                        >
+                          <span className="flex items-center justify-center gap-2">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                            Proceed to Checkout
+                          </span>
+                        </button>
+                        <button 
+                          onClick={clearCart} 
+                          className="px-8 py-5 border-2 border-cordillera-olive/30 text-cordillera-olive rounded-2xl font-semibold hover:bg-cordillera-olive/10 transition-all duration-300 hover:scale-105"
+                        >
+                          Clear Cart
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </aside>
         </div>
       )}

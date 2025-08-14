@@ -157,30 +157,30 @@ const CampaignDetailPage: React.FC = () => {
         </Link>
       </div>
 
-      {/* Campaign Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="aspect-video relative">
-            <img
-              src={campaign.image}
-              alt={campaign.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-            <div className="absolute bottom-6 left-6 right-6">
-              <div className="bg-cordillera-gold/90 text-cordillera-olive px-3 py-1 text-sm font-semibold uppercase tracking-wider backdrop-blur-sm rounded inline-block mb-3">
-                Campaign
-              </div>
-              <h1 className="text-4xl md:text-5xl font-serif text-white mb-2 leading-tight">
-                {campaign.title}
-              </h1>
-              <p className="text-white/90 text-lg">
-                By {campaign.organizer}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+             {/* Campaign Header */}
+       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+           <div className="aspect-[3/1] relative">
+             <img
+               src={campaign.image}
+               alt={campaign.title}
+               className="w-full h-full object-cover"
+             />
+             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+             <div className="absolute bottom-4 left-4 right-4">
+               <div className="bg-cordillera-gold/90 text-cordillera-olive px-3 py-1 text-sm font-semibold uppercase tracking-wider backdrop-blur-sm rounded inline-block mb-2">
+                 Campaign
+               </div>
+               <h1 className="text-3xl md:text-4xl font-serif text-white mb-1 leading-tight">
+                 {campaign.title}
+               </h1>
+               <p className="text-white/90 text-base">
+                 By {campaign.organizer}
+               </p>
+             </div>
+           </div>
+         </div>
+       </div>
 
       {/* Campaign Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -240,17 +240,9 @@ const CampaignDetailPage: React.FC = () => {
               {/* Support Button */}
               <button
                 onClick={handleSupport}
-                className="w-full bg-cordillera-gold text-cordillera-olive py-4 px-6 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors mb-4"
+                className="w-full bg-cordillera-gold text-cordillera-olive py-4 px-6 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
               >
                 Support This Campaign
-              </button>
-
-              {/* Share Button */}
-              <button
-                onClick={() => triggerAction(`Share campaign: ${campaign.title}`)}
-                className="w-full border border-cordillera-olive/20 text-cordillera-olive py-3 px-6 rounded-lg font-medium hover:bg-cordillera-olive/5 transition-colors"
-              >
-                Share Campaign
               </button>
             </div>
           </div>

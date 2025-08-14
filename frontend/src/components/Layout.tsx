@@ -33,6 +33,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className={`text-cordillera-cream hover:text-cordillera-gold transition-colors ${
                   isActive('/') ? 'text-cordillera-gold' : ''
                 }`}
+                style={{ color: isActive('/') ? '#8A784E' : '#E7EFC7' }}
               >
                 Home
               </Link>
@@ -41,6 +42,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className={`text-cordillera-cream hover:text-cordillera-gold transition-colors ${
                   isActive('/marketplace') ? 'text-cordillera-gold' : ''
                 }`}
+                style={{ color: isActive('/marketplace') ? '#8A784E' : '#E7EFC7' }}
               >
                 Marketplace
               </Link>
@@ -49,6 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className={`text-cordillera-cream hover:text-cordillera-gold transition-colors ${
                   isActive('/stories') ? 'text-cordillera-gold' : ''
                 }`}
+                style={{ color: isActive('/stories') ? '#8A784E' : '#E7EFC7' }}
               >
                 Stories
               </Link>
@@ -57,6 +60,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 className={`text-cordillera-cream hover:text-cordillera-gold transition-colors ${
                   isActive('/media-creation') ? 'text-cordillera-gold' : ''
                 }`}
+                style={{ color: isActive('/media-creation') ? '#8A784E' : '#E7EFC7' }}
               >
                 Media Creation
               </Link>
@@ -90,6 +94,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Link
                 to="/"
                 className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors"
+                style={{ color: isActive('/') ? '#8A784E' : '#E7EFC7' }}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home
@@ -97,6 +102,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Link
                 to="/marketplace"
                 className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors"
+                style={{ color: isActive('/marketplace') ? '#8A784E' : '#E7EFC7' }}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Marketplace
@@ -104,6 +110,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Link
                 to="/stories"
                 className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors"
+                style={{ color: isActive('/stories') ? '#8A784E' : '#E7EFC7' }}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Stories
@@ -111,6 +118,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <Link
                 to="/media-creation"
                 className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors"
+                style={{ color: isActive('/media-creation') ? '#8A784E' : '#E7EFC7' }}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Media Creation

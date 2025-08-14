@@ -17,6 +17,13 @@ interface Campaign {
 const FundraisingPage: React.FC = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+  const [donationAmount, setDonationAmount] = useState(1000);
+  const [donorName, setDonorName] = useState('');
+  const [donorEmail, setDonorEmail] = useState('');
+  const [donorMessage, setDonorMessage] = useState('');
 
   useEffect(() => {
     // Sample campaigns data with beautiful images
@@ -101,6 +108,49 @@ const FundraisingPage: React.FC = () => {
     return Math.min((current / goal) * 100, 100);
   };
 
+  // Campaign interaction functions
+  const openCampaignDetails = (campaign: Campaign) => {
+    setSelectedCampaign(campaign);
+    setIsDetailsModalOpen(true);
+  };
+
+  const openDonationModal = (campaign: Campaign) => {
+    setSelectedCampaign(campaign);
+    setIsDonationModalOpen(true);
+  };
+
+  const handleDonation = () => {
+    if (!selectedCampaign || !donorName || !donorEmail) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    // Simulate donation processing
+    triggerAction(`Donated ₱${donationAmount.toLocaleString()} to ${selectedCampaign.title}`);
+    
+    // Update campaign amount (in a real app, this would be an API call)
+    setCampaigns(prev => prev.map(campaign => 
+      campaign.id === selectedCampaign.id 
+        ? { ...campaign, currentAmount: campaign.currentAmount + donationAmount }
+        : campaign
+    ));
+
+    // Reset form and close modal
+    setDonationAmount(1000);
+    setDonorName('');
+    setDonorEmail('');
+    setDonorMessage('');
+    setIsDonationModalOpen(false);
+    
+    alert(`Thank you for your donation of ₱${donationAmount.toLocaleString()}!`);
+  };
+
+  const closeModals = () => {
+    setIsDetailsModalOpen(false);
+    setIsDonationModalOpen(false);
+    setSelectedCampaign(null);
+  };
+
   const featuredCampaign = campaigns.find(campaign => campaign.featured);
   const regularCampaigns = campaigns.filter(campaign => !campaign.featured);
   const categories = ['all', ...Array.from(new Set(campaigns.map(c => c.category)))];
@@ -164,9 +214,20 @@ const FundraisingPage: React.FC = () => {
                 <p className="text-sm text-cordillera-olive/60 mt-2">Ends {featuredCampaign.endDate}</p>
               </div>
 
-              <button onClick={() => triggerAction('Support Featured Campaign')} className="bg-cordillera-gold text-cordillera-olive px-10 py-4 text-lg font-medium hover:bg-cordillera-olive hover:text-cordillera-cream transition-all duration-200">
-                Support This Campaign
-              </button>
+              <div className="flex gap-4">
+                <button 
+                  onClick={() => openCampaignDetails(featuredCampaign)} 
+                  className="bg-cordillera-sage text-cordillera-olive px-8 py-4 text-lg font-medium hover:bg-cordillera-sage/80 transition-all duration-200"
+                >
+                  View Details
+                </button>
+                <button 
+                  onClick={() => openDonationModal(featuredCampaign)} 
+                  className="bg-cordillera-gold text-cordillera-olive px-10 py-4 text-lg font-medium hover:bg-cordillera-olive hover:text-cordillera-cream transition-all duration-200"
+                >
+                  Support This Campaign
+                </button>
+              </div>
             </div>
           </div>
         </section>
@@ -238,15 +299,26 @@ const FundraisingPage: React.FC = () => {
                     <p className="text-xs text-cordillera-olive/50 mt-1">Goal: ₱{campaign.goalAmount.toLocaleString()}</p>
                   </div>
 
-                  <div className="flex justify-between items-center">
-                    <button onClick={() => triggerAction(`Donate to ${campaign.title}`)} className="bg-cordillera-gold text-cordillera-olive px-6 py-3 text-sm font-medium hover:bg-cordillera-gold/90 transition-colors">
-                      Donate Now
-                    </button>
-                    <div className="text-right text-xs text-cordillera-olive/50">
-                      <p>By {campaign.organizer}</p>
-                      <p>Ends {campaign.endDate}</p>
-                    </div>
-                  </div>
+                                     <div className="flex justify-between items-center">
+                     <div className="flex gap-2">
+                       <button 
+                         onClick={() => openCampaignDetails(campaign)} 
+                         className="bg-cordillera-sage text-cordillera-olive px-4 py-2 text-sm font-medium hover:bg-cordillera-sage/80 transition-colors"
+                       >
+                         View Details
+                       </button>
+                       <button 
+                         onClick={() => openDonationModal(campaign)} 
+                         className="bg-cordillera-gold text-cordillera-olive px-4 py-2 text-sm font-medium hover:bg-cordillera-gold/90 transition-colors"
+                       >
+                         Donate Now
+                       </button>
+                     </div>
+                     <div className="text-right text-xs text-cordillera-olive/50">
+                       <p>By {campaign.organizer}</p>
+                       <p>Ends {campaign.endDate}</p>
+                     </div>
+                   </div>
                 </div>
               </div>
             ))}
@@ -284,6 +356,156 @@ const FundraisingPage: React.FC = () => {
           </button>
         </div>
       </section>
+
+      {/* Campaign Details Modal */}
+      {isDetailsModalOpen && selectedCampaign && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeModals}></div>
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b border-cordillera-sage/20 p-6 flex justify-between items-center">
+              <h2 className="text-2xl font-serif text-cordillera-olive">Campaign Details</h2>
+              <button onClick={closeModals} className="text-cordillera-olive/60 hover:text-cordillera-olive">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="grid md:grid-cols-2 gap-8">
+                <div>
+                  <img 
+                    src={selectedCampaign.image} 
+                    alt={selectedCampaign.title}
+                    className="w-full h-64 object-cover rounded-lg"
+                  />
+                </div>
+                <div>
+                  <span className="text-cordillera-gold text-sm font-medium uppercase tracking-wider mb-3 block">
+                    {selectedCampaign.category}
+                  </span>
+                  <h3 className="text-2xl font-serif text-cordillera-olive mb-4">
+                    {selectedCampaign.title}
+                  </h3>
+                  <p className="text-cordillera-olive/70 mb-6 leading-relaxed">
+                    {selectedCampaign.description}
+                  </p>
+                  
+                  <div className="mb-6">
+                    <div className="flex justify-between text-cordillera-olive/80 text-sm mb-2">
+                      <span>Progress: {getProgressPercentage(selectedCampaign.currentAmount, selectedCampaign.goalAmount).toFixed(0)}%</span>
+                      <span>₱{selectedCampaign.currentAmount.toLocaleString()} of ₱{selectedCampaign.goalAmount.toLocaleString()}</span>
+                    </div>
+                    <div className="h-3 bg-cordillera-sage/30 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-cordillera-gold rounded-full transition-all duration-500"
+                        style={{ width: `${getProgressPercentage(selectedCampaign.currentAmount, selectedCampaign.goalAmount)}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3 text-sm text-cordillera-olive/60 mb-6">
+                    <p><strong>Organizer:</strong> {selectedCampaign.organizer}</p>
+                    <p><strong>End Date:</strong> {selectedCampaign.endDate}</p>
+                    <p><strong>Goal:</strong> ₱{selectedCampaign.goalAmount.toLocaleString()}</p>
+                    <p><strong>Current:</strong> ₱{selectedCampaign.currentAmount.toLocaleString()}</p>
+                  </div>
+                  
+                                     <div className="flex gap-3">
+                     <button 
+                       onClick={() => {
+                         setIsDetailsModalOpen(false);
+                         openDonationModal(selectedCampaign);
+                       }}
+                       className="bg-cordillera-gold text-cordillera-olive px-6 py-3 font-medium hover:bg-cordillera-gold/90 transition-colors rounded-lg"
+                     >
+                       Support This Campaign
+                     </button>
+                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Donation Modal */}
+      {isDonationModalOpen && selectedCampaign && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeModals}></div>
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="p-6 border-b border-cordillera-sage/20">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-serif text-cordillera-olive">Make a Donation</h2>
+                <button onClick={closeModals} className="text-cordillera-olive/60 hover:text-cordillera-olive">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <p className="text-cordillera-olive/70 text-sm mt-2">
+                Supporting: <strong>{selectedCampaign.title}</strong>
+              </p>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-cordillera-olive mb-2">Donation Amount (₱)</label>
+                <input
+                  type="number"
+                  value={donationAmount}
+                  onChange={(e) => setDonationAmount(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-cordillera-sage/30 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  min="100"
+                  step="100"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-cordillera-olive mb-2">Your Name *</label>
+                <input
+                  type="text"
+                  value={donorName}
+                  onChange={(e) => setDonorName(e.target.value)}
+                  className="w-full px-3 py-2 border border-cordillera-sage/30 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-cordillera-olive mb-2">Email Address *</label>
+                <input
+                  type="email"
+                  value={donorEmail}
+                  onChange={(e) => setDonorEmail(e.target.value)}
+                  className="w-full px-3 py-2 border border-cordillera-sage/30 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-cordillera-olive mb-2">Message (Optional)</label>
+                <textarea
+                  value={donorMessage}
+                  onChange={(e) => setDonorMessage(e.target.value)}
+                  className="w-full px-3 py-2 border border-cordillera-sage/30 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  rows={3}
+                  placeholder="Share why you're supporting this campaign..."
+                />
+              </div>
+              
+              <button 
+                onClick={handleDonation}
+                className="w-full bg-cordillera-gold text-cordillera-olive py-3 font-medium hover:bg-cordillera-gold/90 transition-colors rounded-lg"
+              >
+                Donate ₱{donationAmount.toLocaleString()}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      
     </div>
   );
 };

@@ -187,7 +187,7 @@ const MediaCreationPage: React.FC = () => {
                   <div key={creation.id} className="w-full flex-shrink-0 animate-fade-in">
                     <div className="grid md:grid-cols-2 gap-0 items-stretch">
                       {/* Creation Image */}
-                      <div className="aspect-square overflow-hidden relative group">
+                      <div className="aspect-[4/3] overflow-hidden relative group">
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                         <img
                           src={creation.image}
@@ -197,14 +197,14 @@ const MediaCreationPage: React.FC = () => {
                       </div>
                       
                       {/* Creation Details */}
-                      <div className="p-12 flex flex-col justify-center bg-gradient-to-br from-white to-cordillera-cream/10">
+                      <div className="p-8 flex flex-col justify-center bg-gradient-to-br from-white to-cordillera-cream/10">
                         <span className="inline-block text-cordillera-gold text-sm font-medium uppercase tracking-wider mb-3 px-3 py-1 bg-cordillera-gold/10 rounded-full self-start">
                           {creation.category}
                         </span>
-                        <h3 className="text-3xl font-serif text-cordillera-olive mb-4 leading-tight">
+                        <h3 className="text-2xl font-serif text-cordillera-olive mb-3 leading-tight">
                           {creation.title}
                         </h3>
-                        <p className="text-cordillera-olive/70 text-lg mb-8 leading-relaxed">
+                        <p className="text-cordillera-olive/70 text-base mb-6 leading-relaxed">
                           {creation.description}
                         </p>
                         <div className="flex items-center space-x-4 text-cordillera-olive/60 mt-auto">
@@ -246,7 +246,7 @@ const MediaCreationPage: React.FC = () => {
             </button>
 
             {/* Slide Indicators */}
-            <div className="flex justify-center mt-12 space-x-3">
+            <div className="flex justify-center mt-8 space-x-3">
               {featuredCreations.map((_, index) => (
                 <button
                   key={index}
@@ -268,28 +268,9 @@ const MediaCreationPage: React.FC = () => {
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center mb-12">
-            <div className="bg-cordillera-sage/20 p-1 rounded-lg inline-flex">
-              <button
-                onClick={() => setActiveTab('photo')}
-                className={`px-8 py-3 rounded-md transition-all duration-300 ${
-                  activeTab === 'photo'
-                    ? 'bg-cordillera-gold text-cordillera-olive shadow-md'
-                    : 'text-cordillera-olive hover:bg-cordillera-gold/20'
-                }`}
-              >
-                Photography Guide
-              </button>
-              <button
-                onClick={() => setActiveTab('design')}
-                className={`px-8 py-3 rounded-md transition-all duration-300 ${
-                  activeTab === 'design'
-                    ? 'bg-cordillera-gold text-cordillera-olive shadow-md'
-                    : 'text-cordillera-olive hover:bg-cordillera-gold/20'
-                }`}
-              >
-                Design Tools
-              </button>
-            </div>
+            <h2 className="text-3xl font-serif text-cordillera-olive text-center">
+              Upload Your Creation Here
+            </h2>
           </div>
 
           {/* Enhanced Upload Area */}

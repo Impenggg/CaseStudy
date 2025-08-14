@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import MarketplacePage from './pages/MarketplacePage';
@@ -10,6 +10,7 @@ import CampaignDetailPage from './pages/CampaignDetailPage';
 import StorySubmissionPage from './pages/StorySubmissionPage';
 import CampaignCreationPage from './pages/CampaignCreationPage';
 import MediaCreationPage from './pages/MediaCreationPage';
+import { useScrollToTop } from './hooks/useScrollToTop';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -58,6 +59,7 @@ const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <Router>
+        <ScrollToTop />
         <Routes>
           {/* All Routes are Public */}
           <Route path="/" element={<Layout><HomePage /></Layout>} />
@@ -78,9 +80,9 @@ const App: React.FC = () => {
                 <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
                   <div className="text-center">
                     <h1 className="text-4xl font-serif text-cordillera-cream mb-4">Page Not Found</h1>
-                    <a href="/" className="text-cordillera-gold hover:text-cordillera-gold/80 transition-colors">
+                    <Link to="/" className="text-cordillera-gold hover:text-cordillera-gold/80 transition-colors">
                       Return to Homepage
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </Layout>
@@ -90,6 +92,12 @@ const App: React.FC = () => {
       </Router>
     </ErrorBoundary>
   );
+};
+
+// ScrollToTop component that uses the hook
+const ScrollToTop: React.FC = () => {
+  useScrollToTop();
+  return null;
 };
 
 export default App;
