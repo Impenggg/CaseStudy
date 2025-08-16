@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { triggerAction } from '../lib/uiActions';
 import { Link } from 'react-router-dom';
+import CartModal from '../components/CartModal';
 
 interface Product {
   id: number;
@@ -541,144 +542,16 @@ const MarketplacePage: React.FC = () => {
           </div>
         </div>
       </div>
-      {/* Premium Cart Side Panel */}
-      {isCartOpen && (
-        <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={() => setIsCartOpen(false)}></div>
-          <aside className="absolute top-0 right-0 h-full w-full sm:w-[520px] bg-gradient-to-br from-cordillera-cream via-white to-cordillera-sage/10 shadow-3xl overflow-hidden border-l border-cordillera-gold/20">
-            {/* Premium Cart Header */}
-            <div className="bg-gradient-to-r from-cordillera-olive to-cordillera-sage text-cordillera-cream p-8 border-b-2 border-cordillera-gold/30 relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-cordillera-gold/10 to-transparent"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-cordillera-gold/20 rounded-xl backdrop-blur-sm">
-                      <svg className="w-8 h-8 text-cordillera-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h3 className="text-3xl font-serif font-light tracking-wide">Shopping Cart</h3>
-                      <p className="text-cordillera-cream/90 mt-1 font-medium">
-                        {cartCount === 0 ? 'Your cart is empty' : `${cartCount} item${cartCount !== 1 ? 's' : ''} in your cart`}
-                      </p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setIsCartOpen(false)} 
-                    className="p-3 hover:bg-cordillera-gold/20 rounded-xl transition-all duration-300 hover:scale-110"
-                  >
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Cart Content */}
-            <div className="flex flex-col h-full">
-              {cartItems.length === 0 ? (
-                <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-                  <div className="w-24 h-24 bg-cordillera-sage/20 rounded-full flex items-center justify-center mb-6">
-                    <svg className="w-12 h-12 text-cordillera-olive/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
-                    </svg>
-                  </div>
-                  <h4 className="text-xl font-serif text-cordillera-olive mb-2">Your cart is empty</h4>
-                  <p className="text-cordillera-olive/60 mb-6">Start shopping to add items to your cart</p>
-                  <button 
-                    onClick={() => setIsCartOpen(false)}
-                    className="bg-cordillera-gold text-cordillera-olive px-6 py-3 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
-                  >
-                    Continue Shopping
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <div className="flex-1 overflow-y-auto p-8">
-                    <div className="space-y-6">
-                      {cartItems.map((item) => (
-                        <div key={item.id} className="group bg-white rounded-2xl border-2 border-cordillera-sage/20 p-6 shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1">
-                          <div className="flex items-center gap-6">
-                            <div className="relative">
-                              <img src={item.image} alt={item.name} className="w-20 h-20 object-cover rounded-xl border-2 border-cordillera-sage/30 shadow-md" />
-                              <div className="absolute -top-2 -right-2 bg-cordillera-gold text-cordillera-olive text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg">
-                                {item.quantity}
-                              </div>
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-lg font-semibold text-cordillera-olive truncate mb-2">{item.name}</h4>
-                              <p className="text-cordillera-gold font-bold text-xl mb-4">₱{item.price.toLocaleString()}</p>
-                              <div className="flex items-center gap-4">
-                                <div className="flex items-center border-2 border-cordillera-sage/40 rounded-xl overflow-hidden shadow-sm">
-                                  <button 
-                                    onClick={() => decrementItem(item.id)} 
-                                    className="px-4 py-2 bg-cordillera-sage/10 hover:bg-cordillera-sage/20 transition-all duration-300 text-cordillera-olive font-bold text-lg hover:scale-110"
-                                  >
-                                    -
-                                  </button>
-                                  <span className="px-6 py-2 text-cordillera-olive font-bold text-lg bg-white min-w-[3rem] text-center">{item.quantity}</span>
-                                  <button 
-                                    onClick={() => incrementItem(item.id)} 
-                                    className="px-4 py-2 bg-cordillera-sage/10 hover:bg-cordillera-sage/20 transition-all duration-300 text-cordillera-olive font-bold text-lg hover:scale-110"
-                                  >
-                                    +
-                                  </button>
-                                </div>
-                                <button 
-                                  onClick={() => removeItem(item.id)} 
-                                  className="p-3 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-xl transition-all duration-300 hover:scale-110"
-                                >
-                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                  </svg>
-                                </button>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-cordillera-olive font-bold text-xl">₱{(item.price * item.quantity).toLocaleString()}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Premium Cart Footer */}
-                  <div className="border-t-2 border-cordillera-sage/30 bg-gradient-to-r from-white to-cordillera-cream/30 p-8">
-                    <div className="space-y-6">
-                      <div className="flex justify-between items-center py-4 border-b-2 border-cordillera-sage/30">
-                        <span className="text-xl font-semibold text-cordillera-olive">Subtotal</span>
-                        <span className="text-2xl font-bold text-cordillera-gold">₱{cartTotal.toLocaleString()}</span>
-                      </div>
-                      <div className="flex gap-4">
-                        <button 
-                          onClick={handleCheckout} 
-                          className="flex-1 bg-gradient-to-r from-cordillera-gold to-cordillera-gold/90 text-cordillera-olive py-5 px-8 rounded-2xl font-bold text-lg hover:from-cordillera-gold/90 hover:to-cordillera-gold transition-all duration-500 shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 hover:scale-105"
-                        >
-                          <span className="flex items-center justify-center gap-2">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                            Proceed to Checkout
-                          </span>
-                        </button>
-                        <button 
-                          onClick={clearCart} 
-                          className="px-8 py-5 border-2 border-cordillera-olive/30 text-cordillera-olive rounded-2xl font-semibold hover:bg-cordillera-olive/10 transition-all duration-300 hover:scale-105"
-                        >
-                          Clear Cart
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </aside>
-        </div>
-      )}
+      {/* Cart Modal */}
+      <CartModal
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        cartItems={cartItems}
+        onIncrement={incrementItem}
+        onDecrement={decrementItem}
+        onRemove={removeItem}
+        onCheckout={handleCheckout}
+      />
 
       {/* Checkout Modal */}
       {isCheckoutOpen && (
