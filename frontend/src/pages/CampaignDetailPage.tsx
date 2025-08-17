@@ -42,7 +42,7 @@ const CampaignDetailPage: React.FC = () => {
         const data = await campaignsAPI.getById(Number(id));
         // Resolve image URL if backend returns a relative path
         const API_ORIGIN = (api.defaults.baseURL || '').replace(/\/api\/?$/, '');
-        const resolveImage = (image?: string) => {
+        const resolveImage = (image?: string | null) => {
           if (!image) return '';
           if (image.startsWith('http://') || image.startsWith('https://')) return image;
           return `${API_ORIGIN}/${image.replace(/^\/?/, '')}`;

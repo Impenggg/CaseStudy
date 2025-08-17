@@ -27,15 +27,15 @@ export const UserDashboard = () => {
           <div className="flex items-center space-x-4 mb-6">
             <img
               src={user.avatar || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face'}
-              alt={user.name}
+              alt={user.name || 'User avatar'}
               className="w-20 h-20 rounded-full object-cover border-2 border-cordillera-gold"
             />
             <div>
               <h1 className="text-4xl font-serif font-light text-cordillera-olive tracking-wide">
-                Welcome, {user.name}
+                Welcome, {user.name || 'Member'}
               </h1>
               <p className="text-cordillera-olive/70 font-light capitalize">
-                {user.role} • Member since {new Date(user.joinedDate).getFullYear()}
+                {(user.role || 'member')} • Member since {user.created_at ? new Date(user.created_at).getFullYear() : new Date().getFullYear()}
               </p>
             </div>
           </div>

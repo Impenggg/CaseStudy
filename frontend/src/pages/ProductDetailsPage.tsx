@@ -46,7 +46,7 @@ export const ProductDetailsPage: React.FC = () => {
           id: product.id,
           name: product.name,
           price: product.price,
-          image: (product.images && product.images[0]) || product.image,
+          image: (product.images && product.images[0]) || product.image || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=600&fit=crop',
           quantity,
         });
       }
@@ -140,7 +140,7 @@ export const ProductDetailsPage: React.FC = () => {
           <div>
             <div className="relative overflow-hidden rounded-lg mb-4">
               <img 
-                src={product.images ? product.images[selectedImage] : product.image} 
+                src={(product.images && product.images[selectedImage]) || product.image || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=600&fit=crop'} 
                 alt={product.name}
                 className="w-full h-96 object-cover"
               />
@@ -178,19 +178,19 @@ export const ProductDetailsPage: React.FC = () => {
                 ₱{product.price.toLocaleString()}
               </span>
               <Badge variant="outline" className="border-yellow-400 text-yellow-400">
-                {product.category}
+                {product.category || 'general'}
               </Badge>
             </div>
 
             <p className="text-yellow-200 mb-6 leading-relaxed">
-              {product.description}
+              {product.description || ''}
             </p>
 
             {/* Cultural Background */}
             <Card className="bg-yellow-100 mb-6">
               <CardContent className="p-4">
                 <h3 className="font-semibold text-green-900 mb-2">Cultural Background</h3>
-                <p className="text-green-800 text-sm">{product.cultural_background}</p>
+                <p className="text-green-800 text-sm">{product.cultural_background || ''}</p>
               </CardContent>
             </Card>
 
@@ -198,7 +198,7 @@ export const ProductDetailsPage: React.FC = () => {
             <div className="mb-6">
               <h3 className="font-semibold mb-2">Materials Used</h3>
               <div className="flex flex-wrap gap-2">
-                {product.materials.map((material, index) => (
+                {(product.materials ?? []).map((material, index) => (
                   <Badge key={index} variant="outline" className="border-yellow-400 text-yellow-400">
                     {material}
                   </Badge>
@@ -212,13 +212,13 @@ export const ProductDetailsPage: React.FC = () => {
                 <h3 className="font-semibold text-yellow-100 mb-2">Artisan</h3>
                 <div className="flex items-center gap-3">
                   <img 
-                    src={product.seller.avatar} 
-                    alt={product.seller.name}
+                    src={product.seller?.avatar || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face'} 
+                    alt={product.seller?.name || 'Artisan'}
                     className="w-12 h-12 rounded-full object-cover"
                   />
                   <div>
-                    <p className="font-medium text-yellow-100">{product.seller.name}</p>
-                    <p className="text-yellow-200 text-sm">{product.seller.location}</p>
+                    <p className="font-medium text-yellow-100">{product.seller?.name || 'Unknown'}</p>
+                    <p className="text-yellow-200 text-sm">{product.seller?.location || ''}</p>
                   </div>
                 </div>
               </CardContent>
@@ -227,7 +227,7 @@ export const ProductDetailsPage: React.FC = () => {
             {/* Purchase */}
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <span className="text-yellow-200">Stock: {product.stock_quantity} available</span>
+                <span className="text-yellow-200">Stock: {product.stock_quantity ?? 0} available</span>
               </div>
               
               {/* Quantity Selector */}
@@ -243,7 +243,7 @@ export const ProductDetailsPage: React.FC = () => {
                   <span className="px-4 py-1 text-yellow-100">{quantity}</span>
                   <button 
                     className="px-3 py-1 text-yellow-400 hover:bg-yellow-400 hover:text-green-900"
-                    onClick={() => setQuantity(Math.min(product.stock_quantity, quantity + 1))}
+                    onClick={() => setQuantity(Math.min(product.stock_quantity ?? 999, quantity + 1))}
                   >
                     +
                   </button>

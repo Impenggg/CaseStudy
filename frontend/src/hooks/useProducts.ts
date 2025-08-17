@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { productsAPI } from '@/services/api';
-import { Product } from '@/types';
+import type { Product } from '@/types';
 
 // Get all products with filtering
 export const useProducts = (params?: {

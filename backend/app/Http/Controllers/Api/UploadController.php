@@ -33,4 +33,43 @@ class UploadController extends Controller
             ],
         ]);
     }
+
+    /**
+     * List uploaded files (public gallery)
+     */
+    public function index(): JsonResponse
+    {
+        $disk = Storage::disk('public');
+        $dir = 'uploads';
+        if (!$disk->exists($dir)) {
+            return response()->json([
+                'status' => 'success',
+                'data' => [],
+            ]);
+        }
+
+        $files = collect($disk->files($dir))
+            ->filter(function ($path) use ($disk) {
+                $mime = $disk->mimeType($path);
+                return str_starts_with((string) $mime, 'image/');
+            })
+            ->map(function ($path) use ($disk) {
+                return [
+                    'url' => Storage::url($path),
+                    'path' => $path,
+                    'size' => $disk->size($path),
+                    'last_modified' => $disk->lastModified($path),
+                    'mime_type' => $disk->mimeType($path),
+                    'filename' => basename($path),
+                ];
+            })
+            ->sortByDesc('last_modified')
+            ->values()
+            ->all();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $files,
+        ]);
+    }
 }

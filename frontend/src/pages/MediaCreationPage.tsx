@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { triggerAction } from '../lib/uiActions';
 import { useAuth } from '../contexts/AuthContext';
+import api, { uploadAPI } from '@/services/api';
 
 interface FeaturedCreation {
   id: number;
@@ -15,9 +16,32 @@ const MediaCreationPage: React.FC = () => {
   const { isAuthenticated, requireAuth } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [activeTab, setActiveTab] = useState<'photo' | 'design'>('photo');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+  const [gallery, setGallery] = useState<Array<{ url: string; path: string; filename: string; size: number; mime_type: string; last_modified: number }>>([]);
+  const [isLoadingGallery, setIsLoadingGallery] = useState(false);
+  const [galleryError, setGalleryError] = useState<string | null>(null);
+
+  // Load uploaded images gallery
+  const loadGallery = async () => {
+    try {
+      setIsLoadingGallery(true);
+      setGalleryError(null);
+      const items = await uploadAPI.list();
+      setGallery(items);
+    } catch (err: any) {
+      const status = err?.response?.status;
+      const msg = err?.response?.data?.message || err?.message || 'Failed to load uploads';
+      setGalleryError(`${status ? status + ' - ' : ''}${msg}`);
+    } finally {
+      setIsLoadingGallery(false);
+    }
+  };
 
   // Sample featured creations data
   const featuredCreations: FeaturedCreation[] = [
@@ -105,13 +129,19 @@ const MediaCreationPage: React.FC = () => {
     const files = e.dataTransfer.files;
     if (files && files[0]) {
       const file = files[0];
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setSelectedImage(reader.result as string);
-        };
-        reader.readAsDataURL(file);
+      if (!file.type.startsWith('image/')) return;
+      if (file.size > 10 * 1024 * 1024) { // 10MB
+        setSaveError('File too large. Max 10MB.');
+        return;
       }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImage(reader.result as string);
+        setSelectedFile(file);
+        setUploadedUrl(null);
+        setSaveError(null);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -134,6 +164,11 @@ const MediaCreationPage: React.FC = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
+
+  // initial gallery load
+  useEffect(() => {
+    loadGallery();
+  }, []);
 
   return (
     <div className="min-h-screen bg-cordillera-cream">
@@ -318,13 +353,20 @@ const MediaCreationPage: React.FC = () => {
                   accept="image/*"
                   onChange={(e) => {
                     const file = e.target.files?.[0];
-                    if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setSelectedImage(reader.result as string);
-                      };
-                      reader.readAsDataURL(file);
+                    if (!file) return;
+                    if (!file.type.startsWith('image/')) return;
+                    if (file.size > 10 * 1024 * 1024) { // 10MB
+                      setSaveError('File too large. Max 10MB.');
+                      return;
                     }
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      setSelectedImage(reader.result as string);
+                      setSelectedFile(file);
+                      setUploadedUrl(null);
+                      setSaveError(null);
+                    };
+                    reader.readAsDataURL(file);
                   }}
                 />
                 
@@ -388,6 +430,9 @@ const MediaCreationPage: React.FC = () => {
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedImage(null);
+                            setSelectedFile(null);
+                            setUploadedUrl(null);
+                            setSaveError(null);
                           }}
                           className="flex-1 bg-cordillera-gold text-cordillera-olive px-4 py-3 rounded-md hover:bg-cordillera-gold/90 transition-colors flex items-center justify-center group"
                         >
@@ -398,7 +443,7 @@ const MediaCreationPage: React.FC = () => {
                           New Image
                         </button>
                         <button 
-                          onClick={(e) => { 
+                          onClick={async (e) => { 
                             e.stopPropagation(); 
                             if (!isAuthenticated) {
                               if (selectedImage) {
@@ -408,16 +453,46 @@ const MediaCreationPage: React.FC = () => {
                               requireAuth('/login');
                               return;
                             }
-                            triggerAction('Save Image'); 
+                            if (!selectedFile) return;
+                            try {
+                              setIsSaving(true);
+                              setSaveError(null);
+                              console.debug('[MediaCreation] Uploading to', api.defaults.baseURL, '/upload');
+                              const res = await uploadAPI.uploadFile(selectedFile);
+                              const url = res?.data?.url || res?.url; // support either shape
+                              setUploadedUrl(url || null);
+                              triggerAction('Save Image');
+                              // refresh gallery after successful upload
+                              loadGallery();
+                            } catch (err: any) {
+                              const status = err?.response?.status;
+                              const msg = err?.response?.data?.message || err?.message || 'Upload failed';
+                              setSaveError(`${status ? status + ' - ' : ''}${msg}`);
+                              console.error('[MediaCreation] Upload error:', status, err?.response?.data || err);
+                            } finally {
+                              setIsSaving(false);
+                            }
                           }}
-                          className="flex-1 border-2 border-cordillera-gold text-cordillera-olive px-4 py-3 rounded-md hover:bg-cordillera-gold/10 transition-colors flex items-center justify-center group"
+                          disabled={isSaving}
+                          className={`flex-1 border-2 border-cordillera-gold text-cordillera-olive px-4 py-3 rounded-md transition-colors flex items-center justify-center group ${isSaving ? 'opacity-50 cursor-not-allowed' : 'hover:bg-cordillera-gold/10'}`}
                         >
                           <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                           </svg>
-                          Save Image
+                          {isSaving ? 'Saving...' : 'Save Image'}
                         </button>
                       </div>
+                      {/* Status messages */}
+                      {(uploadedUrl || saveError) && (
+                        <div className="mt-4 text-sm">
+                          {uploadedUrl && (
+                            <p className="text-green-700">Saved! URL: <a className="underline" href={uploadedUrl} target="_blank" rel="noreferrer">{uploadedUrl}</a></p>
+                          )}
+                          {saveError && (
+                            <p className="text-red-700">{saveError}</p>
+                          )}
+                        </div>
+                      )}
                     </>
                   ) : (
                     <div className="flex-grow flex items-center justify-center border-2 border-dashed border-cordillera-sage/20 rounded-lg">
@@ -430,6 +505,35 @@ const MediaCreationPage: React.FC = () => {
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* Uploaded Images Gallery */}
+              <div className="mt-8">
+                <h3 className="text-lg font-semibold text-cordillera-olive mb-3">Uploaded Images</h3>
+                {galleryError && (
+                  <div className="mb-3 text-sm text-red-700">{galleryError}</div>
+                )}
+                {isLoadingGallery ? (
+                  <div className="text-cordillera-olive/60">Loading gallery…</div>
+                ) : gallery.length === 0 ? (
+                  <div className="text-cordillera-olive/60">No uploads yet.</div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {gallery.map((item) => (
+                      <a
+                        key={item.path}
+                        href={item.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group block border border-cordillera-sage/20 rounded-md overflow-hidden hover:shadow-md transition"
+                        title={item.filename}
+                      >
+                        <img src={item.url} alt={item.filename} className="w-full h-28 object-cover" />
+                        <div className="px-2 py-1 text-xs text-cordillera-olive/70 truncate">{item.filename}</div>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
 

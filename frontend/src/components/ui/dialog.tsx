@@ -8,8 +8,20 @@ interface DialogContextType {
 
 const DialogContext = React.createContext<DialogContextType | undefined>(undefined)
 
-const Dialog = ({ children, ...props }: { children: React.ReactNode }) => {
-  const [open, setOpen] = React.useState(false)
+interface DialogProps {
+  children: React.ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}
+
+const Dialog = ({ children, open: controlledOpen, onOpenChange }: DialogProps) => {
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
+  const isControlled = controlledOpen !== undefined
+  const open = isControlled ? controlledOpen : uncontrolledOpen
+  const setOpen = (next: boolean) => {
+    if (!isControlled) setUncontrolledOpen(next)
+    onOpenChange?.(next)
+  }
   
   return (
     <DialogContext.Provider value={{ open, onOpenChange: setOpen }}>

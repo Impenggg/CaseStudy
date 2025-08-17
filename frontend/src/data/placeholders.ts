@@ -1,4 +1,4 @@
-import { Product, Story, Campaign, User } from '@/types';
+import type { Product, Story, Campaign, User } from '@/types';
 
 // PLACEHOLDER DATA - EASILY REPLACEABLE
 // All images use placeholder services and can be replaced with actual content

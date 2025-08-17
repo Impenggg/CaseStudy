@@ -83,6 +83,51 @@ export const authAPI = {
   },
 };
 
+export type MediaPost = {
+  id: number;
+  user_id: number;
+  caption?: string;
+  image_path: string;
+  image_url: string;
+  created_at: string;
+  user?: { id: number; name: string };
+  reactions_count?: number;
+  comments_count?: number;
+  comments?: Array<{ id: number; body: string; created_at: string; user?: { id: number; name: string } }>;
+};
+
+export const mediaAPI = {
+  list: async (params?: { page?: number; per_page?: number }) => {
+    const res = await api.get('/media', { params });
+    return res.data as {
+      data: MediaPost[];
+      current_page: number;
+      last_page: number;
+      per_page: number;
+      total: number;
+    };
+  },
+  show: async (id: number) => {
+    const res = await api.get(`/media/${id}`);
+    return res.data as MediaPost;
+  },
+  create: async ({ file, caption }: { file: File; caption?: string }) => {
+    const form = new FormData();
+    form.append('image', file);
+    if (caption) form.append('caption', caption);
+    const res = await api.post('/media', form, { headers: { 'Content-Type': 'multipart/form-data' } });
+    return res.data;
+  },
+  react: async (id: number) => {
+    const res = await api.post(`/media/${id}/react`);
+    return res.data as { status: string; reacted: boolean; counts: { reactions_count: number; comments_count: number } };
+  },
+  comment: async (id: number, body: string) => {
+    const res = await api.post(`/media/${id}/comments`, { body });
+    return res.data;
+  },
+};
+
 // Products API
 export const productsAPI = {
   getAll: async (params?: {
@@ -288,6 +333,11 @@ export const uploadAPI = {
       },
     });
     return response.data;
+  },
+  list: async (): Promise<Array<{ url: string; path: string; filename: string; size: number; mime_type: string; last_modified: number }>> => {
+    const response = await api.get('/uploads');
+    // backend returns { status, data: [...] }
+    return response.data.data || [];
   },
 };
 

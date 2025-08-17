@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\DonationController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UploadController;
+use App\Http\Controllers\Api\MediaPostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -37,6 +38,14 @@ Route::get('/stories/{story}', [StoryController::class, 'show']);
 // Public campaign routes
 Route::get('/campaigns', [CampaignController::class, 'index']);
 Route::get('/campaigns/{campaign}', [CampaignController::class, 'show']);
+
+// Public uploads listing (for gallery display)
+Route::get('/uploads', [UploadController::class, 'index']);
+
+// Public media feed routes
+Route::get('/media', [MediaPostController::class, 'index']);
+Route::get('/media/{media}', [MediaPostController::class, 'show']);
+Route::get('/users/{user}/media', [MediaPostController::class, 'userPosts']);
 
 // Protected routes (authentication required)
 Route::middleware('auth:sanctum')->group(function () {
@@ -83,4 +92,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Upload routes
     Route::post('/upload', [UploadController::class, 'upload']);
+
+    // Media routes (authenticated actions)
+    Route::post('/media', [MediaPostController::class, 'store']);
+    Route::post('/media/{media}/react', [MediaPostController::class, 'react']);
+    Route::post('/media/{media}/comments', [MediaPostController::class, 'comment']);
 });

@@ -10,6 +10,8 @@ import CampaignDetailPage from './pages/CampaignDetailPage';
 import StorySubmissionPage from './pages/StorySubmissionPage';
 import CampaignCreationPage from './pages/CampaignCreationPage';
 import MediaCreationPage from './pages/MediaCreationPage';
+import MediaFeedPage from './pages/MediaFeedPage';
+import ProtectedRoute from './components/ProtectedRoute';
 import { useScrollToTop } from './hooks/useScrollToTop';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
@@ -73,6 +75,7 @@ const App: React.FC = () => {
           <Route path="/stories" element={<Layout><StoriesPage /></Layout>} />
           <Route path="/story/:id" element={<Layout><StoryDetailPage /></Layout>} />
           <Route path="/campaign/:id" element={<Layout><CampaignDetailPage /></Layout>} />
+          <Route path="/media" element={<Layout><MediaFeedPage /></Layout>} />
 
           {/* Auth pages */}
           <Route path="/login" element={<Layout><LoginPage /></Layout>} />
@@ -81,7 +84,16 @@ const App: React.FC = () => {
           {/* Account-only routes */}
           <Route path="/submit-story" element={<Layout><StorySubmissionPage /></Layout>} />
           <Route path="/create-campaign" element={<Layout><CampaignCreationPage /></Layout>} />
-          <Route path="/media-creation" element={<Layout><MediaCreationPage /></Layout>} />
+          <Route
+            path="/media-creation"
+            element={
+              <Layout>
+                <ProtectedRoute>
+                  <MediaCreationPage />
+                </ProtectedRoute>
+              </Layout>
+            }
+          />
           <Route path="/account" element={<Layout><AccountPage /></Layout>} />
           <Route path="/orders" element={<Layout><OrdersPage /></Layout>} />
           <Route path="/supports" element={<Layout><SupportsPage /></Layout>} />

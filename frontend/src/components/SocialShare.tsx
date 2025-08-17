@@ -45,9 +45,9 @@ export const SocialShare: React.FC<SocialShareProps> = ({
   };
 
   const handleNativeShare = async () => {
-    if (navigator.share) {
+    if (typeof navigator !== 'undefined' && 'share' in navigator && typeof (navigator as any).share === 'function') {
       try {
-        await navigator.share({
+        await (navigator as any).share({
           title,
           text: description,
           url
@@ -92,7 +92,7 @@ export const SocialShare: React.FC<SocialShareProps> = ({
           >
             💬
           </Button>
-          {navigator.share && (
+          {typeof navigator !== 'undefined' && 'share' in navigator && (
             <Button
               size={buttonSize}
               variant="ghost"
@@ -191,7 +191,7 @@ export const SocialShare: React.FC<SocialShareProps> = ({
         >
           ✉️ Email
         </Button>
-        {navigator.share && (
+        {typeof navigator !== 'undefined' && 'share' in navigator && (
           <Button
             size={buttonSize}
             onClick={handleNativeShare}
