@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Product, Story, Campaign, User, Order, Donation } from '@/types';
+import type { Product, Story, Campaign, User, Order, Donation } from '@/types';
 
 // Configure axios instance
 const api = axios.create({
@@ -24,7 +24,14 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      // Remove invalid token and preserve intended path for post-login redirect
       localStorage.removeItem('auth_token');
+      try {
+        const current = window.location.pathname + window.location.search + window.location.hash;
+        if (!window.location.pathname.startsWith('/login')) {
+          sessionStorage.setItem('intended_path', current);
+        }
+      } catch {}
       window.location.href = '/login';
     }
     return Promise.reject(error);

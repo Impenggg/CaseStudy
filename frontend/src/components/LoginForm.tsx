@@ -13,7 +13,9 @@ const LoginForm = () => {
   const location = useLocation();
   const { login } = useAuth();
 
-  const from = (location.state as any)?.from?.pathname || '/';
+  const fromState = (location.state as any)?.from?.pathname
+  const intended = sessionStorage.getItem('intended_path') || undefined
+  const from = fromState || intended || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,6 +36,8 @@ const LoginForm = () => {
     try {
       const success = await login(formData.email, formData.password);
       if (success) {
+        // clear intended path after successful navigation
+        sessionStorage.removeItem('intended_path');
         navigate(from, { replace: true });
       } else {
         setError('Invalid email or password');

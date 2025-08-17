@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const RegisterForm = () => {
@@ -12,6 +12,7 @@ const RegisterForm = () => {
   const [error, setError] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { register } = useAuth();
 
   // Form validation
@@ -57,7 +58,11 @@ const RegisterForm = () => {
     try {
       const success = await register(formData.email, formData.password, formData.name);
       if (success) {
-        navigate('/dashboard');
+        const fromState = (location.state as any)?.from?.pathname
+        const intended = sessionStorage.getItem('intended_path') || undefined
+        const to = fromState || intended || '/'
+        sessionStorage.removeItem('intended_path')
+        navigate(to, { replace: true });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');

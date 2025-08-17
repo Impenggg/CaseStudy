@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { triggerAction } from '../lib/uiActions';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Campaign {
   id: number;
@@ -18,6 +19,7 @@ interface Campaign {
 
 const CampaignDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { isAuthenticated, requireAuth } = useAuth();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [supportAmount, setSupportAmount] = useState(1000);
@@ -97,6 +99,13 @@ const CampaignDetailPage: React.FC = () => {
   };
 
   const handleSupport = () => {
+    // Require auth before supporting a campaign
+    if (!isAuthenticated) {
+      if (id) sessionStorage.setItem('resume_support_campaign_id', id);
+      sessionStorage.setItem('resume_support', '1');
+      requireAuth('/login');
+      return;
+    }
     setShowSupportModal(true);
   };
 
@@ -106,6 +115,19 @@ const CampaignDetailPage: React.FC = () => {
     setSupportForm({ name: '', email: '', message: '' });
     setSupportAmount(1000);
   };
+
+  // Resume support modal after login
+  useEffect(() => {
+    if (isAuthenticated) {
+      const resume = sessionStorage.getItem('resume_support');
+      const cid = sessionStorage.getItem('resume_support_campaign_id');
+      if (resume === '1' && cid && id === cid) {
+        sessionStorage.removeItem('resume_support');
+        sessionStorage.removeItem('resume_support_campaign_id');
+        setShowSupportModal(true);
+      }
+    }
+  }, [isAuthenticated, id]);
 
   if (isLoading) {
     return (

@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
+import axios from 'axios'
 
 interface User {
   id: string
   name: string
   email: string
   avatar?: string
+  role?: string
 }
 
 interface AuthContextType {
@@ -12,9 +14,17 @@ interface AuthContextType {
   isAuthenticated: boolean
   isLoading: boolean
   login: (email: string, password: string) => Promise<boolean>
-  logout: () => void
-  register: (email: string, password: string, name: string) => Promise<boolean>
+  logout: () => Promise<void>
+  register: (email: string, password: string, name: string, role?: string) => Promise<boolean>
+  checkAuth: () => Promise<void>
+  requireAuth: (redirectPath?: string) => boolean
 }
+
+// Configure axios defaults
+const API_BASE_URL = 'http://localhost:8000/api'
+axios.defaults.baseURL = API_BASE_URL
+// We use bearer tokens, not cookies. Avoid cross-site cookies to match CORS (supports_credentials=false)
+axios.defaults.withCredentials = false
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -30,64 +40,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
+  // Attach bearer token if present
   useEffect(() => {
-    // Check for existing session on app load
-    const checkSession = () => {
+    const interceptor = axios.interceptors.request.use((config) => {
+      const token = localStorage.getItem('auth_token')
+      if (token) {
+        config.headers = config.headers || {}
+        config.headers.Authorization = `Bearer ${token}`
+      }
+      return config
+    })
+    return () => axios.interceptors.request.eject(interceptor)
+  }, [])
+
+  useEffect(() => {
+    const init = async () => {
       try {
-        const authStatus = localStorage.getItem('cordillera_auth')
-        const userString = localStorage.getItem('cordillera_user')
-        
-        if (authStatus === 'true' && userString) {
-          const userData = JSON.parse(userString)
-          setUser(userData)
+        const token = localStorage.getItem('auth_token')
+        if (token) {
+          // Always verify token and refresh user on init
+          const { data } = await axios.get('/user')
+          setUser(data.data)
+          localStorage.setItem('user', JSON.stringify(data.data))
         }
-      } catch (error) {
-        console.error('Session check failed:', error)
-        // Clear corrupted session data
-        localStorage.removeItem('cordillera_auth')
-        localStorage.removeItem('cordillera_user')
+      } catch (e) {
+        localStorage.removeItem('auth_token')
+        localStorage.removeItem('user')
+        setUser(null)
       } finally {
         setIsLoading(false)
       }
     }
-
-    checkSession()
+    init()
   }, [])
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true)
-      
-      // Basic validation
-      if (!email || !password) {
-        throw new Error('Please fill in all fields')
+      const { data } = await axios.post('/login', { email, password })
+      if (data.status === 'success') {
+        const { user, token } = data.data
+        localStorage.setItem('auth_token', token)
+        localStorage.setItem('user', JSON.stringify(user))
+        setUser(user)
+        return true
       }
-
-      if (!email.includes('@')) {
-        throw new Error('Please enter a valid email address')
-      }
-
-      // Call login API
-      const response = await fetch('http://localhost/CaseStudy/backend/api/login.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password })
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed')
-      }
-
-      // Store session
-      localStorage.setItem('cordillera_user', JSON.stringify(data.user))
-      localStorage.setItem('cordillera_auth', 'true')
-      
-      setUser(data.user)
-      return true
+      return false
       
     } catch (error) {
       console.error('Login failed:', error)
@@ -97,49 +95,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const register = async (email: string, password: string, name: string): Promise<boolean> => {
+  const register = async (email: string, password: string, name: string, role: string = 'buyer'): Promise<boolean> => {
     try {
       setIsLoading(true)
-      
-      // Basic validation
-      if (!email || !password || !name) {
-        throw new Error('Please fill in all fields')
+      const { data } = await axios.post('/register', { email, password, name, role })
+      if (data.status === 'success') {
+        const { user, token } = data.data
+        localStorage.setItem('auth_token', token)
+        localStorage.setItem('user', JSON.stringify(user))
+        setUser(user)
+        return true
       }
-
-      if (!email.includes('@')) {
-        throw new Error('Please enter a valid email address')
-      }
-
-      if (password.length < 8) {
-        throw new Error('Password must be at least 8 characters')
-      }
-
-      // Call register API
-      const response = await fetch('http://localhost/CaseStudy/backend/api/register.php', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          name,
-          avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`
-        })
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed')
-      }
-
-      // Store session
-      localStorage.setItem('cordillera_user', JSON.stringify(data.user))
-      localStorage.setItem('cordillera_auth', 'true')
-      
-      setUser(data.user)
-      return true
+      return false
       
     } catch (error) {
       console.error('Registration failed:', error)
@@ -149,10 +116,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const logout = () => {
-    localStorage.removeItem('cordillera_user')
-    localStorage.removeItem('cordillera_auth')
-    setUser(null)
+  const logout = async (): Promise<void> => {
+    try {
+      await axios.post('/logout')
+    } catch (e) {
+      // ignore
+    } finally {
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('user')
+      setUser(null)
+    }
+  }
+
+  const checkAuth = async (): Promise<void> => {
+    const token = localStorage.getItem('auth_token')
+    if (!token) return
+    try {
+      const { data } = await axios.get('/user')
+      setUser(data.data)
+      localStorage.setItem('user', JSON.stringify(data.data))
+    } catch (e) {
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('user')
+      setUser(null)
+      throw e
+    }
+  }
+
+  const requireAuth = (redirectPath: string = '/login'): boolean => {
+    if (!user) {
+      sessionStorage.setItem('intended_path', window.location.pathname + window.location.search)
+      window.location.href = redirectPath
+      return false
+    }
+    return true
   }
 
   const value: AuthContextType = {
@@ -161,12 +158,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isLoading,
     login,
     logout,
-    register
+    register,
+    checkAuth,
+    requireAuth,
   }
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {!isLoading && children}
     </AuthContext.Provider>
   )
 }

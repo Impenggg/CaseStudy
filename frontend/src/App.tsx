@@ -11,6 +11,11 @@ import StorySubmissionPage from './pages/StorySubmissionPage';
 import CampaignCreationPage from './pages/CampaignCreationPage';
 import MediaCreationPage from './pages/MediaCreationPage';
 import { useScrollToTop } from './hooks/useScrollToTop';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import AccountPage from './pages/AccountPage';
+import OrdersPage from './pages/OrdersPage';
+import SupportsPage from './pages/SupportsPage';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -61,16 +66,25 @@ const App: React.FC = () => {
       <Router>
         <ScrollToTop />
         <Routes>
-          {/* All Routes are Public */}
+          {/* Public browsing routes */}
           <Route path="/" element={<Layout><HomePage /></Layout>} />
           <Route path="/marketplace" element={<Layout><MarketplacePage /></Layout>} />
           <Route path="/product/:id" element={<Layout><ProductDetailPage /></Layout>} />
           <Route path="/stories" element={<Layout><StoriesPage /></Layout>} />
           <Route path="/story/:id" element={<Layout><StoryDetailPage /></Layout>} />
           <Route path="/campaign/:id" element={<Layout><CampaignDetailPage /></Layout>} />
+
+          {/* Auth pages */}
+          <Route path="/login" element={<Layout><LoginPage /></Layout>} />
+          <Route path="/register" element={<Layout><RegisterPage /></Layout>} />
+
+          {/* Account-only routes */}
           <Route path="/submit-story" element={<Layout><StorySubmissionPage /></Layout>} />
           <Route path="/create-campaign" element={<Layout><CampaignCreationPage /></Layout>} />
           <Route path="/media-creation" element={<Layout><MediaCreationPage /></Layout>} />
+          <Route path="/account" element={<Layout><AccountPage /></Layout>} />
+          <Route path="/orders" element={<Layout><OrdersPage /></Layout>} />
+          <Route path="/supports" element={<Layout><SupportsPage /></Layout>} />
 
           {/* 404 Page */}
           <Route

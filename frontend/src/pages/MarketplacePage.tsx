@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { triggerAction } from '../lib/uiActions';
 import { Link } from 'react-router-dom';
 import CartModal from '../components/CartModal';
+import { useAuth } from '../contexts/AuthContext';
+import api, { productsAPI } from '@/services/api';
 
 interface Product {
   id: number;
@@ -14,9 +16,11 @@ interface Product {
 }
 
 const MarketplacePage: React.FC = () => {
+  const { isAuthenticated, requireAuth } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('');
   // Simple marketplace cart state (local to this page)
@@ -48,93 +52,54 @@ const MarketplacePage: React.FC = () => {
   });
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'gcash' | 'card'>('cod');
 
+  // resolve API origin (http://localhost:8000) from axios baseURL (http://localhost:8000/api)
+  const API_ORIGIN = React.useMemo(() => (api.defaults.baseURL || '').replace(/\/api\/?$/, ''), []);
+
+  const resolveImageUrl = (image?: string) => {
+    if (!image) return '';
+    if (image.startsWith('http://') || image.startsWith('https://')) return image;
+    // backend seeds use paths like "storage/products/....jpg"
+    return `${API_ORIGIN}/${image.replace(/^\/?/, '')}`;
+  };
+
   useEffect(() => {
-    // Sample products data with high-quality images
-    const sampleProducts: Product[] = [
-      {
-        id: 1,
-        name: "Traditional Ikat Blanket",
-        price: 2500,
-        image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600",
-        description: "Handwoven with indigenous patterns",
-        category: "Blankets",
-        artisan: "Maria Santos"
-      },
-      {
-        id: 2,
-        name: "Cordillera Table Runner",
-        price: 850,
-        image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600",
-        description: "Elegant dining centerpiece",
-        category: "Home Decor",
-        artisan: "Carlos Mendoza"
-      },
-      {
-        id: 3,
-        name: "Woven Shoulder Bag",
-        price: 1200,
-        image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600",
-        description: "Durable traditional craftsmanship",
-        category: "Accessories",
-        artisan: "Ana Bautista"
-      },
-      {
-        id: 4,
-        name: "Mountain Pattern Shawl",
-        price: 1800,
-        image: "https://images.unsplash.com/photo-1594736797933-d0051ba0ff29?w=600",
-        description: "Intricate geometric designs",
-        category: "Clothing",
-        artisan: "Roberto Calam"
-      },
-      {
-        id: 5,
-        name: "Traditional Placemats Set",
-        price: 650,
-        image: "https://images.unsplash.com/photo-1558618666-fcd25b9cd7db?w=600",
-        description: "Set of 6 handwoven placemats",
-        category: "Home Decor",
-        artisan: "Elena Cruz"
-      },
-      {
-        id: 6,
-        name: "Cordillera Wall Hanging",
-        price: 1400,
-        image: "https://images.unsplash.com/photo-1582582494881-41e67beece72?w=600",
-        description: "Decorative cultural art piece",
-        category: "Art",
-        artisan: "Jose Dagdag"
-      },
-      {
-        id: 7,
-        name: "Traditional Backpack",
-        price: 2200,
-        image: "https://images.unsplash.com/photo-1546938576-6e6a64f317cc?w=600",
-        description: "Sturdy mountain-style backpack",
-        category: "Accessories",
-        artisan: "Maria Santos"
-      },
-      {
-        id: 8,
-        name: "Ceremonial Textile",
-        price: 3500,
-        image: "https://images.unsplash.com/photo-1565084287938-0bcf4d4b90d8?w=600",
-        description: "Sacred ceremonial weaving",
-        category: "Ceremonial",
-        artisan: "Elder Aniceto"
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await productsAPI.getAll({ per_page: 100 });
+        // Support both paginated {data: [...]} and raw arrays
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : res?.data?.data || []);
+        const mapped: Product[] = list.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          price: Number(item.price ?? 0),
+          image: resolveImageUrl(item.image),
+          description: item.description || '',
+          category: item.category || 'General',
+          artisan: item.seller?.name || item.user?.name || 'Artisan',
+        }));
+        if (mounted) {
+          setProducts(mapped);
+          setFilteredProducts(mapped);
+        }
+      } catch (e) {
+        // fallback: empty list on error
+        if (mounted) {
+          setProducts([]);
+          setFilteredProducts([]);
+        }
       }
-    ];
-    setProducts(sampleProducts);
-    setFilteredProducts(sampleProducts);
+    })();
+    return () => { mounted = false; };
   }, []);
 
-  // Persist cart to localStorage
   useEffect(() => {
     localStorage.setItem('marketplace_cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
   // Cart helpers
   const addToCart = (product: Product) => {
+    // Guests can add to cart; auth is only required at checkout
     setCartItems((prev) => {
       const existing = prev.find((p) => p.id === product.id);
       if (existing) {
@@ -143,6 +108,8 @@ const MarketplacePage: React.FC = () => {
       return [...prev, { id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 }];
     });
     triggerAction(`Add ${product.name} to cart (Marketplace)`);
+    // Optionally show cart after adding
+    setIsCartOpen(true);
   };
 
   const incrementItem = (id: number) => {
@@ -168,6 +135,12 @@ const MarketplacePage: React.FC = () => {
   const cartTotal = cartItems.reduce((sum, i) => sum + i.quantity * i.price, 0);
 
   const handleCheckout = () => {
+    // Require auth to proceed to checkout
+    if (!isAuthenticated) {
+      sessionStorage.setItem('resume_checkout', '1');
+      requireAuth('/login');
+      return;
+    }
     setIsCartOpen(false);
     setIsCheckoutOpen(true);
     setCheckoutStep('shipping');
@@ -187,6 +160,40 @@ const MarketplacePage: React.FC = () => {
     setCheckoutStep('shipping');
     clearCart();
   };
+
+  // Resume actions post-login
+  useEffect(() => {
+    // Resume add to cart
+    if (isAuthenticated) {
+      const pendingId = sessionStorage.getItem('pending_add_product_id');
+      if (pendingId) {
+        const product = products.find(p => p.id === Number(pendingId));
+        if (product) {
+          setCartItems((prev) => {
+            const existing = prev.find((i) => i.id === product.id);
+            if (existing) {
+              return prev.map((i) => (i.id === product.id ? { ...i, quantity: i.quantity + 1 } : i));
+            }
+            return [...prev, { id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 }];
+          });
+          triggerAction(`Add ${product.name} to cart (Resumed)`);
+        }
+        sessionStorage.removeItem('pending_add_product_id');
+        // Optionally open cart to show item
+        setIsCartOpen(true);
+      }
+
+      // Resume checkout
+      if (sessionStorage.getItem('resume_checkout') === '1') {
+        sessionStorage.removeItem('resume_checkout');
+        if (cartItems.length > 0) {
+          setIsCartOpen(false);
+          setIsCheckoutOpen(true);
+          setCheckoutStep('shipping');
+        }
+      }
+    }
+  }, [isAuthenticated, products]);
 
   // Filter and search functionality
   useEffect(() => {
@@ -441,20 +448,16 @@ const MarketplacePage: React.FC = () => {
                 <Link
                   key={product.id}
                   to={`/product/${product.id}`}
-                  className="group block"
                 >
-                  {/* Enhanced Nikitin-style Product Card */}
-                  <div className="bg-white shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden rounded-lg border border-cordillera-sage/20 h-full flex flex-col">
-                    <div className="aspect-[4/3] overflow-hidden relative">
+                  <div className="group bg-white rounded-xl shadow-md hover:shadow-lg overflow-hidden flex flex-col h-full">
+                    <div className="relative h-56 overflow-hidden">
                       <img
                         src={product.image}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
-                      {/* Hover Overlay */}
-                      <div className="absolute inset-0 bg-cordillera-olive/0 group-hover:bg-cordillera-olive/10 transition-colors duration-300"></div>
-                      {/* Category Badge */}
-                      <div className="absolute top-3 left-3 bg-cordillera-gold/90 text-cordillera-olive px-2 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur-sm">
+                      {/* Top-left badge */}
+                      <div className="absolute top-3 left-3 bg-cordillera-gold text-cordillera-olive text-xs font-semibold px-2 py-1 rounded">
                         {product.category}
                       </div>
                     </div>

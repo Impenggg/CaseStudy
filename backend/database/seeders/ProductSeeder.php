@@ -18,109 +18,187 @@ class ProductSeeder extends Seeder
 
         // Maria Santos products
         $maria = $weavers->where('name', 'Maria Santos')->first();
-        Product::create([
-            'name' => 'Traditional Ikat Weaving',
-            'price' => 2500.00,
-            'category' => 'Traditional Textiles',
-            'description' => 'Authentic handwoven ikat textile featuring traditional geometric patterns passed down through generations. Each piece tells a story of our ancestors and preserves our cultural heritage.',
-            'cultural_background' => 'Ikat weaving is a traditional dyeing technique used to pattern textiles that employs a resist dyeing process similar to tie-dye on either the warp or weft fibres.',
-            'materials' => ['Cotton', 'Natural Dyes', 'Traditional Loom'],
-            'care_instructions' => 'Hand wash in cold water with mild detergent. Do not bleach. Iron on low heat if needed. Store in a cool, dry place.',
-            'image' => 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=800',
-            'user_id' => $maria->id,
-            'stock_quantity' => 5,
-            'dimensions' => [
-                'length' => 200,
-                'width' => 150,
-                'weight' => 500
-            ],
-            'tags' => ['ikat', 'traditional', 'handwoven', 'cultural'],
-            'featured' => true,
-        ]);
-
-        // Rosa Dulawan products
         $rosa = $weavers->where('name', 'Rosa Dulawan')->first();
-        Product::create([
-            'name' => 'Cordillera Blanket',
-            'price' => 1800.00,
-            'category' => 'Home Textiles',
-            'description' => 'Warm and comfortable blanket woven with traditional Cordillera patterns. Perfect for cold mountain nights and adds cultural beauty to any home.',
-            'cultural_background' => 'Cordillera blankets are traditionally woven by women in the mountain provinces, using patterns that represent their community and family heritage.',
-            'materials' => ['Wool', 'Cotton Blend', 'Natural Fibers'],
-            'care_instructions' => 'Dry clean only. Do not machine wash. Store in a dry place away from direct sunlight.',
-            'image' => 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=800',
-            'user_id' => $rosa->id,
-            'stock_quantity' => 8,
-            'dimensions' => [
-                'length' => 180,
-                'width' => 120,
-                'weight' => 800
-            ],
-            'tags' => ['blanket', 'warm', 'traditional', 'cordillera'],
-            'featured' => false,
-        ]);
-
-        // Elena Badiw products
         $elena = $weavers->where('name', 'Elena Badiw')->first();
-        Product::create([
-            'name' => 'Woven Table Runner',
-            'price' => 850.00,
-            'category' => 'Home Decor',
-            'description' => 'Elegant table runner featuring intricate traditional motifs. Perfect for special occasions and adds a touch of cultural elegance to your dining table.',
-            'cultural_background' => 'Table runners in the Cordillera region often feature patterns that represent fertility, prosperity, and protection for the family.',
-            'materials' => ['Cotton', 'Silk Blend', 'Natural Dyes'],
-            'care_instructions' => 'Hand wash in cold water. Iron on low heat. Do not bleach or tumble dry.',
-            'image' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800',
-            'user_id' => $elena->id,
-            'stock_quantity' => 12,
-            'dimensions' => [
-                'length' => 120,
-                'width' => 30,
-                'weight' => 200
-            ],
-            'tags' => ['table runner', 'elegant', 'traditional', 'home decor'],
-            'featured' => true,
-        ]);
+        $defaultWeaver = $maria ?? $rosa ?? $elena ?? $weavers->first();
 
-        // Additional products
-        Product::create([
-            'name' => 'Traditional Shoulder Bag',
-            'price' => 1200.00,
-            'category' => 'Accessories',
-            'description' => 'Handwoven shoulder bag with traditional patterns. Functional and beautiful, perfect for everyday use while showcasing our cultural heritage.',
-            'cultural_background' => 'Shoulder bags are essential items in Cordillera culture, used for carrying personal belongings and often given as gifts during important ceremonies.',
-            'materials' => ['Rattan', 'Cotton', 'Leather Straps'],
-            'care_instructions' => 'Wipe with damp cloth. Keep away from moisture. Store in a dry place.',
-            'image' => 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=800',
-            'user_id' => $maria->id,
-            'stock_quantity' => 10,
-            'dimensions' => [
-                'length' => 25,
-                'width' => 20,
-                'weight' => 300
-            ],
-            'tags' => ['bag', 'shoulder bag', 'traditional', 'accessories'],
-            'featured' => false,
-        ]);
+        // Curated Cordillera products for marketplace
+        // If specific named weavers are not present, fall back to any weaver
+        $weaverId = $defaultWeaver?->id;
 
-        Product::create([
-            'name' => 'Woven Wall Hanging',
-            'price' => 3200.00,
-            'category' => 'Wall Art',
-            'description' => 'Stunning wall hanging featuring traditional Cordillera patterns. A beautiful piece of art that tells the story of our ancestors and adds cultural depth to any space.',
-            'cultural_background' => 'Wall hangings in Cordillera culture often depict stories, legends, and important events in the community\'s history.',
-            'materials' => ['Cotton', 'Natural Dyes', 'Wooden Frame'],
-            'care_instructions' => 'Dust regularly with soft cloth. Avoid direct sunlight. Do not wash.',
-            'image' => 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=800',
-            'user_id' => $rosa->id,
-            'stock_quantity' => 3,
-            'dimensions' => [
-                'length' => 100,
-                'width' => 80,
-                'weight' => 1500
+        $curatedProducts = [
+            [
+                'name' => 'Bulul (Ifugao Rice Guardian)',
+                'price' => 6800.00,
+                'category' => 'Sculpture',
+                'description' => 'Hand-carved Ifugao bulul, a rice granary guardian figure traditionally invoked for abundance and protection.',
+                'cultural_background' => 'Ifugao',
+                'materials' => ['Hardwood'],
+                'care_instructions' => 'Keep dry and away from direct sunlight. Dust with soft cloth.',
+                'image' => 'storage/products/bulul-01.jpg',
+                'stock_quantity' => 2,
+                'dimensions' => ['height' => 40, 'width' => 15, 'depth' => 12, 'weight' => 1500],
+                'tags' => ['ifugao', 'bulul', 'rice deity', 'sculpture', 'ritual'],
+                'featured' => true,
             ],
-            'tags' => ['wall art', 'traditional', 'cultural', 'decorative'],
-            'featured' => true,
-        ]);
+            [
+                'name' => 'Sangi (Bontoc Plaited Backpack)',
+                'price' => 2400.00,
+                'category' => 'Basketry',
+                'description' => 'Traditional Bontoc sangi, a plaited backpack with lid used for everyday carrying.',
+                'cultural_background' => 'Bontoc',
+                'materials' => ['Rattan', 'Bamboo'],
+                'care_instructions' => 'Keep dry; wipe with damp cloth. Store away from moisture.',
+                'image' => 'storage/products/sangi-01.jpg',
+                'stock_quantity' => 5,
+                'dimensions' => ['height' => 35, 'width' => 28, 'depth' => 20, 'weight' => 600],
+                'tags' => ['bontoc', 'sangi', 'backpack', 'basket', 'rattan'],
+                'featured' => false,
+            ],
+            [
+                'name' => 'Tudung (Pandanus Carrier)',
+                'price' => 1800.00,
+                'category' => 'Basketry',
+                'description' => 'Trough-shaped carrier made of a pandanus leaf layer with rattan framework; can double as a rain cover.',
+                'cultural_background' => 'Luzon Highland',
+                'materials' => ['Pandanus Leaves', 'Rattan'],
+                'care_instructions' => 'Air dry after use; avoid prolonged moisture.',
+                'image' => 'storage/products/tudung-01.jpg',
+                'stock_quantity' => 4,
+                'dimensions' => ['length' => 60, 'width' => 25, 'height' => 18, 'weight' => 500],
+                'tags' => ['tudung', 'pandanus', 'rattan', 'basket', 'carrier'],
+                'featured' => false,
+            ],
+            [
+                'name' => 'Kulikug (Rice Basket)',
+                'price' => 1600.00,
+                'category' => 'Basketry',
+                'description' => 'Basket for roasted unripe rice, traditionally woven in the Cordillera.',
+                'cultural_background' => 'Bontoc',
+                'materials' => ['Bamboo', 'Rattan'],
+                'care_instructions' => 'Keep dry; clean with soft brush or cloth.',
+                'image' => 'storage/products/kulikug-01.jpg',
+                'stock_quantity' => 6,
+                'dimensions' => ['height' => 20, 'diameter' => 30, 'weight' => 400],
+                'tags' => ['kulikug', 'basket', 'rice', 'bontoc'],
+                'featured' => false,
+            ],
+            [
+                'name' => 'Inabnutan (Ifugao Hunter’s Backpack)',
+                'price' => 3200.00,
+                'category' => 'Basketry',
+                'description' => 'Weather-resistant Ifugao hunter’s backpack covered with abnut fiber.',
+                'cultural_background' => 'Ifugao',
+                'materials' => ['Rattan', 'Bamboo', 'Abnut Fiber'],
+                'care_instructions' => 'Air dry after exposure to rain; store in a cool, dry place.',
+                'image' => 'storage/products/inabnutan-01.jpg',
+                'stock_quantity' => 3,
+                'dimensions' => ['height' => 40, 'width' => 30, 'depth' => 18, 'weight' => 700],
+                'tags' => ['ifugao', 'inabnutan', 'backpack', 'rattan'],
+                'featured' => true,
+            ],
+            [
+                'name' => 'Lingling-o Pendant (Brass)',
+                'price' => 950.00,
+                'category' => 'Jewelry',
+                'description' => 'Omega-shaped pendant symbolizing protection and balance, inspired by Cordillera heritage.',
+                'cultural_background' => 'Ifugao / Kalinga / Bontoc',
+                'materials' => ['Brass'],
+                'care_instructions' => 'Wipe with jewelry cloth; keep away from chemicals and saltwater.',
+                'image' => 'storage/products/lingling-o-01.jpg',
+                'stock_quantity' => 12,
+                'dimensions' => ['diameter' => 4, 'weight' => 50],
+                'tags' => ['lingling-o', 'pendant', 'jewelry', 'cordillera'],
+                'featured' => false,
+            ],
+            [
+                'name' => 'Itneg Woven Textile (Pinilian)',
+                'price' => 2100.00,
+                'category' => 'Textiles',
+                'description' => 'Handwoven Itneg textile using pinilian technique from Abra; intricate supplementary weft motifs.',
+                'cultural_background' => 'Itneg (Tingguian), Abra',
+                'materials' => ['Cotton', 'Natural Dyes'],
+                'care_instructions' => 'Hand wash cold with mild detergent; line dry; iron low.',
+                'image' => 'storage/products/itneg-pinilian-01.jpg',
+                'stock_quantity' => 7,
+                'dimensions' => ['length' => 180, 'width' => 45, 'weight' => 300],
+                'tags' => ['itneg', 'tingguian', 'pinilian', 'abra', 'weaving'],
+                'featured' => true,
+            ],
+            [
+                'name' => 'Kalinga Kain (Wrap Skirt Cloth)',
+                'price' => 2600.00,
+                'category' => 'Textiles',
+                'description' => 'Traditional Kalinga kain, a wrap-around skirt cloth with bold bands and motifs.',
+                'cultural_background' => 'Kalinga',
+                'materials' => ['Cotton', 'Natural Dyes'],
+                'care_instructions' => 'Hand wash cold; do not bleach; iron on low.',
+                'image' => 'storage/products/kalinga-kain-01.jpg',
+                'stock_quantity' => 5,
+                'dimensions' => ['length' => 170, 'width' => 60, 'weight' => 350],
+                'tags' => ['kalinga', 'kain', 'tapis', 'textile'],
+                'featured' => false,
+            ],
+            [
+                'name' => 'Bontoc Siniwsiwan Blanket',
+                'price' => 3400.00,
+                'category' => 'Textiles',
+                'description' => 'Bontoc siniwsiwan fabric featuring geometric motifs used for clothing and blankets.',
+                'cultural_background' => 'Bontoc',
+                'materials' => ['Cotton', 'Dyed Yarn'],
+                'care_instructions' => 'Dry clean recommended; store away from direct sunlight.',
+                'image' => 'storage/products/siniwsiwan-blanket-01.jpg',
+                'stock_quantity' => 4,
+                'dimensions' => ['length' => 190, 'width' => 120, 'weight' => 900],
+                'tags' => ['bontoc', 'siniwsiwan', 'blanket', 'textile'],
+                'featured' => true,
+            ],
+            [
+                'name' => 'Binakul Throw (Optical Weave)',
+                'price' => 3000.00,
+                'category' => 'Textiles',
+                'description' => 'Binakul (binakol) optical-illusion weave associated with Ilocano and Itneg communities.',
+                'cultural_background' => 'Ilocano / Itneg (Abra)',
+                'materials' => ['Cotton'],
+                'care_instructions' => 'Hand wash cold; lay flat to dry; iron low.',
+                'image' => 'storage/products/binakul-throw-01.jpg',
+                'stock_quantity' => 6,
+                'dimensions' => ['length' => 170, 'width' => 110, 'weight' => 700],
+                'tags' => ['binakul', 'binakol', 'optical', 'itneg', 'ilocano'],
+                'featured' => false,
+            ],
+            [
+                'name' => 'Cordillera Oban (Woven Belt)',
+                'price' => 650.00,
+                'category' => 'Accessories',
+                'description' => 'Traditional woven belt/sash used to secure the wrap skirt (tapis).',
+                'cultural_background' => 'Cordillera',
+                'materials' => ['Cotton'],
+                'care_instructions' => 'Hand wash cold; do not tumble dry; iron low.',
+                'image' => 'storage/products/oban-belt-01.jpg',
+                'stock_quantity' => 10,
+                'dimensions' => ['length' => 200, 'width' => 5, 'weight' => 120],
+                'tags' => ['oban', 'belt', 'sash', 'tapis', 'cordillera'],
+                'featured' => false,
+            ],
+        ];
+
+        foreach ($curatedProducts as $p) {
+            Product::create([
+                'name' => $p['name'],
+                'price' => $p['price'],
+                'category' => $p['category'],
+                'description' => $p['description'],
+                'cultural_background' => $p['cultural_background'],
+                'materials' => $p['materials'],
+                'care_instructions' => $p['care_instructions'],
+                'image' => $p['image'],
+                'user_id' => $weaverId,
+                'stock_quantity' => $p['stock_quantity'],
+                'dimensions' => $p['dimensions'],
+                'tags' => $p['tags'],
+                'featured' => $p['featured'],
+            ]);
+        }
     }
 }

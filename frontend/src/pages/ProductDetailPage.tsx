@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { triggerAction } from '../lib/uiActions';
 import { useParams, Link } from 'react-router-dom';
+import CartModal from '../components/CartModal';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Product {
   id: number;
@@ -18,10 +20,23 @@ interface Product {
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { isAuthenticated, requireAuth } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useState('story');
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  // Local cart state (shared via localStorage with marketplace)
+  interface CartItem { id: number; name: string; price: number; image: string; quantity: number }
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    try {
+      const raw = localStorage.getItem('marketplace_cart');
+      return raw ? (JSON.parse(raw) as CartItem[]) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     // Sample product data - in real app, fetch from API
@@ -46,6 +61,10 @@ const ProductDetailPage: React.FC = () => {
     };
     setProduct(sampleProduct);
   }, [id]);
+
+  useEffect(() => {
+    localStorage.setItem('marketplace_cart', JSON.stringify(cartItems));
+  }, [cartItems]);
 
   // Auto-play carousel functionality
   useEffect(() => {
@@ -72,7 +91,76 @@ const ProductDetailPage: React.FC = () => {
 
   const goToImage = (index: number) => {
     setSelectedImage(index);
-    setIsAutoPlaying(false); // Stop auto-play when user manually selects
+    setIsAutoPlaying(false); // Stop auto-play when user selects
+  };
+
+  const addToCart = (qty: number = 1) => {
+    if (!product) return;
+    try {
+      const key = 'marketplace_cart';
+      const raw = localStorage.getItem(key);
+      const cart: Array<{ id: number; name: string; price: number; image: string; quantity: number }>
+        = raw ? JSON.parse(raw) : [];
+      const existing = cart.find((p) => p.id === product.id);
+      if (existing) {
+        existing.quantity += qty;
+      } else {
+        cart.push({
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          image: product.gallery?.[0] || product.image,
+          quantity: qty,
+        });
+      }
+      localStorage.setItem(key, JSON.stringify(cart));
+      // Update local state for UI and badge
+      setCartItems(cart);
+      triggerAction(`Add ${qty} ${product.name} to cart (Details)`);
+      setIsCartOpen(true);
+    } catch (e) {
+      console.error('Failed to add to cart', e);
+    }
+  };
+
+  // Cart item operations
+  const incrementItem = (id: number) => {
+    setCartItems((prev) => {
+      const next = prev.map((p) => (p.id === id ? { ...p, quantity: p.quantity + 1 } : p));
+      localStorage.setItem('marketplace_cart', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const decrementItem = (id: number) => {
+    setCartItems((prev) => {
+      const next = prev
+        .map((p) => (p.id === id ? { ...p, quantity: Math.max(1, p.quantity - 1) } : p))
+        .filter((p) => p.quantity > 0);
+      localStorage.setItem('marketplace_cart', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const removeItem = (id: number) => {
+    setCartItems((prev) => {
+      const next = prev.filter((p) => p.id !== id);
+      localStorage.setItem('marketplace_cart', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const cartCount = cartItems.reduce((sum, i) => sum + i.quantity, 0);
+  const cartTotal = cartItems.reduce((sum, i) => sum + i.quantity * i.price, 0);
+
+  const handleCheckout = () => {
+    if (!isAuthenticated) {
+      sessionStorage.setItem('resume_checkout', '1');
+      requireAuth('/login');
+      return;
+    }
+    // In a full flow, you might navigate to a dedicated checkout page; for parity we can keep modal-driven flow.
+    triggerAction('Checkout initiated from Product Details');
   };
 
   if (!product) {
@@ -83,6 +171,36 @@ const ProductDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cordillera-cream">
+      {/* Floating Cart Button */}
+      <div className="fixed right-6 bottom-6 z-50">
+        <button
+          onClick={() => setIsCartOpen(true)}
+          className="group relative bg-gradient-to-r from-cordillera-gold to-cordillera-gold/90 text-cordillera-olive px-6 py-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-500 flex items-center gap-3 border-2 border-cordillera-olive/20 hover:border-cordillera-olive transform hover:scale-110 backdrop-blur-sm"
+          aria-label="Open cart"
+        >
+          <div className="relative">
+            <svg className="w-6 h-6 transition-all duration-300 group-hover:rotate-12 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
+            </svg>
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse shadow-lg border border-white">
+                {cartCount}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-col items-start">
+            <span className="text-sm font-bold tracking-wide">Cart</span>
+            <span className="text-xs opacity-90 font-medium">
+              {cartCount === 0 ? 'Empty' : `${cartCount} item${cartCount !== 1 ? 's' : ''}`}
+            </span>
+          </div>
+          {cartTotal > 0 && (
+            <div className="ml-2 pl-3 border-l border-cordillera-olive/30">
+              <span className="text-sm font-bold text-cordillera-olive">₱{cartTotal.toLocaleString()}</span>
+            </div>
+          )}
+        </button>
+      </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Breadcrumb */}
         <nav className="mb-8">
@@ -178,7 +296,7 @@ const ProductDetailPage: React.FC = () => {
                   </svg>
                 ) : (
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1m-6-8h1m4 0h1M9 6h6" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1M9 6h6" />
                   </svg>
                 )}
               </button>
@@ -234,7 +352,7 @@ const ProductDetailPage: React.FC = () => {
                 </span>
               </div>
 
-               <button onClick={() => triggerAction(`Add ${product.name} to cart`)} className="w-full bg-cordillera-gold text-cordillera-olive py-4 text-lg font-medium hover:bg-cordillera-olive hover:text-cordillera-cream transition-all duration-200 tracking-wide">
+              <button onClick={() => addToCart(1)} className="w-full bg-cordillera-gold text-cordillera-olive py-4 text-lg font-medium hover:bg-cordillera-olive hover:text-cordillera-cream transition-all duration-200 tracking-wide">
                 Add to Cart
               </button>
             </div>
@@ -331,6 +449,16 @@ const ProductDetailPage: React.FC = () => {
           </div>
         </section>
       </div>
+      {/* Cart Modal */}
+      <CartModal
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        cartItems={cartItems}
+        onIncrement={incrementItem}
+        onDecrement={decrementItem}
+        onRemove={removeItem}
+        onCheckout={handleCheckout}
+      />
     </div>
   );
 };

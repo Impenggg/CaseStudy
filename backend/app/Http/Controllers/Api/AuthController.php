@@ -17,35 +17,47 @@ class AuthController extends Controller
      */
     public function register(Request $request): JsonResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'role' => 'required|in:weaver,buyer',
-            'bio' => 'nullable|string|max:1000',
-            'location' => 'nullable|string|max:255',
-            'phone' => 'nullable|string|max:20',
-        ]);
+        try {
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8',
+                'role' => 'sometimes|in:weaver,buyer',
+                'bio' => 'nullable|string|max:1000',
+                'location' => 'nullable|string|max:255',
+            ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => $request->role,
-            'bio' => $request->bio,
-            'location' => $request->location,
-        ]);
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => $request->role ?? 'buyer',
+                'bio' => $request->bio,
+                'location' => $request->location,
+            ]);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+            $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User registered successfully',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-            ],
-        ], 201);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'User registered successfully',
+                'data' => [
+                    'user' => $user,
+                    'token' => $token,
+                ],
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Registration failed. Please try again.',
+            ], 500);
+        }
     }
 
     /**
@@ -53,28 +65,42 @@ class AuthController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
-        $request->validate([
-            'email' => 'required|string|email',
-            'password' => 'required|string',
-        ]);
-
-        if (!Auth::attempt($request->only('email', 'password'))) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
+        try {
+            $request->validate([
+                'email' => 'required|string|email',
+                'password' => 'required|string',
             ]);
+
+            if (!Auth::attempt($request->only('email', 'password'))) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Invalid email or password',
+                ], 401);
+            }
+
+            $user = User::where('email', $request->email)->firstOrFail();
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Login successful',
+                'data' => [
+                    'user' => $user,
+                    'token' => $token,
+                ],
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Login failed. Please try again.',
+            ], 500);
         }
-
-        $user = User::where('email', $request->email)->firstOrFail();
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Login successful',
-            'data' => [
-                'user' => $user,
-                'token' => $token,
-            ],
-        ]);
     }
 
     /**

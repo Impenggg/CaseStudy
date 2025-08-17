@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { triggerAction } from '../lib/uiActions';
+import { useAuth } from '../contexts/AuthContext';
 
 interface FeaturedCreation {
   id: number;
@@ -11,6 +12,7 @@ interface FeaturedCreation {
 }
 
 const MediaCreationPage: React.FC = () => {
+  const { isAuthenticated, requireAuth } = useAuth();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -112,6 +114,26 @@ const MediaCreationPage: React.FC = () => {
       }
     }
   };
+
+  // Resume image state and save after login
+  useEffect(() => {
+    if (isAuthenticated) {
+      const pendingImage = sessionStorage.getItem('pending_media_image');
+      const resumeSave = sessionStorage.getItem('resume_media_save') === '1';
+      if (pendingImage) {
+        setSelectedImage(pendingImage);
+        sessionStorage.removeItem('pending_media_image');
+      }
+      if (resumeSave) {
+        sessionStorage.removeItem('resume_media_save');
+        // If we have image, perform the save action now
+        if (pendingImage || selectedImage) {
+          triggerAction('Save Image (Resumed)');
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated]);
 
   return (
     <div className="min-h-screen bg-cordillera-cream">
@@ -228,7 +250,7 @@ const MediaCreationPage: React.FC = () => {
             {/* Navigation Arrows */}
             <button
               onClick={prevSlide}
-              className="absolute -left-4 top-1/2 transform -translate-y-1/2 bg-white text-cordillera-olive p-4 hover:bg-cordillera-gold hover:text-white transition-all duration-300 z-10 shadow-[0_8px_30px_-4px_rgba(59,59,26,0.2)] hover:shadow-[0_8px_40px_-4px_rgba(59,59,26,0.3)] rounded-full hover:scale-110 backdrop-blur-sm"
+              className="absolute -left-4 top-1/2 transform -translate-y-1/2 bg-white text-cordillera-olive p-4 hover:bg-cordillera-gold hover:text-white transition-all duration-300 z-10 shadow-[0_8px_30px_-10px_rgba(59,59,26,0.2)] hover:shadow-[0_8px_40px_-10px_rgba(59,59,26,0.3)] rounded-full hover:scale-110 backdrop-blur-sm"
               aria-label="Previous creation"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
@@ -237,7 +259,7 @@ const MediaCreationPage: React.FC = () => {
             </button>
             <button
               onClick={nextSlide}
-              className="absolute -right-4 top-1/2 transform -translate-y-1/2 bg-white text-cordillera-olive p-4 hover:bg-cordillera-gold hover:text-white transition-all duration-300 z-10 shadow-[0_8px_30px_-4px_rgba(59,59,26,0.2)] hover:shadow-[0_8px_40px_-4px_rgba(59,59,26,0.3)] rounded-full hover:scale-110 backdrop-blur-sm"
+              className="absolute -right-4 top-1/2 transform -translate-y-1/2 bg-white text-cordillera-olive p-4 hover:bg-cordillera-gold hover:text-white transition-all duration-300 z-10 shadow-[0_8px_30px_-10px_rgba(59,59,26,0.2)] hover:shadow-[0_8px_40px_-10px_rgba(59,59,26,0.3)] rounded-full hover:scale-110 backdrop-blur-sm"
               aria-label="Next creation"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
@@ -376,7 +398,18 @@ const MediaCreationPage: React.FC = () => {
                           New Image
                         </button>
                         <button 
-                          onClick={(e) => { e.stopPropagation(); triggerAction('Save Image'); }}
+                          onClick={(e) => { 
+                            e.stopPropagation(); 
+                            if (!isAuthenticated) {
+                              if (selectedImage) {
+                                sessionStorage.setItem('pending_media_image', selectedImage);
+                              }
+                              sessionStorage.setItem('resume_media_save', '1');
+                              requireAuth('/login');
+                              return;
+                            }
+                            triggerAction('Save Image'); 
+                          }}
                           className="flex-1 border-2 border-cordillera-gold text-cordillera-olive px-4 py-3 rounded-md hover:bg-cordillera-gold/10 transition-colors flex items-center justify-center group"
                         >
                           <svg className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
