@@ -46,7 +46,18 @@ class CampaignController extends Controller
         }
 
         $perPage = $request->get('per_page', 12);
-        $campaigns = $query->paginate($perPage);
+
+        // Support fetching all without pagination
+        if ($perPage === 'all') {
+            $items = $query->get();
+            return response()->json([
+                'status' => 'success',
+                'data' => $items,
+                'pagination' => null,
+            ]);
+        }
+
+        $campaigns = $query->paginate((int) $perPage);
 
         return response()->json([
             'status' => 'success',

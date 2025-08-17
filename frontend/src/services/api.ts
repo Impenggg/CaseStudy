@@ -2,8 +2,10 @@ import axios from 'axios';
 import type { Product, Story, Campaign, User, Order, Donation } from '@/types';
 
 // Configure axios instance
+const DEFAULT_API = 'http://localhost:8000/api';
+const RESOLVED_BASE_URL = (import.meta as any)?.env?.VITE_API_BASE_URL || DEFAULT_API;
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api',
+  baseURL: RESOLVED_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -129,7 +131,7 @@ export const storiesAPI = {
     category?: string;
     sort_by?: string;
     featured?: boolean;
-    per_page?: number;
+    per_page?: number | 'all';
     page?: number;
   }) => {
     const response = await api.get('/stories', { params });
@@ -168,7 +170,7 @@ export const campaignsAPI = {
     category?: string;
     status?: string;
     sort_by?: string;
-    per_page?: number;
+    per_page?: number | 'all';
     page?: number;
   }) => {
     const response = await api.get('/campaigns', { params });

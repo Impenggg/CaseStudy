@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { triggerAction } from '../lib/uiActions';
 import { useAuth } from '../contexts/AuthContext';
+import api, { campaignsAPI } from '@/services/api';
 
 interface Campaign {
   id: number;
@@ -31,67 +32,43 @@ const CampaignDetailPage: React.FC = () => {
   });
 
   useEffect(() => {
-    // Simulate loading campaign data
-    setTimeout(() => {
-      const sampleCampaigns: Campaign[] = [
-        {
-          id: 101,
-          title: "Preserving Ancient Patterns Project",
-          description: "Document and digitize centuries-old weaving patterns to ensure these precious designs are preserved for future generations of artisans. This project will create a comprehensive digital archive of traditional Cordillera weaving patterns, including detailed documentation of techniques, materials, and cultural significance. The archive will serve as a valuable resource for weavers, researchers, and cultural preservationists.",
-          image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800",
-          goalAmount: 150000,
-          currentAmount: 112500,
-          endDate: "March 15, 2025",
-          category: "Documentation",
-          organizer: "Heritage Foundation",
+    let mounted = true;
+    (async () => {
+      if (!id) return;
+      setIsLoading(true);
+      try {
+        console.debug('[CampaignDetail] BaseURL:', api.defaults.baseURL);
+        console.debug('[CampaignDetail] Fetching campaign by id:', id);
+        const data = await campaignsAPI.getById(Number(id));
+        // Resolve image URL if backend returns a relative path
+        const API_ORIGIN = (api.defaults.baseURL || '').replace(/\/api\/?$/, '');
+        const resolveImage = (image?: string) => {
+          if (!image) return '';
+          if (image.startsWith('http://') || image.startsWith('https://')) return image;
+          return `${API_ORIGIN}/${image.replace(/^\/?/, '')}`;
+        };
+        const mapped: Campaign = {
+          id: data.id,
+          title: data.title,
+          description: data.description || '',
+          image: resolveImage(data.image),
+          goalAmount: Number((data as any).goal_amount ?? 0),
+          currentAmount: Number((data as any).current_amount ?? 0),
+          endDate: data.end_date ? new Date(data.end_date).toLocaleDateString() : '',
+          category: (data as any).category || 'community',
+          organizer: (data as any).organizer?.name || 'Organizer',
           featured: false,
-          type: 'campaign'
-        },
-        {
-          id: 102,
-          title: "Traditional Loom Restoration",
-          description: "Restore and maintain traditional wooden looms used by master weavers in remote Cordillera villages. These looms are essential tools that have been passed down through generations. Many are in need of repair and restoration to ensure they can continue to be used for creating authentic Cordillera textiles.",
-          image: "https://images.unsplash.com/photo-1607081692251-5bb4c0940e1e?w=800",
-          goalAmount: 80000,
-          currentAmount: 52000,
-          endDate: "February 28, 2025",
-          category: "Equipment",
-          organizer: "Weaver's Guild",
-          featured: false,
-          type: 'campaign'
-        },
-        {
-          id: 103,
-          title: "Youth Weaving Education Program",
-          description: "Establish workshops to teach traditional weaving techniques to young people, ensuring cultural continuity. This program will provide hands-on training in traditional weaving methods, natural dyeing techniques, and pattern creation. Participants will learn from master weavers and gain the skills needed to preserve and continue these important cultural traditions.",
-          image: "https://images.unsplash.com/photo-1594736797933-d0051ba0ff29?w=800",
-          goalAmount: 120000,
-          currentAmount: 75000,
-          endDate: "April 10, 2025",
-          category: "Education",
-          organizer: "Cultural Center",
-          featured: true,
-          type: 'campaign'
-        },
-        {
-          id: 104,
-          title: "Master Artisan Support Fund",
-          description: "Provide financial support to elderly master weavers to continue their craft and share their knowledge. Many master weavers are elderly and face financial challenges that prevent them from continuing their work or teaching others. This fund will provide stipends, materials, and support to ensure their valuable knowledge is preserved and shared.",
-          image: "https://images.unsplash.com/photo-1546938576-6e6a64f317cc?w=800",
-          goalAmount: 90000,
-          currentAmount: 45000,
-          endDate: "May 20, 2025",
-          category: "Support",
-          organizer: "Artisan Alliance",
-          featured: false,
-          type: 'campaign'
-        }
-      ];
-
-      const foundCampaign = sampleCampaigns.find(c => c.id === parseInt(id || '0'));
-      setCampaign(foundCampaign || null);
-      setIsLoading(false);
-    }, 1000);
+          type: 'campaign',
+        };
+        if (mounted) setCampaign(mapped);
+      } catch (e: any) {
+        console.error('[CampaignDetail] Fetch error:', e?.response?.status, e?.response?.data || e);
+        if (mounted) setCampaign(null);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
   }, [id]);
 
   const getProgressPercentage = (current: number, goal: number) => {

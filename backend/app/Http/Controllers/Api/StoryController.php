@@ -46,7 +46,18 @@ class StoryController extends Controller
         }
 
         $perPage = $request->get('per_page', 12);
-        $stories = $query->paginate($perPage);
+
+        // Support fetching all without pagination
+        if ($perPage === 'all') {
+            $items = $query->get();
+            return response()->json([
+                'status' => 'success',
+                'data' => $items,
+                'pagination' => null,
+            ]);
+        }
+
+        $stories = $query->paginate((int) $perPage);
 
         return response()->json([
             'status' => 'success',

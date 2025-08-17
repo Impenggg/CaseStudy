@@ -20,6 +20,7 @@ const MarketplacePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('');
@@ -66,7 +67,10 @@ const MarketplacePage: React.FC = () => {
     let mounted = true;
     (async () => {
       try {
+        console.debug('[Marketplace] BaseURL:', api.defaults.baseURL);
+        console.debug('[Marketplace] Fetching products...');
         const res = await productsAPI.getAll({ per_page: 100 });
+        console.debug('[Marketplace] Products response:', res);
         // Support both paginated {data: [...]} and raw arrays
         const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : res?.data?.data || []);
         const mapped: Product[] = list.map((item: any) => ({
@@ -81,12 +85,17 @@ const MarketplacePage: React.FC = () => {
         if (mounted) {
           setProducts(mapped);
           setFilteredProducts(mapped);
+          setErrorMsg(null);
         }
-      } catch (e) {
+      } catch (e: any) {
+        console.error('[Marketplace] Fetch error:', e?.response?.status, e?.response?.data || e);
         // fallback: empty list on error
         if (mounted) {
           setProducts([]);
           setFilteredProducts([]);
+          const status = e?.response?.status;
+          const msg = e?.response?.data?.message || e?.message || 'Failed to fetch products';
+          setErrorMsg(`Products fetch error${status ? ` (${status})` : ''}: ${msg}`);
         }
       }
     })();
@@ -231,6 +240,9 @@ const MarketplacePage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cordillera-cream">
+      {errorMsg && (
+        <div className="bg-red-50 text-red-700 border border-red-200 px-4 py-3 text-sm">{errorMsg}</div>
+      )}
              {/* Premium Cart Button */}
        <div className="fixed right-6 bottom-6 z-50">
          <button

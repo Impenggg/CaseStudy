@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { triggerAction } from '../lib/uiActions';
 import { Link } from 'react-router-dom';
+import api, { storiesAPI, campaignsAPI } from '@/services/api';
 
 interface Story {
   id: number;
@@ -38,136 +39,88 @@ const StoriesPage: React.FC = () => {
   const [contentType, setContentType] = useState<'all' | 'stories' | 'campaigns'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    // Sample stories data with beautiful images
-    const sampleStories: Story[] = [
-      {
-        id: 1,
-        title: "Master Weaver Maria's Journey",
-        content: "Discover how Maria preserves 300-year-old weaving techniques and passes them down to the next generation...",
-        media_url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=800",
-        author: "Maria Santos",
-        date: "December 15, 2024",
-        category: "Artisan Profile",
-        readTime: 8,
-        featured: true,
-        type: 'story'
-      },
-      {
-        id: 2,
-        title: "The Art of Natural Dyeing",
-        content: "Learning traditional plant-based coloring methods that have been used for centuries in Cordillera textiles...",
-        media_url: "https://images.unsplash.com/photo-1582582494881-41e67beece72?w=800",
-        author: "Carlos Mendoza",
-        date: "December 10, 2024",
-        category: "Techniques",
-        readTime: 6,
-        featured: false,
-        type: 'story'
-      },
-      {
-        id: 3,
-        title: "Young Weavers, Ancient Traditions",
-        content: "How millennials are embracing traditional crafts and bringing fresh perspectives to age-old practices...",
-        media_url: "https://images.unsplash.com/photo-1594736797933-d0051ba0ff29?w=800",
-        author: "Ana Bautista",
-        date: "December 5, 2024",
-        category: "Cultural Heritage",
-        readTime: 10,
-        featured: false,
-        type: 'story'
-      },
-      {
-        id: 4,
-        title: "Preserving Cultural Patterns",
-        content: "The significance of geometric designs in Cordillera textiles and their spiritual meaning in community life...",
-        media_url: "https://images.unsplash.com/photo-1558618666-fcd25b9cd7db?w=800",
-        author: "Roberto Calam",
-        date: "November 28, 2024",
-        category: "Cultural Heritage",
-        readTime: 7,
-        featured: false,
-        type: 'story'
-      },
-      {
-        id: 5,
-        title: "From Loom to Market",
-        content: "The journey of a handwoven textile from creation to the hands of appreciative buyers worldwide...",
-        media_url: "https://images.unsplash.com/photo-1565084287938-0bcf4d4b90d8?w=800",
-        author: "Elena Cruz",
-        date: "November 20, 2024",
-        category: "Business",
-        readTime: 5,
-        featured: false,
-        type: 'story'
-      }
-    ];
+    let mounted = true;
 
-    // Sample campaigns data
-    const sampleCampaigns: Campaign[] = [
-      {
-        id: 101,
-        title: "Preserving Ancient Patterns Project",
-        description: "Document and digitize centuries-old weaving patterns to ensure these precious designs are preserved for future generations of artisans.",
-        image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800",
-        goalAmount: 150000,
-        currentAmount: 112500,
-        endDate: "March 15, 2025",
-        category: "Documentation",
-        organizer: "Heritage Foundation",
-        featured: false,
-        type: 'campaign'
-      },
-      {
-        id: 102,
-        title: "Traditional Loom Restoration",
-        description: "Restore and maintain traditional wooden looms used by master weavers in remote Cordillera villages.",
-        image: "https://images.unsplash.com/photo-1607081692251-5bb4c0940e1e?w=800",
-        goalAmount: 80000,
-        currentAmount: 52000,
-        endDate: "February 28, 2025",
-        category: "Equipment",
-        organizer: "Weaver's Guild",
-        featured: false,
-        type: 'campaign'
-      },
-      {
-        id: 103,
-        title: "Youth Weaving Education Program",
-        description: "Establish workshops to teach traditional weaving techniques to young people, ensuring cultural continuity.",
-        image: "https://images.unsplash.com/photo-1594736797933-d0051ba0ff29?w=800",
-        goalAmount: 120000,
-        currentAmount: 75000,
-        endDate: "April 10, 2025",
-        category: "Education",
-        organizer: "Cultural Center",
-        featured: true,
-        type: 'campaign'
-      },
-      {
-        id: 104,
-        title: "Master Artisan Support Fund",
-        description: "Provide financial support to elderly master weavers to continue their craft and share their knowledge.",
-        image: "https://images.unsplash.com/photo-1546938576-6e6a64f317cc?w=800",
-        goalAmount: 90000,
-        currentAmount: 45000,
-        endDate: "May 20, 2025",
-        category: "Support",
-        organizer: "Artisan Alliance",
-        featured: false,
-        type: 'campaign'
-      }
-    ];
+    // Resolve API origin from axios baseURL
+    const API_ORIGIN = (api.defaults.baseURL || '').replace(/\/api\/?$/, '');
 
-    // Simulate loading time for realistic experience
-    setTimeout(() => {
-      // Combine all content
-      const combined = [...sampleStories, ...sampleCampaigns];
-      setAllContent(combined);
-      setFilteredContent(combined);
-      setIsLoading(false);
-    }, 1000);
+    const isImageUrl = (url?: string) => {
+      if (!url) return false;
+      return /\.(png|jpe?g|gif|webp|bmp|svg)(\?.*)?$/i.test(url);
+    };
+
+    const fallbackImage = 'https://images.unsplash.com/photo-1594736797933-d0051ba0ff29?w=800';
+
+    (async () => {
+      try {
+        console.debug('[StoriesPage] Fetching stories...');
+        const res = await storiesAPI.getAll({ per_page: 'all' });
+        console.debug('[StoriesPage] Stories response:', res);
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : res?.data?.data || []);
+        const mappedStories: Story[] = list.map((s: any) => {
+          // Prefer excerpt in card; full content can be shown in detail page
+          const content = s.excerpt || s.content || '';
+          // Use media_url only if it points to an image, else fallback
+          const cover = isImageUrl(s.media_url) ? s.media_url : fallbackImage;
+          return {
+            id: s.id,
+            title: s.title,
+            content,
+            media_url: cover,
+            author: s.author?.name || 'Unknown',
+            date: s.created_at ? new Date(s.created_at).toLocaleDateString() : '',
+            category: s.category || 'community',
+            readTime: s.reading_time ?? 0,
+            featured: !!s.featured,
+            type: 'story',
+          } as Story;
+        });
+
+        // Fetch campaigns (all)
+        console.debug('[StoriesPage] Fetching campaigns...');
+        const cres = await campaignsAPI.getAll({ per_page: 'all' });
+        console.debug('[StoriesPage] Campaigns response:', cres);
+        const clist = Array.isArray(cres?.data) ? cres.data : (Array.isArray(cres) ? cres : cres?.data?.data || []);
+        const mappedCampaigns: Campaign[] = clist.map((c: any) => {
+          const img = c.image && isImageUrl(c.image) ? c.image : fallbackImage;
+          return {
+            id: c.id,
+            title: c.title,
+            description: c.description,
+            image: img,
+            goalAmount: Number(c.goal_amount ?? 0),
+            currentAmount: Number(c.current_amount ?? 0),
+            endDate: c.end_date ? new Date(c.end_date).toLocaleDateString() : '',
+            category: c.category || 'community',
+            organizer: c.organizer?.name || 'Organizer',
+            featured: false,
+            type: 'campaign',
+          } as Campaign;
+        });
+
+        const combined: ContentItem[] = [...mappedStories, ...mappedCampaigns];
+        if (mounted) {
+          setAllContent(combined);
+          setFilteredContent(combined);
+        }
+      } catch (e: any) {
+        console.error('[StoriesPage] Fetch error:', e?.response?.status, e?.response?.data || e);
+        if (mounted) {
+          setAllContent([]);
+          setFilteredContent([]);
+          const status = e?.response?.status;
+          const msg = e?.response?.data?.message || e?.message || 'Failed to fetch content';
+          setErrorMsg(`Stories/Campaigns fetch error${status ? ` (${status})` : ''}: ${msg}`);
+        }
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    })();
+
+    return () => { mounted = false; };
   }, []);
 
   // Enhanced filtering logic for combined content
@@ -216,12 +169,12 @@ const StoriesPage: React.FC = () => {
     return Math.min((current / goal) * 100, 100);
   };
 
-  // Get featured content (prioritize stories, then campaigns)
+  // Get featured content (currently not displayed separately)
   const featuredStory = allContent.find(item => item.type === 'story' && item.featured) as Story;
   const featuredCampaign = allContent.find(item => item.type === 'campaign' && item.featured) as Campaign;
   
-  // Regular content (non-featured)
-  const regularContent = filteredContent.filter(item => !item.featured);
+  // Show all filtered content (including featured) in the grid
+  const regularContent = filteredContent;
   
   // Get all categories from both stories and campaigns
   const categories = ['all', ...Array.from(new Set(allContent.map(item => item.category)))];

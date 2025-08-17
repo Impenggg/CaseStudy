@@ -16,47 +16,77 @@ class StorySeeder extends Seeder
     {
         $weavers = User::where('role', 'weaver')->get();
 
-        // Maria Santos stories
         $maria = $weavers->where('name', 'Maria Santos')->first();
-        Story::create([
-            'title' => 'The Legacy of Ikat Weaving',
-            'content' => 'For generations, our family has preserved the ancient art of ikat weaving. This traditional technique involves tying and dyeing threads before weaving, creating intricate patterns that tell stories of our ancestors. Each piece I create carries the weight of centuries of tradition and the hopes of preserving our cultural heritage for future generations.',
-            'excerpt' => 'Discover the ancient art of ikat weaving and how this traditional technique preserves our cultural heritage through generations.',
-            'media_url' => 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=800',
-            'media_type' => 'image',
-            'author_id' => $maria->id,
-            'category' => 'tradition',
-            'tags' => ['ikat', 'traditional', 'weaving', 'cultural heritage'],
-            'featured' => true,
-            'published' => true,
-        ]);
-
-        // Rosa Dulawan stories
         $rosa = $weavers->where('name', 'Rosa Dulawan')->first();
+        $elena = $weavers->where('name', 'Elena Badiw')->first();
+        $defaultAuthorId = $maria?->id ?? $rosa?->id ?? $elena?->id ?? $weavers->first()?->id;
+
+        // 1) UNESCO World Heritage: Rice Terraces of the Philippine Cordilleras
         Story::create([
-            'title' => 'Preserving Cultural Heritage Through Weaving',
-            'content' => 'Our cultural heritage is more than just fabric and patterns – it\'s the living connection to our ancestors and the wisdom they passed down through generations. As a master weaver in the Cordillera region, I have dedicated my life to preserving and sharing these traditional techniques.',
-            'excerpt' => 'Explore how traditional weaving preserves cultural heritage and connects generations through shared stories and techniques.',
-            'media_url' => 'https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=800',
-            'media_type' => 'image',
-            'author_id' => $rosa->id,
-            'category' => 'tradition',
-            'tags' => ['cultural heritage', 'traditional weaving', 'community', 'preservation'],
+            'title' => 'Rice Terraces of the Philippine Cordilleras (UNESCO World Heritage)',
+            'content' => 'An overview of the Rice Terraces of the Philippine Cordilleras—centuries-old, living cultural landscapes shaped by Indigenous knowledge systems and sustainable rice cultivation.',
+            'excerpt' => 'UNESCO-listed Rice Terraces of the Philippine Cordilleras: living cultural landscapes and Indigenous knowledge.',
+            'media_url' => 'https://whc.unesco.org/en/list/722/',
+            'media_type' => null,
+            'author_id' => $defaultAuthorId,
+            'category' => 'community',
+            'tags' => ['unesco', 'world heritage', 'rice terraces', 'cordilleras'],
             'featured' => true,
             'published' => true,
         ]);
 
-        // Elena Badiw stories
-        $elena = $weavers->where('name', 'Elena Badiw')->first();
+        // 2) UNESCO ICH: Hudhud chants of the Ifugao
         Story::create([
-            'title' => 'The Art of Home Textiles: Bringing Tradition to Modern Homes',
-            'content' => 'As a weaver specializing in home textiles, I bridge the gap between traditional craftsmanship and modern living. Our ancestors created beautiful and functional textiles for their homes, and today, I continue this tradition by adapting these techniques to contemporary needs.',
-            'excerpt' => 'Discover how traditional home textiles bridge the gap between cultural heritage and modern living spaces.',
-            'media_url' => 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800',
-            'media_type' => 'image',
-            'author_id' => $elena->id,
-            'category' => 'artisan',
-            'tags' => ['home textiles', 'modern living', 'traditional crafts', 'cultural connection'],
+            'title' => 'Hudhud Chants of the Ifugao (UNESCO Intangible Cultural Heritage)',
+            'content' => 'The Hudhud is a narrative chant tradition of the Ifugao, performed during harvests and significant community occasions—celebrating memory, identity, and oral artistry.',
+            'excerpt' => 'Ifugao Hudhud chants—epic oral tradition recognized by UNESCO as Intangible Cultural Heritage.',
+            'media_url' => 'https://ich.unesco.org/en/RL/hudhud-chants-of-the-ifugao-00015',
+            'media_type' => null,
+            'author_id' => $defaultAuthorId,
+            'category' => 'tradition',
+            'tags' => ['unesco', 'ich', 'ifugao', 'hudhud', 'oral tradition'],
+            'featured' => true,
+            'published' => true,
+        ]);
+
+        // 3) UNESCO ICH: Tugging rituals and games
+        Story::create([
+            'title' => 'Tugging Rituals and Games (UNESCO Intangible Cultural Heritage)',
+            'content' => 'Tugging rituals and games, practiced in various communities, symbolize unity, agricultural cycles, and communal cooperation—recognized by UNESCO for their social significance.',
+            'excerpt' => 'Tugging rituals and games—community practices of unity and cooperation recognized by UNESCO.',
+            'media_url' => 'https://ich.unesco.org/en/RL/tugging-rituals-and-games-01080',
+            'media_type' => null,
+            'author_id' => $defaultAuthorId,
+            'category' => 'community',
+            'tags' => ['unesco', 'ich', 'ritual', 'games', 'community'],
+            'featured' => false,
+            'published' => true,
+        ]);
+
+        // 4) ICBE: Preservation and Promotion of the Cordillera Cultural Heritage
+        Story::create([
+            'title' => 'Preservation and Promotion of the Cordillera Cultural Heritage',
+            'content' => 'A community perspective on sustaining Cordillera cultural heritage while addressing current social issues, featuring initiatives among Igorot and Cordillera organizations in Europe.',
+            'excerpt' => 'Sustaining Cordillera heritage and addressing prevailing social issues—community perspectives and initiatives.',
+            'media_url' => 'https://www.icbe.eu/articles/926-preservation-and-promotion-of-the-cordillera-cultural-heritage-and-addressing-prevailing-issues-in-society',
+            'media_type' => null,
+            'author_id' => $defaultAuthorId,
+            'category' => 'community',
+            'tags' => ['cordillera', 'heritage', 'community', 'preservation'],
+            'featured' => false,
+            'published' => true,
+        ]);
+
+        // 5) NCCA: Northern Cultural Communities
+        Story::create([
+            'title' => 'Northern Cultural Communities (NCCA)',
+            'content' => 'Overview of the Northern Cultural Communities under the NCCA—supporting cultural development and safeguarding traditions across Indigenous communities.',
+            'excerpt' => 'NCCA overview of Northern Cultural Communities—cultural development and safeguarding initiatives.',
+            'media_url' => 'https://ncca.gov.ph/about-ncca-3/subcommissions/subcommission-on-cultural-communities-and-traditional-arts-sccta/northern-cultural-communities/',
+            'media_type' => null,
+            'author_id' => $defaultAuthorId,
+            'category' => 'community',
+            'tags' => ['ncca', 'cultural communities', 'policy', 'heritage'],
             'featured' => false,
             'published' => true,
         ]);
