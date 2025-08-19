@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { triggerAction } from '../lib/uiActions';
 import { Link } from 'react-router-dom';
 import CartModal from '../components/CartModal';
@@ -24,6 +24,7 @@ const MarketplacePage: React.FC = () => {
 
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   // Simple marketplace cart state (local to this page)
   interface CartItem {
     id: number;
@@ -52,6 +53,70 @@ const MarketplacePage: React.FC = () => {
     postalCode: ''
   });
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'gcash' | 'card'>('cod');
+
+  // Quick View modal state
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
+  const quickViewRef = useRef<HTMLDivElement | null>(null);
+
+  const openQuickView = (product: Product) => {
+    setQuickViewProduct(product);
+    setIsQuickViewOpen(true);
+    triggerAction(`Open Quick View for ${product.name}`);
+  };
+
+  const closeQuickView = () => {
+    setIsQuickViewOpen(false);
+    setQuickViewProduct(null);
+  };
+
+  // Debounce search input
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearchTerm(searchTerm), 250);
+    return () => clearTimeout(t);
+  }, [searchTerm]);
+
+  // Modal accessibility: Esc to close and basic focus trap
+  useEffect(() => {
+    if (!isQuickViewOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        closeQuickView();
+      } else if (e.key === 'Tab') {
+        // simple trap: keep focus within modal
+        const root = quickViewRef.current;
+        if (!root) return;
+        const focusable = root.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        const active = document.activeElement as HTMLElement | null;
+        if (e.shiftKey) {
+          if (active === first || !root.contains(active)) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (active === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    // focus the first focusable on open
+    setTimeout(() => {
+      const root = quickViewRef.current;
+      if (!root) return;
+      const first = root.querySelector<HTMLElement>('button, a[href], [tabindex]:not([tabindex="-1"])');
+      first?.focus();
+    }, 0);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isQuickViewOpen]);
 
   // resolve API origin (http://localhost:8000) from axios baseURL (http://localhost:8000/api)
   const API_ORIGIN = React.useMemo(() => (api.defaults.baseURL || '').replace(/\/api\/?$/, ''), []);
@@ -208,10 +273,10 @@ const MarketplacePage: React.FC = () => {
   useEffect(() => {
     let filtered = products;
 
-    if (searchTerm) {
+    if (debouncedSearchTerm) {
       filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+        product.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
     }
 
@@ -466,6 +531,9 @@ const MarketplacePage: React.FC = () => {
                       <img
                         src={product.image}
                         alt={product.name}
+                        loading="lazy"
+                        decoding="async"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
                       {/* Top-left badge */}
@@ -473,19 +541,19 @@ const MarketplacePage: React.FC = () => {
                         {product.category}
                       </div>
                     </div>
-                    <div className="p-5 flex flex-col flex-grow">
+                    <div className="p-5 flex flex-col flex-grow text-center">
                       <h3 className="text-lg font-serif text-cordillera-olive mb-2 leading-tight group-hover:text-cordillera-gold transition-colors duration-300 line-clamp-2">
                         {product.name}
                       </h3>
                       <p className="text-cordillera-olive/60 text-sm mb-4 leading-relaxed line-clamp-2 flex-grow">
                         {product.description}
                       </p>
-                      <div className="flex justify-between items-end mt-auto">
-                        <div>
+                      <div className="flex flex-col items-center mt-auto gap-3">
+                        <div className="text-center">
                           <span className="text-xl font-light text-cordillera-gold block mb-1">
                             ₱{product.price.toLocaleString()}
                           </span>
-                          <div className="flex items-center text-xs text-cordillera-olive/50">
+                          <div className="flex items-center justify-center text-xs text-cordillera-olive/50">
                             <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
@@ -494,16 +562,19 @@ const MarketplacePage: React.FC = () => {
                             </span>
                           </div>
                         </div>
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2">
+                        <div className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex gap-2 justify-center">
                           <button
                             onClick={(e) => { e.preventDefault(); addToCart(product); }}
-                            className="bg-cordillera-olive text-cordillera-cream px-3 py-1.5 text-xs font-medium rounded hover:bg-cordillera-olive/90"
+                            className="bg-cordillera-olive text-cordillera-cream px-4 py-2 text-sm font-medium rounded hover:bg-cordillera-olive/90"
                           >
                             Add to Cart
                           </button>
-                          <div className="bg-cordillera-gold text-cordillera-olive px-3 py-1.5 text-xs font-medium rounded" onClick={(e) => { e.preventDefault(); triggerAction(`Quick view ${product.name}`); }}>
+                          <button
+                            onClick={(e) => { e.preventDefault(); openQuickView(product); }}
+                            className="bg-cordillera-gold text-cordillera-olive px-4 py-2 text-sm font-medium rounded hover:bg-cordillera-gold/90"
+                          >
                             Quick View
-                          </div>
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -557,6 +628,66 @@ const MarketplacePage: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* Cart Modal */}
+      {/* Quick View Modal */}
+      {isQuickViewOpen && quickViewProduct && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/50" onClick={closeQuickView}></div>
+          <div className="absolute inset-0 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg shadow-2xl w-full max-w-3xl overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b">
+                <h2 className="text-xl font-serif text-cordillera-olive">Quick View</h2>
+                <button onClick={closeQuickView} className="text-cordillera-olive/60 hover:text-cordillera-olive" aria-label="Close quick view">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              {/* Content */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+                <div className="h-72 md:h-full overflow-hidden">
+                  <img
+                    src={quickViewProduct.image}
+                    alt={quickViewProduct.name}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-6 flex flex-col" ref={quickViewRef} role="dialog" aria-modal="true" aria-label="Quick View">
+                  <div className="text-sm text-cordillera-olive/60 mb-1">{quickViewProduct.category}</div>
+                  <h3 className="text-2xl font-serif text-cordillera-olive mb-2">{quickViewProduct.name}</h3>
+                  <div className="text-cordillera-gold text-2xl font-light mb-4">₱{quickViewProduct.price.toLocaleString()}</div>
+                  <div className="flex items-center text-xs text-cordillera-olive/60 mb-4">
+                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span className="uppercase tracking-wider">{quickViewProduct.artisan}</span>
+                  </div>
+                  <p className="text-cordillera-olive/70 text-sm leading-relaxed mb-6 line-clamp-6">{quickViewProduct.description}</p>
+                  <div className="mt-auto flex gap-3">
+                    <button
+                      onClick={() => { addToCart(quickViewProduct); closeQuickView(); }}
+                      className="bg-cordillera-olive text-cordillera-cream px-5 py-2 rounded-lg font-medium hover:bg-cordillera-olive/90"
+                    >
+                      Add to Cart
+                    </button>
+                    <Link
+                      to={`/product/${quickViewProduct.id}`}
+                      className="border border-cordillera-olive/30 text-cordillera-olive px-5 py-2 rounded-lg font-medium hover:bg-cordillera-olive/5"
+                      onClick={closeQuickView}
+                    >
+                      View Details
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* Cart Modal */}
       <CartModal
         isOpen={isCartOpen}

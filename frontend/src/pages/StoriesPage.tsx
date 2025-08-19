@@ -183,6 +183,9 @@ const StoriesPage: React.FC = () => {
   const totalStoryCount = allContent.filter(item => item.type === 'story').length;
   const totalCampaignCount = allContent.filter(item => item.type === 'campaign').length;
 
+  // Fallback image for any broken/blocked images at render time
+  const FALLBACK_IMG = 'https://images.unsplash.com/photo-1594736797933-d0051ba0ff29?w=800';
+
   // Clear all filters function
   const clearAllFilters = () => {
     setSearchTerm('');
@@ -252,33 +255,38 @@ const StoriesPage: React.FC = () => {
       {/* Content Grid */}
       <section className="py-20 bg-cordillera-cream">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
             {regularContent.map((item) => (
-              <div key={`${item.type}-${item.id}`} className="group block bg-white shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden rounded-lg border border-cordillera-sage/20">
+              <div key={`${item.type}-${item.id}`} className="group block bg-white shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden rounded-lg border border-cordillera-sage/20 h-full">
                 {item.type === 'story' ? (
                   // Story Card
-                  <Link to={`/story/${item.id}`} className="block">
+                  <Link to={`/story/${item.id}`} className="block h-full">
                     <div className="aspect-video overflow-hidden relative">
                       <img
                         src={(item as Story).media_url}
                         alt={item.title}
+                        loading="lazy"
+                        decoding="async"
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG; }}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
                       <div className="absolute top-4 left-4 bg-cordillera-olive/90 text-cordillera-cream px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur-sm rounded">
                         Story
                       </div>
                     </div>
-                    <div className="p-8">
-                      <span className="text-cordillera-gold text-xs font-medium uppercase tracking-wider">
+                    <div className="p-6 flex flex-col h-full">
+                      <span className="text-cordillera-gold text-[11px] font-medium uppercase tracking-wider">
                         {item.category}
                       </span>
-                      <h3 className="text-xl font-serif text-cordillera-olive mt-2 mb-3 leading-tight group-hover:text-cordillera-gold transition-colors duration-300">
+                      <h3 className="text-lg font-serif text-cordillera-olive mt-1 mb-2 leading-snug group-hover:text-cordillera-gold transition-colors duration-300">
                         {item.title}
                       </h3>
-                      <p className="text-cordillera-olive/70 text-sm mb-6 leading-relaxed line-clamp-3">
+                      <p className="text-cordillera-olive/70 text-[13px] leading-relaxed line-clamp-2 md:line-clamp-3">
                         {(item as Story).content}
                       </p>
-                      <div className="flex justify-between items-center text-xs text-cordillera-olive/50">
+                      {/* Spacer to match campaign progress section height */}
+                      <div className="mt-3 mb-4 h-14 md:h-16" aria-hidden="true" />
+                      <div className="mt-auto flex justify-between items-center text-[11px] text-cordillera-olive/60">
                         <span>By {(item as Story).author}</span>
                         <span>{(item as Story).readTime} min read</span>
                       </div>
@@ -286,51 +294,54 @@ const StoriesPage: React.FC = () => {
                   </Link>
                 ) : (
                   // Campaign Card
-                  <div>
+                  <div className="flex flex-col h-full">
                     <div className="aspect-video overflow-hidden relative">
                       <img
                         src={(item as Campaign).image}
                         alt={item.title}
+                        loading="lazy"
+                        decoding="async"
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG; }}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
                       <div className="absolute top-4 left-4 bg-cordillera-gold/90 text-cordillera-olive px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur-sm rounded">
                         Campaign
                       </div>
                     </div>
-                    <div className="p-8">
-                      <span className="text-cordillera-gold text-xs font-medium uppercase tracking-wider">
+                    <div className="p-6 flex flex-col h-full">
+                      <span className="text-cordillera-gold text-[11px] font-medium uppercase tracking-wider">
                         {item.category}
                       </span>
-                      <h3 className="text-xl font-serif text-cordillera-olive mt-2 mb-3 leading-tight group-hover:text-cordillera-gold transition-colors duration-300">
+                      <h3 className="text-lg font-serif text-cordillera-olive mt-1 mb-2 leading-snug group-hover:text-cordillera-gold transition-colors duration-300">
                         {item.title}
                       </h3>
-                      <p className="text-cordillera-olive/70 text-sm mb-6 leading-relaxed line-clamp-3">
+                      <p className="text-cordillera-olive/70 text-[13px] leading-relaxed line-clamp-2 md:line-clamp-3">
                         {(item as Campaign).description}
                       </p>
                       
-                      {/* Progress Bar */}
-                      <div className="mb-6">
-                        <div className="flex justify-between text-cordillera-olive/80 text-sm mb-2">
+                      {/* Progress Bar - fixed height to align with story spacer */}
+                      <div className="mt-3 mb-4 h-14 md:h-16 flex flex-col justify-start">
+                        <div className="flex justify-between text-cordillera-olive/80 text-[13px] mb-1.5">
                           <span>{getProgressPercentage((item as Campaign).currentAmount, (item as Campaign).goalAmount).toFixed(0)}% funded</span>
                           <span>₱{(item as Campaign).currentAmount.toLocaleString()}</span>
                         </div>
-                        <div className="h-2 bg-cordillera-sage/30 rounded-full overflow-hidden">
+                        <div className="h-1.5 bg-cordillera-sage/30 rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-cordillera-gold rounded-full transition-all duration-500"
                             style={{ width: `${getProgressPercentage((item as Campaign).currentAmount, (item as Campaign).goalAmount)}%` }}
                           ></div>
                         </div>
-                        <p className="text-xs text-cordillera-olive/50 mt-1">Goal: ₱{(item as Campaign).goalAmount.toLocaleString()}</p>
+                        <p className="text-[11px] text-cordillera-olive/60 mt-1">Goal: ₱{(item as Campaign).goalAmount.toLocaleString()}</p>
                       </div>
 
-                      <div className="flex justify-between items-center">
+                      <div className="mt-auto flex flex-col md:flex-row md:justify-between items-stretch md:items-center gap-2.5">
                         <Link 
                           to={`/campaign/${item.id}`}
-                          className="bg-cordillera-gold text-cordillera-olive px-6 py-3 text-sm font-medium hover:bg-cordillera-gold/90 transition-colors rounded cursor-pointer"
+                          className="bg-cordillera-gold text-cordillera-olive px-5 py-2.5 text-sm font-medium hover:bg-cordillera-gold/90 transition-colors rounded cursor-pointer w-full md:w-auto text-center md:min-w-[128px]"
                         >
                           Support Now
                         </Link>
-                        <div className="text-right text-xs text-cordillera-olive/50">
+                        <div className="text-center md:text-right text-[11px] text-cordillera-olive/60">
                           <p>By {(item as Campaign).organizer}</p>
                           <p>Ends {(item as Campaign).endDate}</p>
                         </div>

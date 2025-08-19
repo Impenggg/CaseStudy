@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import BackLink from '@/components/BackLink';
 import { triggerAction } from '../lib/uiActions';
 import { useAuth } from '../contexts/AuthContext';
 import api, { campaignsAPI } from '@/services/api';
@@ -145,40 +146,37 @@ const CampaignDetailPage: React.FC = () => {
 
       {/* Return Button */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        <Link 
-          to="/stories" 
-          className="inline-flex items-center text-cordillera-olive hover:text-cordillera-gold transition-colors mb-6"
-        >
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Stories
-        </Link>
+        <BackLink to="/stories" className="mb-6">Back to Stories</BackLink>
+      </div>
+
+      {/* Title & Meta below breadcrumb and return button (consistent with StoryDetailPage) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
+        <h1 className="text-3xl md:text-4xl font-serif text-cordillera-olive mb-2 leading-tight">
+          {campaign.title}
+        </h1>
+        <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-cordillera-olive/80">
+          <span className="bg-cordillera-gold/30 text-cordillera-olive px-2.5 py-1 text-xs uppercase tracking-wider rounded">Campaign</span>
+          <span className="hidden sm:inline">•</span>
+          <span>By {campaign.organizer}</span>
+          {campaign.endDate && (<>
+            <span className="hidden sm:inline">•</span>
+            <span>Ends {campaign.endDate}</span>
+          </>)}
+        </div>
       </div>
 
              {/* Campaign Header */}
        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-           <div className="aspect-[3/1] relative">
-             <img
-               src={campaign.image}
-               alt={campaign.title}
-               className="w-full h-full object-cover"
-             />
-             <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-             <div className="absolute bottom-4 left-4 right-4">
-               <div className="bg-cordillera-gold/90 text-cordillera-olive px-3 py-1 text-sm font-semibold uppercase tracking-wider backdrop-blur-sm rounded inline-block mb-2">
-                 Campaign
-               </div>
-               <h1 className="text-3xl md:text-4xl font-serif text-white mb-1 leading-tight">
-                 {campaign.title}
-               </h1>
-               <p className="text-white/90 text-base">
-                 By {campaign.organizer}
-               </p>
-             </div>
-           </div>
-         </div>
+          <div className="aspect-[3/1] relative">
+            <img
+              src={campaign.image}
+              alt={campaign.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+          </div>
+        </div>
        </div>
 
       {/* Campaign Content */}

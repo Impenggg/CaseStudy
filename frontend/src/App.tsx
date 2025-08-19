@@ -91,21 +91,66 @@ const App: React.FC = () => {
           <Route path="/register" element={<Layout><RegisterPage /></Layout>} />
 
           {/* Account-only routes */}
-          <Route path="/submit-story" element={<Layout><StorySubmissionPage /></Layout>} />
-          <Route path="/create-campaign" element={<Layout><CampaignCreationPage /></Layout>} />
+          <Route
+            path="/submit-story"
+            element={
+              <Layout>
+                <ProtectedRoute>
+                  <StorySubmissionPage />
+                </ProtectedRoute>
+              </Layout>
+            }
+          />
+          <Route
+            path="/create-campaign"
+            element={
+              <Layout>
+                <ProtectedRoute>
+                  <CampaignCreationPage />
+                </ProtectedRoute>
+              </Layout>
+            }
+          />
           <Route
             path="/media-creation"
             element={
               <Layout>
                 <ProtectedRoute>
-                  <MediaFeedPage />
+                  <MediaCreationPage />
                 </ProtectedRoute>
               </Layout>
             }
           />
-          <Route path="/account" element={<Layout><AccountPage /></Layout>} />
-          <Route path="/orders" element={<Layout><OrdersPage /></Layout>} />
-          <Route path="/supports" element={<Layout><SupportsPage /></Layout>} />
+          <Route
+            path="/account"
+            element={
+              <Layout>
+                <ProtectedRoute>
+                  <AccountPage />
+                </ProtectedRoute>
+              </Layout>
+            }
+          />
+          <Route
+            path="/orders"
+            element={
+              <Layout>
+                <ProtectedRoute>
+                  <OrdersPage />
+                </ProtectedRoute>
+              </Layout>
+            }
+          />
+          <Route
+            path="/supports"
+            element={
+              <Layout>
+                <ProtectedRoute>
+                  <SupportsPage />
+                </ProtectedRoute>
+              </Layout>
+            }
+          />
 
           {/* 404 Page */}
           <Route

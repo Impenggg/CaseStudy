@@ -19,13 +19,15 @@ export const StorytellingPage: React.FC = () => {
         </div>
 
         {/* Stories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sampleStories.map((story) => (
-            <Card key={story.id} className="bg-white border-none shadow-lg hover:shadow-xl transition-all group overflow-hidden">
+            <Card key={story.id} className="bg-white border-none shadow-lg hover:shadow-xl transition-all group overflow-hidden flex flex-col h-full">
               <div className="relative overflow-hidden">
-                <img 
-                  src={story.media_url || 'https://images.unsplash.com/photo-1521335629791-ce4aec67dd53?w=800&h=600&fit=crop'} 
+                <img
+                  src={story.media_url || 'https://images.unsplash.com/photo-1521335629791-ce4aec67dd53?w=800&h=600&fit=crop'}
                   alt={story.title || 'Story image'}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 {story.featured && (
@@ -34,26 +36,24 @@ export const StorytellingPage: React.FC = () => {
                   </Badge>
                 )}
               </div>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="outline" className="border-yellow-400 text-yellow-600">
+              <CardContent className="p-5 flex flex-col flex-1 text-center">
+                <div className="flex items-center justify-center gap-2 mb-2.5">
+                  <Badge variant="outline" className="border-yellow-400 text-yellow-600 text-[11px]">
                     {story.category || 'General'}
                   </Badge>
-                  <span className="text-sm text-gray-600">
+                  <span className="text-[11px] text-gray-600">
                     {(story.reading_time ?? 0)} min read
                   </span>
                 </div>
-                <h3 className="text-xl font-serif font-semibold text-gray-900 mb-2">
+                <h3 className="text-lg font-serif font-semibold text-gray-900 mb-1.5 leading-snug">
                   {story.title || 'Untitled Story'}
                 </h3>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 mb-3 leading-relaxed line-clamp-2 flex-grow text-[13px]">
                   {story.excerpt || ''}
                 </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">
-                    By {story.author?.name || 'Unknown'}
-                  </span>
-                  <Button size="sm" variant="outline" className="border-yellow-400 text-yellow-600 hover:bg-yellow-400 hover:text-white">
+                <div className="mt-auto flex flex-col items-center gap-2.5">
+                  <span className="text-[12px] text-gray-500">By {story.author?.name || 'Unknown'}</span>
+                  <Button size="sm" variant="outline" className="border-yellow-400 text-yellow-600 hover:bg-yellow-400 hover:text-white px-4 py-2">
                     Read Story
                   </Button>
                 </div>

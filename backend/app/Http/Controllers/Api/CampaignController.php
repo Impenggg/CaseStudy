@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CampaignStoreRequest;
+use App\Http\Requests\CampaignUpdateRequest;
+use App\Http\Resources\CampaignResource;
 use App\Models\Campaign;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -61,7 +64,7 @@ class CampaignController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'data' => $campaigns->items(),
+            'data' => CampaignResource::collection($campaigns->getCollection()),
             'pagination' => [
                 'current_page' => $campaigns->currentPage(),
                 'total_pages' => $campaigns->lastPage(),
@@ -74,28 +77,20 @@ class CampaignController extends Controller
     /**
      * Store a newly created campaign.
      */
-    public function store(Request $request): JsonResponse
+    public function store(CampaignStoreRequest $request): JsonResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'goal_amount' => 'required|numeric|min:0',
-            'end_date' => 'required|date|after:today',
-            'image' => 'nullable|string',
-            'category' => 'required|in:preservation,education,equipment,community',
-        ]);
+        $validated = $request->validated();
 
-        $campaign = Campaign::create([
-            ...$request->all(),
+        $campaign = Campaign::create(array_merge($validated, [
             'organizer_id' => Auth::id(),
             'current_amount' => 0,
             'backers_count' => 0,
-        ]);
+        ]));
 
         return response()->json([
             'status' => 'success',
             'message' => 'Campaign created successfully',
-            'data' => $campaign->load(['organizer', 'images']),
+            'data' => new CampaignResource($campaign->load(['organizer', 'images'])),
         ], 201);
     }
 
@@ -106,14 +101,14 @@ class CampaignController extends Controller
     {
         return response()->json([
             'status' => 'success',
-            'data' => $campaign->load(['organizer', 'images', 'donations']),
+            'data' => new CampaignResource($campaign->load(['organizer', 'images', 'donations'])),
         ]);
     }
 
     /**
      * Update the specified campaign.
      */
-    public function update(Request $request, Campaign $campaign): JsonResponse
+    public function update(CampaignUpdateRequest $request, Campaign $campaign): JsonResponse
     {
         // Check if user owns the campaign
         if ($campaign->organizer_id !== Auth::id()) {
@@ -123,21 +118,14 @@ class CampaignController extends Controller
             ], 403);
         }
 
-        $request->validate([
-            'title' => 'sometimes|string|max:255',
-            'description' => 'sometimes|string',
-            'goal_amount' => 'sometimes|numeric|min:0',
-            'end_date' => 'sometimes|date|after:today',
-            'image' => 'nullable|string',
-            'category' => 'sometimes|in:preservation,education,equipment,community',
-        ]);
+        $validated = $request->validated();
 
-        $campaign->update($request->all());
+        $campaign->update($validated);
 
         return response()->json([
             'status' => 'success',
             'message' => 'Campaign updated successfully',
-            'data' => $campaign->load(['organizer', 'images']),
+            'data' => new CampaignResource($campaign->load(['organizer', 'images'])),
         ]);
     }
 
@@ -169,12 +157,12 @@ class CampaignController extends Controller
     {
         $query = Campaign::where('organizer_id', Auth::id())->with(['images']);
 
-        $perPage = $request->get('per_page', 12);
+        $perPage = (int) $request->get('per_page', 12);
         $campaigns = $query->paginate($perPage);
 
         return response()->json([
             'status' => 'success',
-            'data' => $campaigns->items(),
+            'data' => CampaignResource::collection($campaigns->getCollection()),
             'pagination' => [
                 'current_page' => $campaigns->currentPage(),
                 'total_pages' => $campaigns->lastPage(),

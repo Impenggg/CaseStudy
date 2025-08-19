@@ -3,6 +3,7 @@ import { triggerAction } from '../lib/uiActions';
 import { useParams, Link } from 'react-router-dom';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
+import BackLink from '@/components/BackLink';
 
 interface Product {
   id: number;
@@ -215,12 +216,7 @@ const ProductDetailPage: React.FC = () => {
 
         {/* Return Button */}
         <div className="mb-6">
-          <Link to="/marketplace" className="inline-flex items-center border-2 border-cordillera-olive text-cordillera-olive px-4 py-2 rounded-lg bg-cordillera-cream/40 hover:bg-cordillera-gold hover:border-cordillera-gold hover:text-cordillera-olive transition-all">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Marketplace
-          </Link>
+          <BackLink to="/marketplace">Back to Marketplace</BackLink>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">

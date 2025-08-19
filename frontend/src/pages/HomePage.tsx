@@ -363,7 +363,24 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="bg-cordillera-olive text-cordillera-cream py-16">
+      <footer className="relative overflow-hidden bg-gradient-to-b from-[#1b200a] to-[#0f1206] text-cordillera-cream py-16">
+        {/* Layered wave divider to clearly separate from previous section */}
+        <div className="absolute -top-9 left-0 right-0" aria-hidden="true">
+          {/* Top light wave */}
+          <div className="text-cordillera-cream/90 drop-shadow-[0_4px_8px_rgba(0,0,0,0.35)]">
+            <svg viewBox="0 0 1440 90" preserveAspectRatio="none" className="w-full h-10">
+              <path fill="currentColor" d="M0,64L60,58.7C120,53,240,43,360,40C480,37,600,43,720,53.3C840,64,960,80,1080,77.3C1200,75,1320,53,1380,42.7L1440,32L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z" />
+            </svg>
+          </div>
+          {/* Slightly darker wave behind for depth */}
+          <div className="-mt-5 text-[#1b200a] opacity-95">
+            <svg viewBox="0 0 1440 90" preserveAspectRatio="none" className="w-full h-10">
+              <path fill="currentColor" d="M0,64L60,58.7C120,53,240,43,360,40C480,37,600,43,720,53.3C840,64,960,80,1080,77.3C1200,75,1320,53,1380,42.7L1440,32L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z" />
+            </svg>
+          </div>
+        </div>
+        {/* Top shadow for extra separation */}
+        <div className="pointer-events-none absolute -top-px inset-x-0 h-8 bg-gradient-to-b from-black/30 via-black/20 to-transparent" aria-hidden="true" />
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="grid grid-cols-1 gap-6">
             {/* Contact Information */}

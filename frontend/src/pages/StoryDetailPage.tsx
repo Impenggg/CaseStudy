@@ -1,51 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams, Link } from 'react-router-dom';
-
-interface Story {
-  id: number;
-  title: string;
-  content: string;
-  media_url: string;
-  author: string;
-  date: string;
-  category: string;
-  fullContent: string;
-  tags: string[];
-}
+import BackLink from '@/components/BackLink';
+import { useStory } from '@/hooks/useStory';
 
 const StoryDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [story, setStory] = useState<Story | null>(null);
+  const { data: story, isLoading } = useStory(id);
 
-  useEffect(() => {
-    // Sample story data - in real app, fetch from API
-    const sampleStory: Story = {
-      id: parseInt(id || '1'),
-      title: "Master Weaver Maria's Journey",
-      content: "Discover how Maria preserves 300-year-old weaving techniques...",
-      media_url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1200",
-      author: "Maria Santos",
-      date: "December 15, 2024",
-      category: "Artisan Profile",
-      fullContent: `
-        <p>In the misty mountains of Bontoc, where clouds kiss the rice terraces and ancient traditions flow like the mountain streams, Maria Santos sits at her traditional loom, her weathered hands moving with the precision of a master craftsperson who has dedicated over four decades to preserving the sacred art of Cordillera weaving.</p>
-        
-        <p>Maria's story begins in 1965, when she was just eight years old. Her grandmother, Aling Rosa, first placed the wooden shuttle in her small hands and taught her the sacred patterns that have been passed down through generations of women in their family. "Each thread tells a story," Aling Rosa would say, "and each pattern holds the wisdom of our ancestors."</p>
-        
-        <p>The traditional Ikat weaving technique that Maria practices is far more than a craft—it's a spiritual practice that connects her to the land, her ancestors, and the cosmic order that governs mountain life. The geometric patterns she weaves represent mountains, rivers, rice fields, and the eternal cycle of planting and harvest that has sustained her people for centuries.</p>
-        
-        <p>Today, at 67, Maria has become one of the most respected master weavers in the region. Her works are not merely textiles but repositories of cultural memory, each piece carrying within its fibers the stories, beliefs, and artistic vision of the Cordillera people. Through her dedication, she ensures that these ancient techniques will not be lost to time.</p>
-        
-        <p>"When I weave," Maria explains, her eyes twinkling with the wisdom of years, "I am not just creating cloth. I am continuing a conversation that began with my great-great-grandmothers, and I am ensuring that my granddaughters will have voices in that conversation too."</p>
-        
-        <p>Her workshop, nestled in a traditional Ifugao house overlooking the famous Banaue rice terraces, has become a pilgrimage site for young people eager to learn traditional weaving techniques. Maria teaches not just the technical aspects of the craft, but also the cultural significance, the proper prayers to say while working, and the respect that must be shown to the materials and the process.</p>
-      `,
-      tags: ["Traditional Craft", "Master Weaver", "Cultural Heritage", "Bontoc", "Ikat Weaving"]
-    };
-    setStory(sampleStory);
-  }, [id]);
-
-  if (!story) {
+  if (isLoading || !story) {
     return <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
       <div className="text-cordillera-cream">Loading...</div>
     </div>;
@@ -53,43 +15,37 @@ const StoryDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cordillera-olive">
-      {/* Compact Header (no image) */}
-      <section className="bg-cordillera-olive py-10">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Breadcrumb (consistent with CampaignDetailPage) */}
+      <div className="bg-cordillera-olive py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex items-center text-sm text-cordillera-cream/80">
+            <Link to="/stories" className="hover:text-cordillera-cream transition-colors">Stories</Link>
+            <span className="mx-2">/</span>
+            <span className="text-cordillera-cream/60">Story</span>
+          </nav>
+        </div>
+      </div>
+
+      {/* Return Button (consistent spacing) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <BackLink to="/stories" variant="light" className="mb-4">Back to Stories</BackLink>
+      </div>
+
+      {/* Title & Meta below breadcrumb and return button */}
+      <section className="bg-cordillera-olive pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl md:text-5xl font-serif text-cordillera-cream mb-3 leading-tight">
             {story.title}
           </h1>
-          <div className="flex items-center space-x-4 text-cordillera-cream/80">
+          <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-cordillera-cream/80">
             <span className="text-cordillera-gold font-medium">By {story.author}</span>
-            <span>•</span>
+            <span className="hidden sm:inline">•</span>
             <span>{story.date}</span>
-            <span>•</span>
+            <span className="hidden sm:inline">•</span>
             <span className="bg-cordillera-gold/20 px-3 py-1 text-sm">{story.category}</span>
           </div>
         </div>
       </section>
-
-      {/* Breadcrumb */}
-      <div className="bg-cordillera-olive">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <nav className="flex items-center text-sm text-cordillera-cream/60">
-            <Link to="/" className="hover:text-cordillera-cream">Home</Link>
-            <span className="mx-2">/</span>
-            <Link to="/stories" className="hover:text-cordillera-cream">Stories</Link>
-            <span className="mx-2">/</span>
-            <span className="text-cordillera-cream">{story.title}</span>
-          </nav>
-          {/* Return Button */}
-          <div className="mt-3">
-            <Link to="/stories" className="inline-flex items-center border-2 border-cordillera-cream text-cordillera-cream px-4 py-2 rounded-lg hover:bg-cordillera-cream hover:text-cordillera-olive transition-all">
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back to Stories
-            </Link>
-          </div>
-        </div>
-      </div>
 
       {/* Story Content */}
       <section className="py-16 bg-cordillera-cream">
