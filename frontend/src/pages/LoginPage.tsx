@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export const LoginPage = () => {
@@ -10,6 +10,10 @@ export const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromState = (location.state as any)?.from?.pathname as string | undefined;
+  const intendedPath = (typeof window !== 'undefined') ? sessionStorage.getItem('intended_path') || undefined : undefined;
+  const redirectTo = fromState || intendedPath || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,7 +23,8 @@ export const LoginPage = () => {
     try {
       const success = await login(email, password);
       if (success) {
-        navigate('/');
+        if (intendedPath) sessionStorage.removeItem('intended_path');
+        navigate(redirectTo, { replace: true });
       } else {
         setError('Invalid email or password. Try: maria@example.com / password');
       }
@@ -46,7 +51,8 @@ export const LoginPage = () => {
     try {
       const success = await login(demoEmail, 'password');
       if (success) {
-        navigate('/');
+        if (intendedPath) sessionStorage.removeItem('intended_path');
+        navigate(redirectTo, { replace: true });
       }
     } catch (err) {
       setError('Demo login failed.');

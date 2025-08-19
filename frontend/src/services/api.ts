@@ -111,6 +111,16 @@ export const mediaAPI = {
     const res = await api.get(`/media/${id}`);
     return res.data as MediaPost;
   },
+  userPosts: async (userId: number, params?: { page?: number; per_page?: number }) => {
+    const res = await api.get(`/users/${userId}/media`, { params });
+    return res.data as {
+      data: MediaPost[];
+      current_page: number;
+      last_page: number;
+      per_page: number;
+      total: number;
+    };
+  },
   create: async ({ file, caption }: { file: File; caption?: string }) => {
     const form = new FormData();
     form.append('image', file);
