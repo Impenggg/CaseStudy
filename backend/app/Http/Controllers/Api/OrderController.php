@@ -35,6 +35,73 @@ class OrderController extends Controller
     }
 
     /**
+     * Store multiple orders in a single transaction (batch checkout).
+     */
+    public function batchStore(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'items' => 'required|array|min:1',
+            'items.*.product_id' => 'required|exists:products,id',
+            'items.*.quantity' => 'required|integer|min:1',
+            'shipping_address' => 'required|array',
+            'shipping_address.street' => 'required|string',
+            'shipping_address.city' => 'required|string',
+            'shipping_address.province' => 'required|string',
+            'shipping_address.postal_code' => 'required|string',
+            'shipping_address.country' => 'required|string',
+            'shipping_address.phone' => 'nullable|string',
+            'payment_method' => 'required|string',
+        ]);
+
+        $items = collect($validated['items']);
+        $productIds = $items->pluck('product_id')->unique()->values()->all();
+
+        // Perform all operations in a single DB transaction with row-level locks
+        $createdIds = DB::transaction(function () use ($items, $productIds, $validated) {
+            // Lock products for update to prevent race conditions
+            $products = Product::whereIn('id', $productIds)->lockForUpdate()->get()->keyBy('id');
+
+            // Stock check
+            foreach ($items as $it) {
+                $product = $products->get($it['product_id']);
+                if (!$product) {
+                    abort(400, 'Product not found in batch');
+                }
+                if ($product->stock_quantity < $it['quantity']) {
+                    abort(400, 'Insufficient stock for product ID ' . $product->id);
+                }
+            }
+
+            // Create orders and decrement stock
+            $ids = [];
+            foreach ($items as $it) {
+                $product = $products->get($it['product_id']);
+                $totalAmount = $product->price * $it['quantity'];
+                $order = Order::create([
+                    'product_id' => $product->id,
+                    'buyer_id' => Auth::id(),
+                    'quantity' => $it['quantity'],
+                    'total_amount' => $totalAmount,
+                    'shipping_address' => $validated['shipping_address'],
+                    'payment_method' => $validated['payment_method'],
+                ]);
+                $ids[] = $order->id;
+
+                // decrement stock
+                $product->decrement('stock_quantity', $it['quantity']);
+            }
+
+            return $ids;
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Batch order placed successfully',
+            'data' => [ 'order_ids' => $createdIds ],
+        ], 201);
+    }
+
+    /**
      * Store a newly created order.
      */
     public function store(Request $request): JsonResponse
@@ -64,7 +131,7 @@ class OrderController extends Controller
 
         $totalAmount = $product->price * $request->quantity;
 
-        DB::transaction(function () use ($request, $product, $totalAmount) {
+        $orderId = DB::transaction(function () use ($request, $product, $totalAmount) {
             // Create order
             $order = Order::create([
                 'product_id' => $request->product_id,
@@ -77,11 +144,14 @@ class OrderController extends Controller
 
             // Update product stock
             $product->decrement('stock_quantity', $request->quantity);
+
+            return $order->id;
         });
 
         return response()->json([
             'status' => 'success',
             'message' => 'Order placed successfully',
+            'data' => [ 'order_id' => $orderId ],
         ], 201);
     }
 

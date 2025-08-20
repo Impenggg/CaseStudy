@@ -3,7 +3,7 @@ import { triggerAction } from '../lib/uiActions';
 import { Link } from 'react-router-dom';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
-import api, { productsAPI } from '@/services/api';
+import api, { productsAPI, ordersAPI } from '@/services/api';
 import LoadingScreen from '../components/LoadingScreen';
 
 interface Product {
@@ -14,6 +14,7 @@ interface Product {
   description: string;
   category: string;
   artisan: string;
+  stockQuantity?: number;
 }
 
 const MarketplacePage: React.FC = () => {
@@ -34,6 +35,7 @@ const MarketplacePage: React.FC = () => {
     price: number;
     image: string;
     quantity: number;
+    stock?: number;
   }
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     try {
@@ -44,6 +46,27 @@ const MarketplacePage: React.FC = () => {
     }
   });
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Reconcile cart with latest product stock when products change
+  useEffect(() => {
+    if (!products || products.length === 0) return;
+    setCartItems((prev) => {
+      let changed = false;
+      const next = prev.map((item) => {
+        const prod = products.find((p) => p.id === item.id);
+        const stock = prod && typeof prod.stockQuantity === 'number' ? prod.stockQuantity : item.stock;
+        if (stock === undefined) return item;
+        const clampedQty = Math.min(item.quantity, Math.max(0, stock));
+        const updated = { ...item, stock, quantity: clampedQty };
+        if (updated.quantity !== item.quantity || updated.stock !== item.stock) changed = true;
+        return updated;
+      });
+      if (changed) {
+        try { localStorage.setItem('marketplace_cart', JSON.stringify(next)); } catch {}
+      }
+      return next;
+    });
+  }, [products]);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [checkoutStep, setCheckoutStep] = useState<'shipping' | 'payment' | 'confirmation'>('shipping');
   const [shippingDetails, setShippingDetails] = useState({
@@ -52,14 +75,19 @@ const MarketplacePage: React.FC = () => {
     phone: '',
     address: '',
     city: '',
+    province: '',
     postalCode: ''
   });
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'gcash' | 'card'>('cod');
+  const [lastOrderIds, setLastOrderIds] = useState<number[] | null>(null);
+  const [confirmationItems, setConfirmationItems] = useState<typeof cartItems>([]);
+  const [confirmationTotal, setConfirmationTotal] = useState<number>(0);
 
   // Quick View modal state
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const quickViewRef = useRef<HTMLDivElement | null>(null);
+  const productsGridRef = useRef<HTMLDivElement | null>(null);
 
   const openQuickView = (product: Product) => {
     setQuickViewProduct(product);
@@ -148,6 +176,7 @@ const MarketplacePage: React.FC = () => {
           description: item.description || '',
           category: item.category || 'General',
           artisan: item.seller?.name || item.user?.name || 'Artisan',
+          stockQuantity: Number(item.stock_quantity ?? item.stockQuantity ?? 0),
         }));
         if (mounted) {
           setProducts(mapped);
@@ -177,21 +206,31 @@ const MarketplacePage: React.FC = () => {
 
   // Cart helpers
   const addToCart = (product: Product) => {
-    // Guests can add to cart; auth is only required at checkout
+    // Respect stock limits if provided
+    const stock = typeof product.stockQuantity === 'number' ? product.stockQuantity : undefined;
+    if (stock !== undefined && stock <= 0) {
+      return; // out of stock, do nothing
+    }
     setCartItems((prev) => {
       const existing = prev.find((p) => p.id === product.id);
       if (existing) {
-        return prev.map((p) => (p.id === product.id ? { ...p, quantity: p.quantity + 1 } : p));
+        const nextQty = stock !== undefined ? Math.min(existing.quantity + 1, stock) : existing.quantity + 1;
+        return prev.map((p) => (p.id === product.id ? { ...p, quantity: nextQty, stock: stock ?? p.stock } : p));
       }
-      return [...prev, { id: product.id, name: product.name, price: product.price, image: product.image, quantity: 1 }];
+      const initialQty = stock !== undefined ? Math.min(1, stock) : 1;
+      return [...prev, { id: product.id, name: product.name, price: product.price, image: product.image, quantity: initialQty, stock }];
     });
     triggerAction(`Add ${product.name} to cart (Marketplace)`);
-    // Optionally show cart after adding
-    setIsCartOpen(true);
   };
 
   const incrementItem = (id: number) => {
-    setCartItems((prev) => prev.map((p) => (p.id === id ? { ...p, quantity: p.quantity + 1 } : p)));
+    const prod = products.find((pr) => pr.id === id);
+    const stock = prod && typeof prod.stockQuantity === 'number' ? prod.stockQuantity : undefined;
+    setCartItems((prev) => prev.map((p) => {
+      if (p.id !== id) return p;
+      const nextQty = stock !== undefined ? Math.min(p.quantity + 1, stock) : p.quantity + 1;
+      return { ...p, quantity: nextQty };
+    }));
   };
 
   const decrementItem = (id: number) => {
@@ -228,15 +267,85 @@ const MarketplacePage: React.FC = () => {
     setCheckoutStep('payment');
   };
 
-  const handlePaymentSubmit = () => {
-    setCheckoutStep('confirmation');
-    triggerAction('Order placed successfully');
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+
+  const handlePaymentSubmit = async () => {
+    // Create an order per cart item (backend Order is single-product)
+    try {
+      if (isPlacingOrder) return;
+      setIsPlacingOrder(true);
+      if (cartItems.length === 0) return;
+
+      const shipping_address = {
+        street: shippingDetails.address || '',
+        city: shippingDetails.city || '',
+        province: shippingDetails.province || 'N/A',
+        postal_code: shippingDetails.postalCode || '',
+        country: 'PH',
+        phone: shippingDetails.phone || undefined,
+      };
+
+      // Batch place all items in one transaction
+      const batchRes = await ordersAPI.batchCreate({
+        items: cartItems.map((it) => ({ product_id: it.id, quantity: it.quantity })),
+        shipping_address,
+        payment_method: paymentMethod,
+      });
+      const createdIds: number[] = batchRes?.data?.order_ids || [];
+      setLastOrderIds(createdIds.length ? createdIds : null);
+      // Snapshot items and total for confirmation, then clear the live cart so counts update
+      setConfirmationItems(cartItems);
+      const snapshotTotal = cartItems.reduce((sum, it) => sum + (it.price * it.quantity), 0);
+      setConfirmationTotal(snapshotTotal);
+      clearCart();
+
+      // Refresh products to reflect new stock
+      try {
+        const res = await productsAPI.getAll({ per_page: 100 });
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : res?.data?.data || []);
+        const mapped: Product[] = list.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          price: Number(item.price ?? 0),
+          image: resolveImageUrl(item.image),
+          description: item.description || '',
+          category: item.category || 'General',
+          artisan: item.seller?.name || item.user?.name || 'Artisan',
+          stockQuantity: Number(item.stock_quantity ?? item.stockQuantity ?? 0),
+        }));
+        setProducts(mapped);
+        setFilteredProducts(mapped);
+        // Notify and scroll to updated products grid
+        triggerAction('Stock updated');
+        setTimeout(() => {
+          productsGridRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+      } catch {}
+
+      setCheckoutStep('confirmation');
+      // Success toast with first order ID if available (use createdIds from response)
+      if (createdIds && createdIds.length > 0) {
+        triggerAction(`Order placed successfully (ID: ${createdIds[0]})`);
+      } else {
+        triggerAction('Order placed successfully');
+      }
+    } catch (e: any) {
+      console.error('[Checkout] Order placement failed:', e?.response?.status, e?.response?.data || e);
+      const status = e?.response?.status;
+      const msg = e?.response?.data?.message || e?.message || 'Failed to place order';
+      setErrorMsg(`Checkout error${status ? ` (${status})` : ''}: ${msg}`);
+    } finally {
+      setIsPlacingOrder(false);
+    }
   };
 
   const handleCheckoutComplete = () => {
     setIsCheckoutOpen(false);
     setCheckoutStep('shipping');
-    clearCart();
+    setLastOrderIds(null);
+    setConfirmationItems([]);
+    setConfirmationTotal(0);
+    // Cart was already cleared after a successful checkout
   };
 
   // Resume actions post-login
@@ -257,8 +366,7 @@ const MarketplacePage: React.FC = () => {
           triggerAction(`Add ${product.name} to cart (Resumed)`);
         }
         sessionStorage.removeItem('pending_add_product_id');
-        // Optionally open cart to show item
-        setIsCartOpen(true);
+        // Do not auto-open the cart when resuming an add-to-cart action
       }
 
       // Resume checkout
@@ -570,11 +678,24 @@ const MarketplacePage: React.FC = () => {
                               {product.artisan}
                             </span>
                           </div>
+                          {typeof product.stockQuantity === 'number' && (
+                            <div className="mt-1 text-xs">
+                              {product.stockQuantity === 0 ? (
+                                <span className="text-red-600 font-medium">Out of stock</span>
+                              ) : product.stockQuantity <= 5 ? (
+                                <span className="text-orange-600">Only <span className="font-semibold">{product.stockQuantity}</span> left</span>
+                              ) : (
+                                <span className="text-cordillera-olive/70">In stock: <span className="font-medium text-cordillera-olive">{product.stockQuantity}</span></span>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <div className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex gap-2 justify-center">
                           <button
                             onClick={(e) => { e.preventDefault(); addToCart(product); }}
-                            className="bg-cordillera-olive text-cordillera-cream px-4 py-2 text-sm font-medium rounded hover:bg-cordillera-olive/90"
+                            disabled={typeof product.stockQuantity === 'number' && product.stockQuantity === 0}
+                            title={typeof product.stockQuantity === 'number' && product.stockQuantity === 0 ? 'Out of stock' : undefined}
+                            className={`bg-cordillera-olive text-cordillera-cream px-4 py-2 text-sm font-medium rounded hover:bg-cordillera-olive/90 ${typeof product.stockQuantity === 'number' && product.stockQuantity === 0 ? 'opacity-50 cursor-not-allowed hover:bg-cordillera-olive' : ''}`}
                           >
                             Add to Cart
                           </button>
@@ -674,11 +795,18 @@ const MarketplacePage: React.FC = () => {
                     </svg>
                     <span className="uppercase tracking-wider">{quickViewProduct.artisan}</span>
                   </div>
+                  {typeof quickViewProduct.stockQuantity === 'number' && (
+                    <div className="text-xs text-cordillera-olive/70 mb-4">
+                      In stock: <span className="font-medium text-cordillera-olive">{quickViewProduct.stockQuantity}</span>
+                    </div>
+                  )}
                   <p className="text-cordillera-olive/70 text-sm leading-relaxed mb-6 line-clamp-6">{quickViewProduct.description}</p>
                   <div className="mt-auto flex gap-3">
                     <button
                       onClick={() => { addToCart(quickViewProduct); closeQuickView(); }}
-                      className="bg-cordillera-olive text-cordillera-cream px-5 py-2 rounded-lg font-medium hover:bg-cordillera-olive/90"
+                      disabled={typeof quickViewProduct.stockQuantity === 'number' && quickViewProduct.stockQuantity === 0}
+                      title={typeof quickViewProduct.stockQuantity === 'number' && quickViewProduct.stockQuantity === 0 ? 'Out of stock' : undefined}
+                      className={`bg-cordillera-olive text-cordillera-cream px-5 py-2 rounded-lg font-medium hover:bg-cordillera-olive/90 ${typeof quickViewProduct.stockQuantity === 'number' && quickViewProduct.stockQuantity === 0 ? 'opacity-50 cursor-not-allowed hover:bg-cordillera-olive' : ''}`}
                     >
                       Add to Cart
                     </button>
@@ -794,6 +922,16 @@ const MarketplacePage: React.FC = () => {
                           placeholder="Enter your city"
                         />
                       </div>
+                      <div>
+                        <label className="block text-sm font-medium text-cordillera-olive mb-2">Province</label>
+                        <input
+                          type="text"
+                          value={shippingDetails.province}
+                          onChange={(e) => setShippingDetails(prev => ({ ...prev, province: e.target.value }))}
+                          className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                          placeholder="Enter your province"
+                        />
+                      </div>
                       <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-cordillera-olive mb-2">Address</label>
                         <textarea
@@ -882,9 +1020,10 @@ const MarketplacePage: React.FC = () => {
                       </button>
                       <button
                         onClick={handlePaymentSubmit}
-                        className="bg-cordillera-gold text-cordillera-olive px-8 py-3 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
+                        disabled={isPlacingOrder}
+                        className={`bg-cordillera-gold text-cordillera-olive px-8 py-3 rounded-lg font-medium transition-colors ${isPlacingOrder ? 'opacity-60 cursor-not-allowed' : 'hover:bg-cordillera-gold/90'}`}
                       >
-                        Place Order
+                        {isPlacingOrder ? 'Placing…' : 'Place Order'}
                       </button>
                     </div>
                   </div>
@@ -905,13 +1044,19 @@ const MarketplacePage: React.FC = () => {
                     <div className="bg-cordillera-olive/5 rounded-lg p-6">
                       <h4 className="font-medium text-cordillera-olive mb-4">Order Summary</h4>
                       <div className="space-y-3">
-                        {cartItems.map((item) => (
-                          <div key={item.id} className="flex justify-between items-center">
+                        {confirmationItems.map((item) => (
+                          <div key={item.id} className="flex items-center justify-between text-sm">
                             <div className="flex items-center gap-3">
-                              <img src={item.image} alt={item.name} className="w-12 h-12 object-cover rounded" />
+                              <div className="w-10 h-10 bg-cordillera-sage/20 rounded overflow-hidden flex items-center justify-center">
+                                {item.image ? (
+                                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                ) : (
+                                  <span className="text-cordillera-olive/60 text-xs">No Image</span>
+                                )}
+                              </div>
                               <div>
                                 <div className="font-medium text-cordillera-olive">{item.name}</div>
-                                <div className="text-sm text-cordillera-olive/60">Qty: {item.quantity}</div>
+                                <div className="text-cordillera-olive/70">Qty: {item.quantity}</div>
                               </div>
                             </div>
                             <div className="text-cordillera-olive font-medium">₱{(item.price * item.quantity).toLocaleString()}</div>
@@ -920,30 +1065,56 @@ const MarketplacePage: React.FC = () => {
                         <div className="border-t pt-3">
                           <div className="flex justify-between font-medium text-cordillera-olive">
                             <span>Total</span>
-                            <span>₱{cartTotal.toLocaleString()}</span>
+                            <span>₱{confirmationTotal.toLocaleString()}</span>
                           </div>
                         </div>
                       </div>
                     </div>
+
+                    {lastOrderIds && (
+                      <div className="bg-cordillera-olive/5 rounded-lg p-6">
+                        <h4 className="font-medium text-cordillera-olive mb-2">Order Reference</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {lastOrderIds.map((id) => (
+                            <Link
+                              key={id}
+                              to={`/orders/${id}`}
+                              className="text-sm px-3 py-1 rounded-full border border-cordillera-olive/30 text-cordillera-olive hover:bg-cordillera-olive/5"
+                              title={`View order ${id}`}
+                            >
+                              #{id}
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
 
                     <div className="bg-cordillera-olive/5 rounded-lg p-6">
                       <h4 className="font-medium text-cordillera-olive mb-4">Shipping Details</h4>
                       <div className="space-y-2 text-sm text-cordillera-olive/80">
                         <div>{shippingDetails.fullName}</div>
                         <div>{shippingDetails.address}</div>
-                        <div>{shippingDetails.city}, {shippingDetails.postalCode}</div>
+                        <div>{shippingDetails.city}, {shippingDetails.province} {shippingDetails.postalCode}</div>
                         <div>{shippingDetails.phone}</div>
                         <div>{shippingDetails.email}</div>
                       </div>
                     </div>
 
                     <div className="text-center pt-4">
-                      <button
-                        onClick={handleCheckoutComplete}
-                        className="bg-cordillera-gold text-cordillera-olive px-8 py-3 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
-                      >
-                        Continue Shopping
-                      </button>
+                      <div className="flex items-center justify-center gap-3 flex-wrap">
+                        <button
+                          onClick={handleCheckoutComplete}
+                          className="bg-cordillera-gold text-cordillera-olive px-8 py-3 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
+                        >
+                          Continue Shopping
+                        </button>
+                        <Link
+                          to="/orders"
+                          className="px-8 py-3 rounded-lg font-medium border border-cordillera-olive/30 text-cordillera-olive hover:bg-cordillera-olive/5 transition-colors"
+                        >
+                          View My Orders
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 )}

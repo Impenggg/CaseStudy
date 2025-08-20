@@ -16,6 +16,7 @@ const MediaCreationPage = lazy(() => import('./pages/MediaCreationPage'));
 const MediaFeedPage = lazy(() => import('./pages/MediaFeedPage'));
 const AccountPage = lazy(() => import('./pages/AccountPage'));
 const OrdersPage = lazy(() => import('./pages/OrdersPage'));
+const OrderDetailPage = lazy(() => import('./pages/OrderDetailPage'));
 const SupportsPage = lazy(() => import('./pages/SupportsPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
@@ -147,6 +148,16 @@ const App: React.FC = () => {
               <Layout>
                 <ProtectedRoute>
                   <OrdersPage />
+                </ProtectedRoute>
+              </Layout>
+            }
+          />
+          <Route
+            path="/orders/:id"
+            element={
+              <Layout>
+                <ProtectedRoute>
+                  <OrderDetailPage />
                 </ProtectedRoute>
               </Layout>
             }

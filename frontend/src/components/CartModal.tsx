@@ -6,6 +6,7 @@ interface CartItem {
   price: number;
   image: string;
   quantity: number;
+  stock?: number;
 }
 
 interface CartModalProps {
@@ -106,6 +107,17 @@ const CartModal: React.FC<CartModalProps> = ({
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="text-lg font-semibold text-cordillera-olive truncate mb-1">{item.name}</h4>
+                        {typeof item.stock === 'number' && (
+                          <p className="text-xs mb-1">
+                            {item.stock === 0 ? (
+                              <span className="text-red-600 font-medium">Out of stock</span>
+                            ) : item.stock <= 5 ? (
+                              <span className="text-orange-600">Only <span className="font-semibold">{item.stock}</span> left</span>
+                            ) : (
+                              <span className="text-cordillera-olive/70">Available: <span className="font-medium text-cordillera-olive">{item.stock}</span></span>
+                            )}
+                          </p>
+                        )}
                         <p className="text-cordillera-gold font-bold text-lg">₱{item.price.toLocaleString()}</p>
                       </div>
                       <div className="flex items-center gap-3">
@@ -121,7 +133,9 @@ const CartModal: React.FC<CartModalProps> = ({
                           </span>
                           <button 
                             onClick={() => onIncrement(item.id)} 
-                            className="px-3 py-1 bg-cordillera-sage/10 hover:bg-cordillera-sage/20 transition-colors text-cordillera-olive font-bold"
+                            disabled={typeof item.stock === 'number' && item.quantity >= item.stock}
+                            title={typeof item.stock === 'number' && item.quantity >= item.stock ? 'Reached available stock' : undefined}
+                            className={`px-3 py-1 bg-cordillera-sage/10 hover:bg-cordillera-sage/20 transition-colors text-cordillera-olive font-bold ${typeof item.stock === 'number' && item.quantity >= item.stock ? 'opacity-50 cursor-not-allowed hover:bg-cordillera-sage/10' : ''}`}
                           >
                             +
                           </button>

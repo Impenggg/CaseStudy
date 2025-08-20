@@ -73,6 +73,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Order routes
     Route::get('/orders', [OrderController::class, 'index']);
+    Route::post('/orders/batch', [OrderController::class, 'batchStore']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders/{order}', [OrderController::class, 'show']);
     Route::put('/orders/{order}', [OrderController::class, 'update']);

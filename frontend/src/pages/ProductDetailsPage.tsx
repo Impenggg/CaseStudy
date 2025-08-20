@@ -17,7 +17,7 @@ export const ProductDetailsPage: React.FC = () => {
   const { isAuthenticated, requireAuth } = useAuth();
 
   // Cart state synced with localStorage (shared with Marketplace)
-  type CartItem = { id: number; name: string; price: number; image: string; quantity: number };
+  type CartItem = { id: number; name: string; price: number; image: string; quantity: number; stock?: number };
   const [cartItems, setCartItems] = React.useState<CartItem[]>(() => {
     try {
       const raw = localStorage.getItem('marketplace_cart');
@@ -31,29 +31,53 @@ export const ProductDetailsPage: React.FC = () => {
     localStorage.setItem('marketplace_cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
+  // Reconcile cart item for this product with latest stock quantity
+  React.useEffect(() => {
+    if (!product) return;
+    const stock = typeof product.stock_quantity === 'number' ? product.stock_quantity : undefined;
+    if (stock === undefined) return;
+    setCartItems(prev => {
+      let changed = false;
+      const next = prev.map(it => {
+        if (it.id !== product.id) return it;
+        const clamped = Math.min(it.quantity, Math.max(0, stock));
+        const updated = { ...it, stock, quantity: clamped };
+        if (updated.quantity !== it.quantity || updated.stock !== it.stock) changed = true;
+        return updated;
+      });
+      if (changed) {
+        try { localStorage.setItem('marketplace_cart', JSON.stringify(next)); } catch {}
+      }
+      return next;
+    });
+  }, [product?.id, product?.stock_quantity]);
+
   const addToCart = () => {
     if (!product) return;
     try {
       const key = 'marketplace_cart';
       const raw = localStorage.getItem(key);
-      const cart: Array<{ id: number; name: string; price: number; image: string; quantity: number }>
+      const cart: Array<{ id: number; name: string; price: number; image: string; quantity: number; stock?: number }>
         = raw ? JSON.parse(raw) : [];
       const existing = cart.find((p) => p.id === product.id);
+      const stock = typeof product.stock_quantity === 'number' ? product.stock_quantity : undefined;
       if (existing) {
-        existing.quantity = Math.min(999, existing.quantity + quantity);
+        const nextQty = stock !== undefined ? Math.min(existing.quantity + quantity, stock) : Math.min(999, existing.quantity + quantity);
+        existing.quantity = nextQty;
+        if (stock !== undefined) existing.stock = stock;
       } else {
         cart.push({
           id: product.id,
           name: product.name,
           price: product.price,
           image: (product.images && product.images[0]) || product.image || 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800&h=600&fit=crop',
-          quantity,
+          quantity: stock !== undefined ? Math.min(quantity, stock) : quantity,
+          stock,
         });
       }
       localStorage.setItem(key, JSON.stringify(cart));
       setCartItems(cart);
       showToast(`Added ${quantity} ${product.name}(s) to cart!`, 'success');
-      setIsCartOpen(true);
     } catch (e) {
       console.error('Failed to add to cart', e);
       showToast('Failed to add to cart', 'error');
@@ -63,7 +87,11 @@ export const ProductDetailsPage: React.FC = () => {
   // Cart operations
   const incrementItem = (pid: number) => {
     setCartItems(prev => {
-      const next = prev.map(p => (p.id === pid ? { ...p, quantity: p.quantity + 1 } : p));
+      const next = prev.map(p => {
+        if (p.id !== pid) return p;
+        const max = typeof p.stock === 'number' ? p.stock : 999;
+        return { ...p, quantity: Math.min(p.quantity + 1, max) };
+      });
       localStorage.setItem('marketplace_cart', JSON.stringify(next));
       return next;
     });
@@ -227,7 +255,17 @@ export const ProductDetailsPage: React.FC = () => {
             {/* Purchase */}
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <span className="text-yellow-200">Stock: {product.stock_quantity ?? 0} available</span>
+                {typeof product.stock_quantity === 'number' ? (
+                  product.stock_quantity === 0 ? (
+                    <span className="text-red-400 font-semibold">Out of stock</span>
+                  ) : product.stock_quantity <= 5 ? (
+                    <span className="text-orange-300">Only <span className="font-bold">{product.stock_quantity}</span> left</span>
+                  ) : (
+                    <span className="text-yellow-200">In stock: <span className="font-semibold">{product.stock_quantity}</span></span>
+                  )
+                ) : (
+                  <span className="text-yellow-200">Stock: N/A</span>
+                )}
               </div>
               
               {/* Quantity Selector */}
@@ -252,7 +290,8 @@ export const ProductDetailsPage: React.FC = () => {
 
               <Button 
                 size="lg" 
-                className="w-full bg-yellow-500 text-green-900 hover:bg-yellow-400"
+                className={`w-full bg-yellow-500 text-green-900 hover:bg-yellow-400 ${typeof product.stock_quantity === 'number' && product.stock_quantity === 0 ? 'opacity-50 cursor-not-allowed hover:bg-yellow-500' : ''}`}
+                disabled={typeof product.stock_quantity === 'number' && product.stock_quantity === 0}
                 onClick={addToCart}
               >
                 Add to Cart - ₱{(product.price * quantity).toLocaleString()}

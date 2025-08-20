@@ -17,6 +17,7 @@ interface Product {
   careInstructions: string[];
   artisan: string;
   gallery: string[];
+  stockQuantity?: number;
 }
 
 const ProductDetailPage: React.FC = () => {
@@ -28,7 +29,7 @@ const ProductDetailPage: React.FC = () => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   // Local cart state (shared via localStorage with marketplace)
-  interface CartItem { id: number; name: string; price: number; image: string; quantity: number }
+  interface CartItem { id: number; name: string; price: number; image: string; quantity: number; stock?: number }
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     try {
       const raw = localStorage.getItem('marketplace_cart');
@@ -58,10 +59,32 @@ const ProductDetailPage: React.FC = () => {
         "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800",
         "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800",
         "https://images.unsplash.com/photo-1607081692251-5bb4c0940e1e?w=800"
-      ]
+      ],
+      stockQuantity: 7,
     };
     setProduct(sampleProduct);
-  }, [id]);
+  }, []);
+
+  // Reconcile cart item with latest product stock when product loads/changes
+  useEffect(() => {
+    if (!product) return;
+    const stock = typeof product.stockQuantity === 'number' ? product.stockQuantity : undefined;
+    if (stock === undefined) return;
+    setCartItems((prev) => {
+      let changed = false;
+      const next = prev.map((it) => {
+        if (it.id !== product.id) return it;
+        const clampedQty = Math.min(it.quantity, Math.max(0, stock));
+        const updated = { ...it, stock, quantity: clampedQty };
+        if (updated.quantity !== it.quantity || updated.stock !== it.stock) changed = true;
+        return updated;
+      });
+      if (changed) {
+        try { localStorage.setItem('marketplace_cart', JSON.stringify(next)); } catch {}
+      }
+      return next;
+    });
+  }, [product?.stockQuantity, product?.id]);
 
   useEffect(() => {
     localStorage.setItem('marketplace_cart', JSON.stringify(cartItems));
@@ -100,25 +123,29 @@ const ProductDetailPage: React.FC = () => {
     try {
       const key = 'marketplace_cart';
       const raw = localStorage.getItem(key);
-      const cart: Array<{ id: number; name: string; price: number; image: string; quantity: number }>
+      const cart: Array<{ id: number; name: string; price: number; image: string; quantity: number; stock?: number }>
         = raw ? JSON.parse(raw) : [];
       const existing = cart.find((p) => p.id === product.id);
+      const stock = typeof product.stockQuantity === 'number' ? product.stockQuantity : undefined;
       if (existing) {
-        existing.quantity += qty;
+        const nextQty = stock !== undefined ? Math.min(existing.quantity + qty, stock) : (existing.quantity + qty);
+        existing.quantity = nextQty;
+        if (stock !== undefined) existing.stock = stock;
       } else {
+        const initialQty = stock !== undefined ? Math.min(qty, stock) : qty;
         cart.push({
           id: product.id,
           name: product.name,
           price: product.price,
           image: product.gallery?.[0] || product.image,
-          quantity: qty,
+          quantity: initialQty,
+          stock,
         });
       }
       localStorage.setItem(key, JSON.stringify(cart));
       // Update local state for UI and badge
       setCartItems(cart);
       triggerAction(`Add ${qty} ${product.name} to cart (Details)`);
-      setIsCartOpen(true);
     } catch (e) {
       console.error('Failed to add to cart', e);
     }
@@ -126,8 +153,13 @@ const ProductDetailPage: React.FC = () => {
 
   // Cart item operations
   const incrementItem = (id: number) => {
+    const stock = product && product.id === id && typeof product.stockQuantity === 'number' ? product.stockQuantity : undefined;
     setCartItems((prev) => {
-      const next = prev.map((p) => (p.id === id ? { ...p, quantity: p.quantity + 1 } : p));
+      const next = prev.map((p) => {
+        if (p.id !== id) return p;
+        const nextQty = stock !== undefined ? Math.min(p.quantity + 1, stock) : p.quantity + 1;
+        return { ...p, quantity: nextQty };
+      });
       localStorage.setItem('marketplace_cart', JSON.stringify(next));
       return next;
     });
@@ -339,7 +371,7 @@ const ProductDetailPage: React.FC = () => {
                 {product.description}
               </p>
               
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center justify-between mb-2">
                 <span className="text-3xl font-light text-cordillera-gold">
                   ₱{product.price.toLocaleString()}
                 </span>
@@ -347,8 +379,19 @@ const ProductDetailPage: React.FC = () => {
                   {product.category}
                 </span>
               </div>
+              {typeof product.stockQuantity === 'number' && (
+                <div className="mb-6 text-sm">
+                  {product.stockQuantity === 0 ? (
+                    <span className="text-red-600 font-medium">Out of stock</span>
+                  ) : product.stockQuantity <= 5 ? (
+                    <span className="text-orange-600">Only <span className="font-semibold">{product.stockQuantity}</span> left</span>
+                  ) : (
+                    <span className="text-cordillera-olive/70">In stock: <span className="font-medium text-cordillera-olive">{product.stockQuantity}</span></span>
+                  )}
+                </div>
+              )}
 
-              <button onClick={() => addToCart(1)} className="w-full bg-cordillera-gold text-cordillera-olive py-4 text-lg font-medium hover:bg-cordillera-olive hover:text-cordillera-cream transition-all duration-200 tracking-wide">
+              <button onClick={() => addToCart(1)} disabled={typeof product.stockQuantity === 'number' && product.stockQuantity === 0} title={typeof product.stockQuantity === 'number' && product.stockQuantity === 0 ? 'Out of stock' : undefined} className={`w-full bg-cordillera-gold text-cordillera-olive py-4 text-lg font-medium hover:bg-cordillera-olive hover:text-cordillera-cream transition-all duration-200 tracking-wide ${typeof product.stockQuantity === 'number' && product.stockQuantity === 0 ? 'opacity-50 cursor-not-allowed hover:bg-cordillera-gold' : ''}`}>
                 Add to Cart
               </button>
             </div>

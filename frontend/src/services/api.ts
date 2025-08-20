@@ -286,8 +286,29 @@ export const ordersAPI = {
     return response.data.data;
   },
 
+  batchCreate: async (payload: {
+    items: Array<{ product_id: number; quantity: number }>;
+    shipping_address: {
+      street: string;
+      city: string;
+      province: string;
+      postal_code: string;
+      country: string;
+      phone?: string;
+    };
+    payment_method: string;
+  }) => {
+    const response = await api.post('/orders/batch', payload);
+    return response.data;
+  },
+
   update: async (id: number, orderData: Partial<Order>) => {
     const response = await api.put(`/orders/${id}`, orderData);
+    return response.data.data;
+  },
+
+  getOne: async (id: number) => {
+    const response = await api.get(`/orders/${id}`);
     return response.data.data;
   },
 
