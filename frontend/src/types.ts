@@ -89,6 +89,8 @@ export interface Order {
 export interface Donation {
   id: ID;
   campaign_id: ID;
+  // Optional campaign relation may be included by backend responses
+  campaign?: Campaign;
   amount: number;
   message?: string;
   anonymous?: boolean;
