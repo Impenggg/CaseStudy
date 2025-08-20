@@ -1,23 +1,25 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import React, { Suspense, lazy } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
-import HomePage from './pages/HomePage';
-import MarketplacePage from './pages/MarketplacePage';
-import ProductDetailPage from './pages/ProductDetailPage';
-import StoriesPage from './pages/StoriesPage';
-import StoryDetailPage from './pages/StoryDetailPage';
-import CampaignDetailPage from './pages/CampaignDetailPage';
-import StorySubmissionPage from './pages/StorySubmissionPage';
-import CampaignCreationPage from './pages/CampaignCreationPage';
-import MediaCreationPage from './pages/MediaCreationPage';
-import MediaFeedPage from './pages/MediaFeedPage';
-import ProtectedRoute from './components/ProtectedRoute';
 import { useScrollToTop } from './hooks/useScrollToTop';
-import { LoginPage } from './pages/LoginPage';
-import { RegisterPage } from './pages/RegisterPage';
-import AccountPage from './pages/AccountPage';
-import OrdersPage from './pages/OrdersPage';
-import SupportsPage from './pages/SupportsPage';
+
+// Lazy-loaded pages for better structure and to avoid stale modules
+const HomePage = lazy(() => import('./pages/HomePage'));
+const MarketplacePage = lazy(() => import('./pages/MarketplacePage'));
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
+const StoriesPage = lazy(() => import('./pages/StoriesPage'));
+const StoryDetailPage = lazy(() => import('./pages/StoryDetailPage'));
+const CampaignDetailPage = lazy(() => import('./pages/CampaignDetailPage'));
+const StorySubmissionPage = lazy(() => import('./pages/StorySubmissionPage'));
+const CampaignCreationPage = lazy(() => import('./pages/CampaignCreationPage'));
+const MediaCreationPage = lazy(() => import('./pages/MediaCreationPage'));
+const MediaFeedPage = lazy(() => import('./pages/MediaFeedPage'));
+const AccountPage = lazy(() => import('./pages/AccountPage'));
+const OrdersPage = lazy(() => import('./pages/OrdersPage'));
+const SupportsPage = lazy(() => import('./pages/SupportsPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const RegisterPage = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -67,6 +69,13 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <Router>
         <ScrollToTop />
+        <Suspense
+          fallback={
+            <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
+              <div className="text-center text-cordillera-cream">Loading…</div>
+            </div>
+          }
+        >
         <Routes>
           {/* Public browsing routes */}
           <Route path="/" element={<Layout><HomePage /></Layout>} />
@@ -75,6 +84,7 @@ const App: React.FC = () => {
           <Route path="/stories" element={<Layout><StoriesPage /></Layout>} />
           <Route path="/story/:id" element={<Layout><StoryDetailPage /></Layout>} />
           <Route path="/campaign/:id" element={<Layout><CampaignDetailPage /></Layout>} />
+          {/* Media-related routes */}
           <Route
             path="/media"
             element={
@@ -116,7 +126,7 @@ const App: React.FC = () => {
             element={
               <Layout>
                 <ProtectedRoute>
-                  <MediaCreationPage />
+                  <Navigate to="/media" replace />
                 </ProtectedRoute>
               </Layout>
             }
@@ -169,6 +179,7 @@ const App: React.FC = () => {
             }
           />
         </Routes>
+        </Suspense>
       </Router>
     </ErrorBoundary>
   );

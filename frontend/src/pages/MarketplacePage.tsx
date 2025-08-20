@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
 import api, { productsAPI } from '@/services/api';
+import LoadingScreen from '../components/LoadingScreen';
 
 interface Product {
   id: number;
@@ -21,6 +22,7 @@ const MarketplacePage: React.FC = () => {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('');
@@ -162,6 +164,8 @@ const MarketplacePage: React.FC = () => {
           const msg = e?.response?.data?.message || e?.message || 'Failed to fetch products';
           setErrorMsg(`Products fetch error${status ? ` (${status})` : ''}: ${msg}`);
         }
+      } finally {
+        if (mounted) setIsLoading(false);
       }
     })();
     return () => { mounted = false; };
@@ -302,6 +306,11 @@ const MarketplacePage: React.FC = () => {
   }, [searchTerm, selectedCategory, sortBy, products]);
 
   const categories = Array.from(new Set(products.map(p => p.category)));
+
+  // Loading UI
+  if (isLoading) {
+    return <LoadingScreen title="Loading Marketplace" subtitle="Fetching products from artisans..." />;
+  }
 
   return (
     <div className="min-h-screen bg-cordillera-cream">

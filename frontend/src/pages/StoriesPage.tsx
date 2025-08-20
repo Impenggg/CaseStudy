@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import LoadingScreen from '../components/LoadingScreen';
 import { triggerAction } from '../lib/uiActions';
 import { Link } from 'react-router-dom';
 import api, { storiesAPI, campaignsAPI } from '@/services/api';
@@ -195,15 +196,7 @@ const StoriesPage: React.FC = () => {
 
   // Loading component
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-cordillera-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <h2 className="text-2xl font-serif text-cordillera-cream mb-2">Loading Heritage Content</h2>
-          <p className="text-cordillera-cream/70">Gathering stories and campaigns...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen title="Loading Heritage Content" subtitle="Gathering stories and campaigns..." />;
   }
 
   return (
