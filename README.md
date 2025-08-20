@@ -146,6 +146,23 @@ Following JSON:API standards for consistent response formats.
 ### Authentication
 Using Laravel Sanctum for SPA authentication with React frontend.
 
+### Frontend Auth & API Client Notes
+
+- The frontend uses a single shared Axios instance at `frontend/src/services/api.ts`.
+  - Base URL is configured via `frontend/.env` using `VITE_API_BASE_URL` (default: `http://localhost:8000/api`).
+  - A 401 response automatically clears the token, stores the intended path, and redirects to `/login`.
+- `AuthContext` (`frontend/src/contexts/AuthContext.tsx`) consumes that shared API instance for `/login`, `/register`, `/logout`, and `/user`.
+- Redirect behavior on protected pages:
+  - `ProtectedRoute` guards routes like `/media`, `/account`, etc. Unauthenticated users are sent to `/login` with `location.state.from`.
+  - When code triggers `requireAuth()`, it stores the full intended path (pathname + search + hash) in `sessionStorage:intended_path` before redirecting to `/login`.
+  - `LoginPage` reads `location.state.from` first, then `sessionStorage:intended_path`, then defaults to `/`.
+
+### Protected Features
+
+- The Media feature (`/media`, media creation actions) is protected on both frontend and backend.
+- Backend media endpoints (`/api/media`, `/api/media/{id}`, reactions/comments) require authentication.
+- Uploads listing (`GET /api/uploads`) is public for gallery display; `POST /api/upload` is protected.
+
 ## Contributing
 
 Please ensure all cultural content is respectful and authentic to Cordillera weaving traditions.

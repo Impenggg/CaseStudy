@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
-import axios from 'axios'
 import type { User } from '@/types'
 import LoadingOverlay from '@/components/LoadingOverlay'
+import api from '@/services/api'
 
 interface AuthContextType {
   user: User | null
@@ -14,12 +14,6 @@ interface AuthContextType {
   checkAuth: () => Promise<void>
   requireAuth: (redirectPath?: string) => boolean
 }
-
-// Configure axios defaults
-const API_BASE_URL = 'http://localhost:8000/api'
-axios.defaults.baseURL = API_BASE_URL
-// We use bearer tokens, not cookies. Avoid cross-site cookies to match CORS (supports_credentials=false)
-axios.defaults.withCredentials = false
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -36,19 +30,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true)
   const [loadingMessage, setLoadingMessage] = useState<string | undefined>('Checking session...')
 
-  // Attach bearer token if present
-  useEffect(() => {
-    const interceptor = axios.interceptors.request.use((config) => {
-      const token = localStorage.getItem('auth_token')
-      if (token) {
-        config.headers = config.headers || {}
-        config.headers.Authorization = `Bearer ${token}`
-      }
-      return config
-    })
-    return () => axios.interceptors.request.eject(interceptor)
-  }, [])
-
   useEffect(() => {
     const init = async () => {
       try {
@@ -56,7 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const token = localStorage.getItem('auth_token')
         if (token) {
           // Always verify token and refresh user on init
-          const { data } = await axios.get('/user')
+          const { data } = await api.get('/user')
           setUser(data.data)
           localStorage.setItem('user', JSON.stringify(data.data))
         }
@@ -76,7 +57,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true)
       setLoadingMessage('Signing you in...')
-      const { data } = await axios.post('/login', { email, password })
+      const { data } = await api.post('/login', { email, password })
       if (data.status === 'success') {
         const { user, token } = data.data
         localStorage.setItem('auth_token', token)
@@ -98,7 +79,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true)
       setLoadingMessage('Creating your account...')
-      const { data } = await axios.post('/register', { email, password, name, role })
+      const { data } = await api.post('/register', { email, password, name, role })
       if (data.status === 'success') {
         const { user, token } = data.data
         localStorage.setItem('auth_token', token)
@@ -118,7 +99,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async (): Promise<void> => {
     try {
-      await axios.post('/logout')
+      await api.post('/logout')
     } catch (e) {
       // ignore
     } finally {
@@ -132,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const token = localStorage.getItem('auth_token')
     if (!token) return
     try {
-      const { data } = await axios.get('/user')
+      const { data } = await api.get('/user')
       setUser(data.data)
       localStorage.setItem('user', JSON.stringify(data.data))
     } catch (e) {
@@ -145,7 +126,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const requireAuth = (redirectPath: string = '/login'): boolean => {
     if (!user) {
-      sessionStorage.setItem('intended_path', window.location.pathname + window.location.search)
+      const intended = window.location.pathname + window.location.search + window.location.hash
+      sessionStorage.setItem('intended_path', intended)
       window.location.href = redirectPath
       return false
     }
