@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import BackLink from '@/components/BackLink';
 import { triggerAction } from '../lib/uiActions';
 import { useAuth } from '../contexts/AuthContext';
-import api, { campaignsAPI } from '@/services/api';
+import api, { campaignsAPI, donationsAPI } from '@/services/api';
 
 interface Campaign {
   id: number;
@@ -31,6 +31,8 @@ const CampaignDetailPage: React.FC = () => {
     email: '',
     message: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [polling, setPolling] = useState<{ active: boolean; attempts: number }>()
 
   useEffect(() => {
     let mounted = true;
@@ -72,6 +74,42 @@ const CampaignDetailPage: React.FC = () => {
     return () => { mounted = false; };
   }, [id]);
 
+  // Helper to refresh campaign details (used by polling)
+  const refreshCampaign = async () => {
+    if (!id) return;
+    const data = await campaignsAPI.getById(Number(id));
+    const API_ORIGIN = (api.defaults.baseURL || '').replace(/\/api\/?$/, '');
+    const resolveImage = (image?: string | null) => {
+      if (!image) return '';
+      if (image.startsWith('http://') || image.startsWith('https://')) return image;
+      return `${API_ORIGIN}/${image.replace(/^\/?/, '')}`;
+    };
+    const mapped: Campaign = {
+      id: data.id,
+      title: data.title,
+      description: data.description || '',
+      image: resolveImage(data.image),
+      goalAmount: Number((data as any).goal_amount ?? 0),
+      currentAmount: Number((data as any).current_amount ?? 0),
+      endDate: data.end_date ? new Date(data.end_date).toLocaleDateString() : '',
+      category: (data as any).category || 'community',
+      organizer: (data as any).organizer?.name || 'Organizer',
+      featured: false,
+      type: 'campaign',
+    };
+    setCampaign(mapped);
+  };
+
+  // Continuous light polling while viewing the page (every 10s)
+  useEffect(() => {
+    if (!id) return;
+    let interval: number | undefined;
+    interval = window.setInterval(async () => {
+      try { await refreshCampaign(); } catch {}
+    }, 10000);
+    return () => { if (interval) window.clearInterval(interval); };
+  }, [id]);
+
   const getProgressPercentage = (current: number, goal: number) => {
     return Math.min((current / goal) * 100, 100);
   };
@@ -87,11 +125,44 @@ const CampaignDetailPage: React.FC = () => {
     setShowSupportModal(true);
   };
 
-  const handleSupportSubmit = () => {
-    triggerAction(`Support campaign: ${campaign?.title} with ₱${supportAmount.toLocaleString()}`);
-    setShowSupportModal(false);
-    setSupportForm({ name: '', email: '', message: '' });
-    setSupportAmount(1000);
+  const handleSupportSubmit = async () => {
+    if (!id || !campaign) return;
+    if (supportAmount <= 0) return;
+    setIsSubmitting(true);
+    try {
+      // Submit donation
+      await donationsAPI.create({
+        campaign_id: Number(id),
+        amount: supportAmount,
+        message: supportForm.message || undefined,
+        anonymous: false,
+        payment_method: 'card',
+      } as any);
+
+      // Optimistic UI update
+      setCampaign(prev => prev ? { ...prev, currentAmount: prev.currentAmount + supportAmount } : prev);
+      triggerAction(`Support campaign: ${campaign.title} with ₱${supportAmount.toLocaleString()}`);
+
+      // Start short polling (10 attempts every 2s) to reflect server total and other supporters in near real-time
+      let attempts = 0;
+      const maxAttempts = 10;
+      const interval = setInterval(async () => {
+        attempts += 1;
+        try { await refreshCampaign(); } catch {}
+        if (attempts >= maxAttempts) {
+          clearInterval(interval);
+        }
+      }, 2000);
+
+      setShowSupportModal(false);
+      setSupportForm({ name: '', email: '', message: '' });
+      setSupportAmount(1000);
+    } catch (e: any) {
+      console.error('[CampaignDetail] Support failed', e);
+      triggerAction('Failed to support campaign');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Resume support modal after login

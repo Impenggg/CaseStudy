@@ -10,13 +10,17 @@ export interface Story {
   category: string
   fullContent: string
   tags: string[]
+  /** Optional: URL of the external reference for this story */
+  sourceUrl?: string
+  /** Optional: Cleaned text/content extracted from the sourceUrl */
+  sourceText?: string
 }
 
 // Temporary mocked fetch function. Replace with real API call later.
 async function fetchStory(id: number): Promise<Story> {
   // Simulate API latency
   await new Promise((r) => setTimeout(r, 200))
-  return {
+  const mock: Story = {
     id,
     title: "Master Weaver Maria's Journey",
     content: 'Discover how Maria preserves 300-year-old weaving techniques...',
@@ -33,7 +37,15 @@ async function fetchStory(id: number): Promise<Story> {
         <p>Her workshop, nestled in a traditional Ifugao house overlooking the famous Banaue rice terraces, has become a pilgrimage site for young people eager to learn traditional weaving techniques. Maria teaches not just the technical aspects of the craft, but also the cultural significance, the proper prayers to say while working, and the respect that must be shown to the materials and the process.</p>
       `,
     tags: ['Traditional Craft', 'Master Weaver', 'Cultural Heritage', 'Bontoc', 'Ikat Weaving'],
+    // Add placeholders; once real links are provided, populate sourceUrl and (optionally) sourceText
+    sourceUrl: undefined,
+    sourceText: undefined,
   }
+  // Prefer referenced text if present
+  if (mock.sourceText) {
+    mock.fullContent = mock.sourceText
+  }
+  return mock
 }
 
 export function useStory(id?: string) {

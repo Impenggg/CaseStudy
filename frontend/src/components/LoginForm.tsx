@@ -8,10 +8,9 @@ const LoginForm = () => {
     password: ''
   });
   const [error, setError] = React.useState('');
-  const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, isLoading } = useAuth();
 
   const fromState = (location.state as any)?.from?.pathname
   const intended = sessionStorage.getItem('intended_path') || undefined
@@ -31,8 +30,6 @@ const LoginForm = () => {
       return;
     }
 
-    setIsLoading(true);
-
     try {
       const success = await login(formData.email, formData.password);
       if (success) {
@@ -44,8 +41,6 @@ const LoginForm = () => {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed. Please try again.');
-    } finally {
-      setIsLoading(false);
     }
   };
 

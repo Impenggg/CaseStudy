@@ -10,10 +10,9 @@ const RegisterForm = () => {
     confirmPassword: ''
   });
   const [error, setError] = React.useState('');
-  const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { register } = useAuth();
+  const { register, isLoading } = useAuth();
 
   // Form validation
   const validateForm = () => {
@@ -53,8 +52,6 @@ const RegisterForm = () => {
       return;
     }
 
-    setIsLoading(true);
-
     try {
       const success = await register(formData.email, formData.password, formData.name);
       if (success) {
@@ -66,8 +63,6 @@ const RegisterForm = () => {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
-    } finally {
-      setIsLoading(false);
     }
   };
 

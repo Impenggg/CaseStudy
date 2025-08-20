@@ -53,9 +53,22 @@ const StoryDetailPage: React.FC = () => {
           <article className="prose prose-lg max-w-none">
             <div 
               className="text-cordillera-olive leading-relaxed space-y-6"
-              dangerouslySetInnerHTML={{ __html: story.fullContent }}
+              dangerouslySetInnerHTML={{ __html: story.sourceText ?? story.fullContent }}
             />
           </article>
+
+          {story.sourceUrl && (
+            <div className="mt-6 text-sm">
+              <a
+                href={story.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-cordillera-olive underline hover:text-cordillera-gold"
+              >
+                Source: {story.sourceUrl}
+              </a>
+            </div>
+          )}
 
           {/* Tags */}
           <div className="mt-12 pt-8 border-t border-cordillera-sage">

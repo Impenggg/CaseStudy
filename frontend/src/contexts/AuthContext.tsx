@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import axios from 'axios'
 import type { User } from '@/types'
+import LoadingOverlay from '@/components/LoadingOverlay'
 
 interface AuthContextType {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean
+  loadingMessage?: string
   login: (email: string, password: string) => Promise<boolean>
   logout: () => Promise<void>
   register: (email: string, password: string, name: string, role?: string) => Promise<boolean>
@@ -32,6 +34,7 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [loadingMessage, setLoadingMessage] = useState<string | undefined>('Checking session...')
 
   // Attach bearer token if present
   useEffect(() => {
@@ -49,6 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const init = async () => {
       try {
+        setLoadingMessage('Checking session...')
         const token = localStorage.getItem('auth_token')
         if (token) {
           // Always verify token and refresh user on init
@@ -62,6 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(null)
       } finally {
         setIsLoading(false)
+        setLoadingMessage(undefined)
       }
     }
     init()
@@ -70,6 +75,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setIsLoading(true)
+      setLoadingMessage('Signing you in...')
       const { data } = await axios.post('/login', { email, password })
       if (data.status === 'success') {
         const { user, token } = data.data
@@ -79,18 +85,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return true
       }
       return false
-      
     } catch (error) {
       console.error('Login failed:', error)
       throw error
     } finally {
       setIsLoading(false)
+      setLoadingMessage(undefined)
     }
   }
 
   const register = async (email: string, password: string, name: string, role: string = 'buyer'): Promise<boolean> => {
     try {
       setIsLoading(true)
+      setLoadingMessage('Creating your account...')
       const { data } = await axios.post('/register', { email, password, name, role })
       if (data.status === 'success') {
         const { user, token } = data.data
@@ -100,12 +107,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return true
       }
       return false
-      
     } catch (error) {
       console.error('Registration failed:', error)
       throw error
     } finally {
       setIsLoading(false)
+      setLoadingMessage(undefined)
     }
   }
 
@@ -149,6 +156,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     isAuthenticated: !!user,
     isLoading,
+    loadingMessage,
     login,
     logout,
     register,
@@ -158,7 +166,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   return (
     <AuthContext.Provider value={value}>
-      {!isLoading && children}
+      {children}
+      <LoadingOverlay show={isLoading} message={loadingMessage} />
     </AuthContext.Provider>
   )
 }
