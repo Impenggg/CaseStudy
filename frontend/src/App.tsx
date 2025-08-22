@@ -22,6 +22,10 @@ const SupportsPage = lazy(() => import('./pages/SupportsPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
 const ProductCreatePage = lazy(() => import('./pages/ProductCreatePage'));
+const MyProductsPage = lazy(() => import('./pages/MyProductsPage'));
+const ProductEditPage = lazy(() => import('./pages/ProductEditPage'));
+const MyStoriesPage = lazy(() => import('./pages/MyStoriesPage'));
+const MyCampaignsPage = lazy(() => import('./pages/MyCampaignsPage'));
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
 
@@ -171,6 +175,50 @@ const App: React.FC = () => {
               <Layout>
                 <RoleProtectedRoute allowed={['artisan', 'admin']}>
                   <ProductCreatePage />
+                </RoleProtectedRoute>
+              </Layout>
+            }
+          />
+
+          <Route
+            path="/my-products"
+            element={
+              <Layout>
+                <RoleProtectedRoute allowed={['artisan', 'admin']}>
+                  <MyProductsPage />
+                </RoleProtectedRoute>
+              </Layout>
+            }
+          />
+
+          <Route
+            path="/products/:id/edit"
+            element={
+              <Layout>
+                <RoleProtectedRoute allowed={['artisan', 'admin']}>
+                  <ProductEditPage />
+                </RoleProtectedRoute>
+              </Layout>
+            }
+          />
+
+          <Route
+            path="/my-stories"
+            element={
+              <Layout>
+                <RoleProtectedRoute allowed={['artisan', 'admin']}>
+                  <MyStoriesPage />
+                </RoleProtectedRoute>
+              </Layout>
+            }
+          />
+
+          <Route
+            path="/my-campaigns"
+            element={
+              <Layout>
+                <RoleProtectedRoute allowed={['artisan', 'admin']}>
+                  <MyCampaignsPage />
                 </RoleProtectedRoute>
               </Layout>
             }

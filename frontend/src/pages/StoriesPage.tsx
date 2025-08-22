@@ -263,6 +263,46 @@ const StoriesPage: React.FC = () => {
               <span className="text-sm font-medium">Heritage Preservation</span>
             </div>
           </div>
+          {user && (
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to="/submit-story"
+                className="inline-flex items-center px-6 py-3 rounded-lg bg-cordillera-gold text-cordillera-olive font-semibold hover:bg-cordillera-gold/90 shadow-md transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Submit Story
+              </Link>
+              <Link
+                to="/create-campaign"
+                className="inline-flex items-center px-6 py-3 rounded-lg bg-cordillera-gold text-cordillera-olive font-semibold hover:bg-cordillera-gold/90 shadow-md transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Create Campaign
+              </Link>
+              <Link
+                to="/my-stories"
+                className="inline-flex items-center px-6 py-3 rounded-lg border border-cordillera-cream/40 text-cordillera-cream hover:bg-white/10 font-semibold transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" />
+                </svg>
+                My Stories
+              </Link>
+              <Link
+                to="/my-campaigns"
+                className="inline-flex items-center px-6 py-3 rounded-lg border border-cordillera-cream/40 text-cordillera-cream hover:bg-white/10 font-semibold transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6a2 2 0 012-2h8" />
+                </svg>
+                My Campaigns
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
@@ -273,22 +313,14 @@ const StoriesPage: React.FC = () => {
             {regularContent.map((item) => (
               <div key={`${item.type}-${item.id}`} className="group block bg-white shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden rounded-lg border border-cordillera-sage/20 h-full">
                 {item.type === 'story' ? (
-                  // Story Card
+                  // Story Card (no image preview)
                   <Link to={`/story/${item.id}`} className="block h-full">
-                    <div className="aspect-video overflow-hidden relative">
-                      <img
-                        src={(item as Story).media_url}
-                        alt={item.title}
-                        loading="lazy"
-                        decoding="async"
-                        onError={(e) => { (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG; }}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                      <div className="absolute top-4 left-4 bg-cordillera-olive/90 text-cordillera-cream px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur-sm rounded">
+                    <div className="px-6 pt-6">
+                      <span className="inline-block bg-cordillera-olive/90 text-cordillera-cream px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded">
                         Story
-                      </div>
+                      </span>
                     </div>
-                    <div className="p-6 flex flex-col h-full">
+                    <div className="p-6 pt-4 flex flex-col h-full">
                       <span className="text-cordillera-gold text-[11px] font-medium uppercase tracking-wider">
                         {item.category}
                       </span>
@@ -307,22 +339,14 @@ const StoriesPage: React.FC = () => {
                     </div>
                   </Link>
                 ) : (
-                  // Campaign Card
+                  // Campaign Card (no image preview)
                   <div className="flex flex-col h-full">
-                    <div className="aspect-video overflow-hidden relative">
-                      <img
-                        src={(item as Campaign).image}
-                        alt={item.title}
-                        loading="lazy"
-                        decoding="async"
-                        onError={(e) => { (e.currentTarget as HTMLImageElement).src = FALLBACK_IMG; }}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                      <div className="absolute top-4 left-4 bg-cordillera-gold/90 text-cordillera-olive px-3 py-1 text-xs font-semibold uppercase tracking-wider backdrop-blur-sm rounded">
+                    <div className="px-6 pt-6">
+                      <span className="inline-block bg-cordillera-gold/90 text-cordillera-olive px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded">
                         Campaign
-                      </div>
+                      </span>
                     </div>
-                    <div className="p-6 flex flex-col h-full">
+                    <div className="p-6 pt-4 flex flex-col h-full">
                       <span className="text-cordillera-gold text-[11px] font-medium uppercase tracking-wider">
                         {item.category}
                       </span>

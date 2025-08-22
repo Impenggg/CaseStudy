@@ -246,19 +246,16 @@ const CampaignDetailPage: React.FC = () => {
         </div>
       </div>
 
-             {/* Campaign Header */}
-       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="aspect-[3/1] relative">
-            <img
-              src={campaign.image}
-              alt={campaign.title}
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent"></div>
+             {/* Campaign Header (no image) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div className="px-6 py-4">
+            <span className="inline-block bg-cordillera-gold/90 text-cordillera-olive px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded">
+              Campaign
+            </span>
           </div>
         </div>
-       </div>
+      </div>
 
       {/* Campaign Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

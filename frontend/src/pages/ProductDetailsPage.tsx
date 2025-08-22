@@ -15,7 +15,7 @@ export const ProductDetailsPage: React.FC = () => {
   const [selectedImage, setSelectedImage] = React.useState(0);
   const [quantity, setQuantity] = React.useState(1);
   const { toast, showToast, hideToast } = useToast();
-  const { isAuthenticated, requireAuth } = useAuth();
+  const { isAuthenticated, requireAuth, user } = useAuth();
 
   // Cart state synced with localStorage (shared with Marketplace)
   type CartItem = { id: number; name: string; price: number; image: string; quantity: number; stock?: number };
@@ -55,6 +55,12 @@ export const ProductDetailsPage: React.FC = () => {
 
   const addToCart = () => {
     if (!product) return;
+    // Block artisans and admins from adding to cart
+    const role = user && (user as any).role;
+    if (role === 'artisan' || role === 'admin') {
+      showToast('This account type cannot add items to the cart.', 'error');
+      return;
+    }
     try {
       const key = 'marketplace_cart';
       const raw = localStorage.getItem(key);
@@ -294,8 +300,13 @@ export const ProductDetailsPage: React.FC = () => {
 
               <Button 
                 size="lg" 
-                className={`w-full bg-yellow-500 text-green-900 hover:bg-yellow-400 ${typeof product.stock_quantity === 'number' && product.stock_quantity === 0 ? 'opacity-50 cursor-not-allowed hover:bg-yellow-500' : ''}`}
-                disabled={typeof product.stock_quantity === 'number' && product.stock_quantity === 0}
+                title={(typeof product.stock_quantity === 'number' && product.stock_quantity === 0)
+                  ? 'Out of stock'
+                  : ((user && ((user as any).role === 'artisan' || (user as any).role === 'admin'))
+                    ? 'This account type cannot add items to the cart.'
+                    : undefined)}
+                className={`w-full bg-yellow-500 text-green-900 hover:bg-yellow-400 ${((typeof product.stock_quantity === 'number' && product.stock_quantity === 0) || Boolean(user && (((user as any).role === 'artisan') || ((user as any).role === 'admin')))) ? 'opacity-50 cursor-not-allowed hover:bg-yellow-500' : ''}`}
+                disabled={(typeof product.stock_quantity === 'number' && product.stock_quantity === 0) || Boolean(user && (((user as any).role === 'artisan') || ((user as any).role === 'admin')))}
                 onClick={addToCart}
               >
                 Add to Cart - ₱{(product.price * quantity).toLocaleString()}

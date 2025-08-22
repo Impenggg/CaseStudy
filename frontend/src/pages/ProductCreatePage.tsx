@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BackLink from '@/components/BackLink';
 import { productsAPI } from '@/services/api';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -16,10 +17,6 @@ const ProductCreatePage: React.FC = () => {
     materials: '', // comma-separated
     care_instructions: '',
     stock_quantity: '0',
-    length: '',
-    width: '',
-    height: '',
-    weight: '',
     tags: '', // comma-separated
     featured: false,
   });
@@ -69,12 +66,6 @@ const ProductCreatePage: React.FC = () => {
         .map(s => s.trim())
         .filter(Boolean);
 
-      const dimensions: Record<string, number> = {};
-      if (form.length) dimensions.length = Number(form.length);
-      if (form.width) dimensions.width = Number(form.width);
-      if (form.height) dimensions.height = Number(form.height);
-      if (form.weight) dimensions.weight = Number(form.weight);
-
       const created = await productsAPI.createWithImage({
         name: form.name.trim(),
         price: Number(form.price),
@@ -84,7 +75,6 @@ const ProductCreatePage: React.FC = () => {
         materials,
         care_instructions: form.care_instructions.trim(),
         stock_quantity: Number(form.stock_quantity),
-        dimensions: Object.keys(dimensions).length ? dimensions : undefined,
         tags: tags.length ? tags : undefined,
         featured: !!form.featured,
         image,
@@ -107,6 +97,9 @@ const ProductCreatePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-cordillera-olive text-cordillera-cream py-10">
       <div className="max-w-3xl mx-auto bg-cordillera-olive/40 border border-cordillera-cream/20 p-6">
+        <div className="mb-4">
+          <BackLink to="/my-products" variant="dark">Back to My Products</BackLink>
+        </div>
         <h1 className="text-3xl font-serif mb-6">Create Product</h1>
         {user?.role && (
           <p className="text-sm text-cordillera-cream/70 mb-4">Signed in as: <span className="font-medium">{user.role}</span></p>
@@ -149,15 +142,7 @@ const ProductCreatePage: React.FC = () => {
             <label className="block mb-1">Care Instructions</label>
             <textarea name="care_instructions" value={form.care_instructions} onChange={onChange} rows={3} className="w-full p-2 bg-cordillera-cream text-cordillera-olive" />
           </div>
-          <div>
-            <label className="block mb-1">Dimensions (optional)</label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <input placeholder="Length" name="length" value={form.length} onChange={onChange} className="p-2 bg-cordillera-cream text-cordillera-olive" />
-              <input placeholder="Width" name="width" value={form.width} onChange={onChange} className="p-2 bg-cordillera-cream text-cordillera-olive" />
-              <input placeholder="Height" name="height" value={form.height} onChange={onChange} className="p-2 bg-cordillera-cream text-cordillera-olive" />
-              <input placeholder="Weight" name="weight" value={form.weight} onChange={onChange} className="p-2 bg-cordillera-cream text-cordillera-olive" />
-            </div>
-          </div>
+          {/* Dimensions removed by request */}
           <div>
             <label className="block mb-1">Tags (comma-separated)</label>
             <input name="tags" value={form.tags} onChange={onChange} className="w-full p-2 bg-cordillera-cream text-cordillera-olive" />

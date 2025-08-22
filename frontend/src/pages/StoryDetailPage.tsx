@@ -134,11 +134,9 @@ const StoryDetailPage: React.FC = () => {
           {/* Author Bio */}
           <div className="mt-12 p-8 bg-cordillera-sage">
             <div className="flex items-start space-x-6">
-              <img
-                src="https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?w=100&h=100&fit=crop&crop=face"
-                alt={story.author}
-                className="w-20 h-20 rounded-full object-cover"
-              />
+              <div className="w-20 h-20 rounded-full bg-cordillera-olive/20 flex items-center justify-center text-cordillera-olive font-semibold">
+                <span className="text-lg">{(story.author || 'A').slice(0,1).toUpperCase()}</span>
+              </div>
               <div>
                 <h3 className="text-xl font-serif text-cordillera-olive mb-2">{story.author}</h3>
                 <p className="text-cordillera-olive/70 leading-relaxed">

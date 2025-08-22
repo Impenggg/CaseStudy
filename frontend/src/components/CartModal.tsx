@@ -17,6 +17,14 @@ interface CartModalProps {
   onDecrement: (id: number) => void;
   onRemove: (id: number) => void;
   onCheckout: () => void;
+  // Optional: disable checkout action (e.g., for artisan users)
+  disableCheckout?: boolean;
+  // Optional: reason to display when checkout is disabled
+  disabledReason?: string;
+  // Optional: disable increasing quantity (treat as adding)
+  disableIncrease?: boolean;
+  // Optional: reason to display when increase is disabled
+  disableIncreaseReason?: string;
 }
 
 const CartModal: React.FC<CartModalProps> = ({
@@ -26,7 +34,11 @@ const CartModal: React.FC<CartModalProps> = ({
   onIncrement,
   onDecrement,
   onRemove,
-  onCheckout
+  onCheckout,
+  disableCheckout = false,
+  disabledReason,
+  disableIncrease = false,
+  disableIncreaseReason
 }) => {
   const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = cartItems.reduce((total, item) => total + (item.price * item.quantity), 0);
@@ -133,9 +145,19 @@ const CartModal: React.FC<CartModalProps> = ({
                           </span>
                           <button 
                             onClick={() => onIncrement(item.id)} 
-                            disabled={typeof item.stock === 'number' && item.quantity >= item.stock}
-                            title={typeof item.stock === 'number' && item.quantity >= item.stock ? 'Reached available stock' : undefined}
-                            className={`px-3 py-1 bg-cordillera-sage/10 hover:bg-cordillera-sage/20 transition-colors text-cordillera-olive font-bold ${typeof item.stock === 'number' && item.quantity >= item.stock ? 'opacity-50 cursor-not-allowed hover:bg-cordillera-sage/10' : ''}`}
+                            disabled={disableIncrease || (typeof item.stock === 'number' && item.quantity >= item.stock)}
+                            title={
+                              disableIncrease
+                                ? (disableIncreaseReason || 'Quantity increase is disabled')
+                                : (typeof item.stock === 'number' && item.quantity >= item.stock)
+                                  ? 'Reached available stock'
+                                  : undefined
+                            }
+                            className={`px-3 py-1 bg-cordillera-sage/10 hover:bg-cordillera-sage/20 transition-colors text-cordillera-olive font-bold ${
+                              disableIncrease || (typeof item.stock === 'number' && item.quantity >= item.stock)
+                                ? 'opacity-50 cursor-not-allowed hover:bg-cordillera-sage/10'
+                                : ''
+                            }`}
                           >
                             +
                           </button>
@@ -167,6 +189,11 @@ const CartModal: React.FC<CartModalProps> = ({
                   <span>Total ({cartCount} items)</span>
                   <span className="text-2xl text-cordillera-gold">₱{cartTotal.toLocaleString()}</span>
                 </div>
+                {disableCheckout && (
+                  <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3" role="note">
+                    {disabledReason || 'Checkout is disabled for your account.'}
+                  </div>
+                )}
                 <div className="flex gap-3">
                   <button 
                     onClick={onClose}
@@ -176,7 +203,11 @@ const CartModal: React.FC<CartModalProps> = ({
                   </button>
                   <button 
                     onClick={onCheckout}
-                    className="flex-1 bg-cordillera-gold text-cordillera-olive px-6 py-3 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    disabled={disableCheckout}
+                    title={disableCheckout ? (disabledReason || 'Checkout disabled') : undefined}
+                    className={`flex-1 px-6 py-3 rounded-lg font-medium transition-colors shadow-lg transform ${disableCheckout 
+                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                      : 'bg-cordillera-gold text-cordillera-olive hover:bg-cordillera-gold/90 hover:shadow-xl hover:-translate-y-0.5'}`}
                   >
                     Proceed to Checkout
                   </button>
@@ -191,3 +222,4 @@ const CartModal: React.FC<CartModalProps> = ({
 };
 
 export default CartModal;
+

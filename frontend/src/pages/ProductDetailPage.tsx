@@ -24,7 +24,7 @@ interface Product {
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated, requireAuth } = useAuth();
+  const { isAuthenticated, requireAuth, user } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState('story');
 
@@ -109,6 +109,12 @@ const ProductDetailPage: React.FC = () => {
 
   const addToCart = (qty: number = 1) => {
     if (!product) return;
+    // Block artisans and admins from adding to cart
+    const role = user && (user as any).role;
+    if (role === 'artisan' || role === 'admin') {
+      triggerAction('Restricted role attempted to add to cart on ProductDetailPage');
+      return;
+    }
     try {
       const key = 'marketplace_cart';
       const raw = localStorage.getItem(key);
@@ -286,7 +292,16 @@ const ProductDetailPage: React.FC = () => {
                 </div>
               )}
 
-              <button onClick={() => addToCart(1)} disabled={typeof product.stockQuantity === 'number' && product.stockQuantity === 0} title={typeof product.stockQuantity === 'number' && product.stockQuantity === 0 ? 'Out of stock' : undefined} className={`w-full bg-cordillera-gold text-cordillera-olive py-4 text-lg font-medium hover:bg-cordillera-olive hover:text-cordillera-cream transition-all duration-200 tracking-wide ${typeof product.stockQuantity === 'number' && product.stockQuantity === 0 ? 'opacity-50 cursor-not-allowed hover:bg-cordillera-gold' : ''}`}>
+              <button
+                onClick={() => addToCart(1)}
+                disabled={(typeof product.stockQuantity === 'number' && product.stockQuantity === 0) || Boolean(user && ((user as any).role === 'artisan' || (user as any).role === 'admin'))}
+                title={(typeof product.stockQuantity === 'number' && product.stockQuantity === 0)
+                  ? 'Out of stock'
+                  : (user && ((user as any).role === 'artisan' || (user as any).role === 'admin'))
+                    ? 'This account type cannot add items to the cart.'
+                    : undefined}
+                className={`w-full bg-cordillera-gold text-cordillera-olive py-4 text-lg font-medium hover:bg-cordillera-olive hover:text-cordillera-cream transition-all duration-200 tracking-wide ${((typeof product.stockQuantity === 'number' && product.stockQuantity === 0) || Boolean(user && ((user as any).role === 'artisan' || (user as any).role === 'admin'))) ? 'opacity-50 cursor-not-allowed hover:bg-cordillera-gold' : ''}`}
+              >
                 Add to Cart
               </button>
             </div>
