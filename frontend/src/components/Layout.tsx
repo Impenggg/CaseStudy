@@ -12,6 +12,27 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isAccountOpen, setIsAccountOpen] = React.useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const accountRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Close account dropdown on outside click or Escape
+  React.useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (!isAccountOpen) return;
+      const target = e.target as Node | null;
+      if (accountRef.current && target && !accountRef.current.contains(target)) {
+        setIsAccountOpen(false);
+      }
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsAccountOpen(false);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isAccountOpen]);
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -75,7 +96,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="hidden md:flex items-center space-x-4">
               {/* Auth controls */}
               {isAuthenticated ? (
-                <div className="relative">
+                <div className="relative" ref={accountRef}>
                   <button
                     onClick={() => setIsAccountOpen(v => !v)}
                     className="ml-2 inline-flex items-center px-3 py-1.5 rounded-full bg-cordillera-cream/10 text-cordillera-cream hover:bg-cordillera-cream/20 transition-colors"
@@ -96,8 +117,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       </div>
                       <div className="py-1">
                         <Link to="/account" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Account Information</Link>
-                        <Link to="/orders" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Orders & History</Link>
-                        <Link to="/supports" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Support Fundraising History</Link>
+                        <Link to="/my-products" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">My Products</Link>
+                        <Link to="/my-stories" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">My Stories</Link>
+                        <Link to="/my-campaigns" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">My Campaigns</Link>
                         <Link to="/media-creation" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Media Uploads</Link>
                         <button
                           onClick={async () => {
@@ -176,8 +198,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <>
                   <div className="px-3 pt-3 text-cordillera-cream/70 text-xs">Account</div>
                   <Link to="/account" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Account Information</Link>
-                  <Link to="/orders" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Orders & History</Link>
-                  <Link to="/supports" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Support History</Link>
+                  <Link to="/my-products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">My Products</Link>
+                  <Link to="/my-stories" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">My Stories</Link>
+                  <Link to="/my-campaigns" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">My Campaigns</Link>
                   <Link to="/media-creation" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Media Uploads</Link>
                   <button
                     onClick={async () => { setIsMobileMenuOpen(false); await logout(); navigate('/'); }}

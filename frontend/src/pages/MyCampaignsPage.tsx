@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { campaignsAPI } from '@/services/api'
 import type { Campaign } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
@@ -77,7 +78,17 @@ const MyCampaignsPage: React.FC = () => {
         <BackLink to="/stories" variant="light" className="mb-4">Back to Stories & Campaigns</BackLink>
       </div>
       <div className="px-4 pb-4 max-w-6xl mx-auto">
-        <h1 className="text-2xl font-serif text-cordillera-cream">My Campaigns</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-serif text-cordillera-cream">My Campaigns</h1>
+          {canManage && (
+            <Link
+              to="/create-campaign"
+              className="bg-cordillera-gold text-cordillera-olive px-4 py-2 rounded hover:bg-cordillera-gold/90"
+            >
+              Create Campaign
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="px-4 pb-10 max-w-6xl mx-auto">

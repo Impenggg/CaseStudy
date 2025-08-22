@@ -12,8 +12,7 @@ const CampaignCreationPage: React.FC = () => {
     email: '',
     phone: '',
     goalAmount: '',
-    endDate: '',
-    imageUrl: ''
+    endDate: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -44,8 +43,7 @@ const CampaignCreationPage: React.FC = () => {
         email: '',
         phone: '',
         goalAmount: '',
-        endDate: '',
-        imageUrl: ''
+        endDate: ''
       });
     }, 2000);
   };
@@ -240,7 +238,7 @@ const CampaignCreationPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-1 gap-6">
               <div>
                 <label className="block text-sm font-medium text-cordillera-olive mb-2">
                   End Date *
@@ -255,20 +253,6 @@ const CampaignCreationPage: React.FC = () => {
                   className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
                 />
               </div>
-
-              <div>
-                <label className="block text-sm font-medium text-cordillera-olive mb-2">
-                  Campaign Image URL (Optional)
-                </label>
-                <input
-                  type="url"
-                  name="imageUrl"
-                  value={formData.imageUrl}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
             </div>
 
             <div className="bg-cordillera-sage/20 rounded-lg p-6">
@@ -277,7 +261,6 @@ const CampaignCreationPage: React.FC = () => {
                 <li>• Campaigns must support Cordillera weaving heritage preservation</li>
                 <li>• Provide clear goals and how funds will be used</li>
                 <li>• Set realistic funding goals and timelines</li>
-                <li>• Include high-quality images that represent your project</li>
                 <li>• We'll review your campaign and may request additional information</li>
                 <li>• Campaigns typically run for 30-90 days</li>
               </ul>

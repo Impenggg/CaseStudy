@@ -10,7 +10,6 @@ const StorySubmissionPage: React.FC = () => {
     category: '',
     author: '',
     email: '',
-    mediaUrl: '',
     readTime: 5
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -40,7 +39,6 @@ const StorySubmissionPage: React.FC = () => {
         category: '',
         author: '',
         email: '',
-        mediaUrl: '',
         readTime: 5
       });
     }, 2000);
@@ -203,21 +201,7 @@ const StorySubmissionPage: React.FC = () => {
               />
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-cordillera-olive mb-2">
-                  Image URL (Optional)
-                </label>
-                <input
-                  type="url"
-                  name="mediaUrl"
-                  value={formData.mediaUrl}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
-
+            <div className="grid md:grid-cols-1 gap-6">
               <div>
                 <label className="block text-sm font-medium text-cordillera-olive mb-2">
                   Estimated Read Time (minutes)
@@ -240,7 +224,6 @@ const StorySubmissionPage: React.FC = () => {
                 <li>• Stories should be authentic and related to Cordillera weaving heritage</li>
                 <li>• Include personal experiences, techniques, or cultural insights</li>
                 <li>• Respect cultural traditions and community values</li>
-                <li>• Images should be high-quality and relevant to your story</li>
                 <li>• We'll review your submission and may contact you for additional details</li>
               </ul>
             </div>

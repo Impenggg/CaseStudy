@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { storiesAPI } from '@/services/api'
 import type { Story } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
@@ -77,7 +78,17 @@ const MyStoriesPage: React.FC = () => {
         <BackLink to="/stories" variant="light" className="mb-4">Back to Stories</BackLink>
       </div>
       <div className="px-4 pb-4 max-w-6xl mx-auto">
-        <h1 className="text-2xl font-serif text-cordillera-cream">My Stories</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-serif text-cordillera-cream">My Stories</h1>
+          {canManage && (
+            <Link
+              to="/submit-story"
+              className="bg-cordillera-gold text-cordillera-olive px-4 py-2 rounded hover:bg-cordillera-gold/90"
+            >
+              Submit Story
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="px-4 pb-10 max-w-6xl mx-auto">
