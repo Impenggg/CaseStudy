@@ -30,6 +30,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true)
   const [loadingMessage, setLoadingMessage] = useState<string | undefined>('Checking session...')
 
+  // Normalize backend roles to frontend: 'weaver' -> 'artisan'
+  const normalizeRole = (role?: string): string | undefined => {
+    if (!role) return role
+    const r = role.toLowerCase()
+    if (r === 'weaver') return 'artisan'
+    if (r === 'customer') return 'buyer'
+    return r
+  }
+
+  const normalizeUser = (u: any): User => ({ ...u, role: normalizeRole(u?.role) as any })
+
   useEffect(() => {
     const init = async () => {
       try {
@@ -38,8 +49,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (token) {
           // Always verify token and refresh user on init
           const { data } = await api.get('/user')
-          setUser(data.data)
-          localStorage.setItem('user', JSON.stringify(data.data))
+          const u = normalizeUser(data.data)
+          setUser(u)
+          localStorage.setItem('user', JSON.stringify(u))
         }
       } catch (e) {
         localStorage.removeItem('auth_token')
@@ -60,9 +72,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const { data } = await api.post('/login', { email, password })
       if (data.status === 'success') {
         const { user, token } = data.data
+        const u = normalizeUser(user)
         localStorage.setItem('auth_token', token)
-        localStorage.setItem('user', JSON.stringify(user))
-        setUser(user)
+        localStorage.setItem('user', JSON.stringify(u))
+        setUser(u)
         return true
       }
       return false
@@ -79,18 +92,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setIsLoading(true)
       setLoadingMessage('Creating your account...')
-      const { data } = await api.post('/register', { email, password, name, role })
+      // Map frontend 'artisan' to backend 'weaver'
+      const backendRole = role?.toLowerCase() === 'artisan' ? 'weaver' : (role?.toLowerCase() || 'buyer')
+      const normalizedEmail = email.trim().toLowerCase().replace(/\s+/g, '').normalize('NFKC')
+      const normalizedName = name.trim().normalize('NFKC')
+      const payload: any = { email: normalizedEmail, password, name: normalizedName }
+      // Only include role if artisan (weaver). Buyers can rely on backend default
+      if (backendRole === 'weaver') payload.role = backendRole
+      if (import.meta.env.DEV) {
+        // Debug payload in development only (no password value)
+        const debugPayload = { ...payload, password: '***' }
+        console.debug('Register payload:', debugPayload)
+      }
+      const { data } = await api.post('/register', payload)
       if (data.status === 'success') {
         const { user, token } = data.data
+        const u = normalizeUser(user)
         localStorage.setItem('auth_token', token)
-        localStorage.setItem('user', JSON.stringify(user))
-        setUser(user)
+        localStorage.setItem('user', JSON.stringify(u))
+        setUser(u)
         return true
       }
       return false
-    } catch (error) {
-      console.error('Registration failed:', error)
-      throw error
+    } catch (error: any) {
+      // Surface helpful server validation or error messages
+      const resp = error?.response
+      const backendErrors = resp?.data?.errors
+      let message = resp?.data?.message || 'Registration failed. Please try again.'
+      if (backendErrors && typeof backendErrors === 'object') {
+        try {
+          const list = Object.values(backendErrors).flat() as string[]
+          if (list.length) message = list.join(' ')
+        } catch {}
+      }
+      console.error('Registration failed:', resp?.data || error)
+      throw new Error(message)
     } finally {
       setIsLoading(false)
       setLoadingMessage(undefined)
@@ -114,8 +150,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!token) return
     try {
       const { data } = await api.get('/user')
-      setUser(data.data)
-      localStorage.setItem('user', JSON.stringify(data.data))
+      const u = normalizeUser(data.data)
+      setUser(u)
+      localStorage.setItem('user', JSON.stringify(u))
     } catch (e) {
       localStorage.removeItem('auth_token')
       localStorage.removeItem('user')

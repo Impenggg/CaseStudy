@@ -21,7 +21,7 @@ interface Campaign {
 
 const CampaignDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { isAuthenticated, requireAuth } = useAuth();
+  const { isAuthenticated, requireAuth, user } = useAuth();
   const [campaign, setCampaign] = useState<Campaign | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [supportAmount, setSupportAmount] = useState(1000);
@@ -115,6 +115,11 @@ const CampaignDetailPage: React.FC = () => {
   };
 
   const handleSupport = () => {
+    // Block artisans from supporting campaigns
+    if (user && (user as any).role === 'artisan') {
+      triggerAction('Artisan accounts cannot support campaigns');
+      return;
+    }
     // Require auth before supporting a campaign
     if (!isAuthenticated) {
       if (id) sessionStorage.setItem('resume_support_campaign_id', id);
@@ -127,6 +132,11 @@ const CampaignDetailPage: React.FC = () => {
 
   const handleSupportSubmit = async () => {
     if (!id || !campaign) return;
+    // Safety: block artisans at submit time as well
+    if (user && (user as any).role === 'artisan') {
+      triggerAction('Artisan accounts cannot support campaigns');
+      return;
+    }
     if (supportAmount <= 0) return;
     setIsSubmitting(true);
     try {

@@ -3,7 +3,11 @@ import type { Product, Story, Campaign, User, Order, Donation } from '@/types';
 
 // Configure axios instance
 const DEFAULT_API = 'http://localhost:8000/api';
-const RESOLVED_BASE_URL = (import.meta as any)?.env?.VITE_API_BASE_URL || DEFAULT_API;
+let RESOLVED_BASE_URL = (import.meta as any)?.env?.VITE_API_BASE_URL || DEFAULT_API;
+// Guard against malformed base URLs like ':8000/api'
+if (typeof RESOLVED_BASE_URL === 'string' && RESOLVED_BASE_URL.trim().startsWith(':')) {
+  RESOLVED_BASE_URL = DEFAULT_API;
+}
 const api = axios.create({
   baseURL: RESOLVED_BASE_URL,
   headers: {
@@ -17,6 +21,11 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem('auth_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  if ((import.meta as any)?.env?.DEV && (config.url?.includes('/register') || config.url?.includes('/login'))) {
+    try {
+      console.debug('[API] Request:', { baseURL: config.baseURL, url: config.url, method: config.method, data: config.data });
+    } catch {}
   }
   return config;
 });
@@ -160,8 +169,43 @@ export const productsAPI = {
   },
 
   create: async (productData: Omit<Product, 'id' | 'user_id' | 'seller' | 'created_at' | 'updated_at'>) => {
+    // JSON-based creation (no file). Kept for backward compatibility.
     const response = await api.post('/products', productData);
     return response.data.data;
+  },
+
+  createWithImage: async (payload: {
+    name: string;
+    price: number;
+    category: string;
+    description: string;
+    cultural_background?: string;
+    materials: string[];
+    care_instructions: string;
+    stock_quantity: number;
+    dimensions?: Record<string, any>;
+    tags?: string[];
+    featured?: boolean;
+    image: File; // main image file
+  }) => {
+    const form = new FormData();
+    form.append('name', payload.name);
+    form.append('price', String(payload.price));
+    form.append('category', payload.category);
+    form.append('description', payload.description);
+    if (payload.cultural_background) form.append('cultural_background', payload.cultural_background);
+    payload.materials.forEach((m, i) => form.append(`materials[${i}]`, m));
+    form.append('care_instructions', payload.care_instructions);
+    form.append('stock_quantity', String(payload.stock_quantity));
+    if (payload.dimensions) form.append('dimensions', JSON.stringify(payload.dimensions));
+    if (payload.tags) payload.tags.forEach((t, i) => form.append(`tags[${i}]`, t));
+    if (typeof payload.featured === 'boolean') form.append('featured', String(payload.featured ? 1 : 0));
+    form.append('image', payload.image);
+
+    const response = await api.post('/products', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data.data as Product;
   },
 
   update: async (id: number, productData: Partial<Product>) => {

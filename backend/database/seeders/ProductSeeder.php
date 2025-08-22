@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class ProductSeeder extends Seeder
 {
@@ -25,6 +26,19 @@ class ProductSeeder extends Seeder
         // Curated Cordillera products for marketplace
         // If specific named weavers are not present, fall back to any weaver
         $weaverId = $defaultWeaver?->id;
+
+        // If still none, create a minimal default weaver so seeding doesn't fail
+        if (!$weaverId) {
+            $defaultWeaver = User::create([
+                'name' => 'Default Weaver',
+                'email' => 'weaver@example.com',
+                'password' => Hash::make('password'),
+                'role' => 'weaver',
+                'bio' => 'Auto-created weaver for product ownership during seeding.',
+                'location' => 'Cordillera',
+            ]);
+            $weaverId = $defaultWeaver->id;
+        }
 
         $curatedProducts = [
             [

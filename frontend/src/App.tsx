@@ -15,12 +15,15 @@ const CampaignCreationPage = lazy(() => import('./pages/CampaignCreationPage'));
 const MediaCreationPage = lazy(() => import('./pages/MediaCreationPage'));
 const MediaFeedPage = lazy(() => import('./pages/MediaFeedPage'));
 const AccountPage = lazy(() => import('./pages/AccountPage'));
+const UserDashboard = lazy(() => import('./pages/UserDashboard').then(m => ({ default: m.UserDashboard })));
 const OrdersPage = lazy(() => import('./pages/OrdersPage'));
 const OrderDetailPage = lazy(() => import('./pages/OrderDetailPage.tsx').then(m => ({ default: m.default })));
 const SupportsPage = lazy(() => import('./pages/SupportsPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
 const RegisterPage = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const ProductCreatePage = lazy(() => import('./pages/ProductCreatePage'));
 import ProtectedRoute from './components/ProtectedRoute';
+import RoleProtectedRoute from './components/RoleProtectedRoute';
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -162,6 +165,39 @@ const App: React.FC = () => {
               </Layout>
             }
           />
+          <Route
+            path="/create-product"
+            element={
+              <Layout>
+                <RoleProtectedRoute allowed={['artisan', 'admin']}>
+                  <ProductCreatePage />
+                </RoleProtectedRoute>
+              </Layout>
+            }
+          />
+
+          {/* Role-specific dashboards */}
+          <Route
+            path="/dashboard/artisan"
+            element={
+              <Layout>
+                <RoleProtectedRoute allowed={['artisan', 'admin']}>
+                  <UserDashboard />
+                </RoleProtectedRoute>
+              </Layout>
+            }
+          />
+          <Route
+            path="/dashboard/customer"
+            element={
+              <Layout>
+                <RoleProtectedRoute allowed={['buyer', 'admin']}>
+                  <UserDashboard />
+                </RoleProtectedRoute>
+              </Layout>
+            }
+          />
+
           <Route
             path="/supports"
             element={

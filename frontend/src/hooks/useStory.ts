@@ -1,4 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
+import { externalStories } from '@/data/storiesExternal'
+import { storiesAPI } from '@/services/api'
 
 export interface Story {
   id: number
@@ -16,36 +18,65 @@ export interface Story {
   sourceText?: string
 }
 
-// Temporary mocked fetch function. Replace with real API call later.
+// Fetch a story by ID, preferring local external dataset and falling back to backend API
 async function fetchStory(id: number): Promise<Story> {
-  // Simulate API latency
-  await new Promise((r) => setTimeout(r, 200))
-  const mock: Story = {
-    id,
-    title: "Master Weaver Maria's Journey",
-    content: 'Discover how Maria preserves 300-year-old weaving techniques...',
-    media_url: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1200',
-    author: 'Maria Santos',
-    date: 'December 15, 2024',
-    category: 'Artisan Profile',
-    fullContent: `
-        <p>In the misty mountains of Bontoc, where clouds kiss the rice terraces and ancient traditions flow like the mountain streams, Maria Santos sits at her traditional loom, her weathered hands moving with the precision of a master craftsperson who has dedicated over four decades to preserving the sacred art of Cordillera weaving.</p>
-        <p>Maria's story begins in 1965, when she was just eight years old. Her grandmother, Aling Rosa, first placed the wooden shuttle in her small hands and taught her the sacred patterns that have been passed down through generations of women in their family. "Each thread tells a story," Aling Rosa would say, "and each pattern holds the wisdom of our ancestors."</p>
-        <p>The traditional Ikat weaving technique that Maria practices is far more than a craft—it's a spiritual practice that connects her to the land, her ancestors, and the cosmic order that governs mountain life. The geometric patterns she weaves represent mountains, rivers, rice fields, and the eternal cycle of planting and harvest that has sustained her people for centuries.</p>
-        <p>Today, at 67, Maria has become one of the most respected master weavers in the region. Her works are not merely textiles but repositories of cultural memory, each piece carrying within its fibers the stories, beliefs, and artistic vision of the Cordillera people. Through her dedication, she ensures that these ancient techniques will not be lost to time.</p>
-        <p>"When I weave," Maria explains, her eyes twinkling with the wisdom of years, "I am not just creating cloth. I am continuing a conversation that began with my great-great-grandmothers, and I am ensuring that my granddaughters will have voices in that conversation too."</p>
-        <p>Her workshop, nestled in a traditional Ifugao house overlooking the famous Banaue rice terraces, has become a pilgrimage site for young people eager to learn traditional weaving techniques. Maria teaches not just the technical aspects of the craft, but also the cultural significance, the proper prayers to say while working, and the respect that must be shown to the materials and the process.</p>
-      `,
-    tags: ['Traditional Craft', 'Master Weaver', 'Cultural Heritage', 'Bontoc', 'Ikat Weaving'],
-    // Add placeholders; once real links are provided, populate sourceUrl and (optionally) sourceText
-    sourceUrl: undefined,
-    sourceText: undefined,
+  // 1) Try external dataset
+  const ext = externalStories.find((s) => s.id === id)
+  if (ext) {
+    const fullContent = ext.source_text ?? ext.content
+    return {
+      id: ext.id,
+      title: ext.title,
+      content: ext.excerpt || ext.content,
+      media_url: ext.media_url,
+      author: typeof ext.author === 'string' ? ext.author : (ext as any).author?.name || 'Unknown',
+      date: ext.created_at ? new Date(ext.created_at).toLocaleDateString() : '',
+      category: ext.category || 'community',
+      fullContent,
+      tags: ext.tags || [],
+      sourceUrl: ext.source_url,
+      sourceText: ext.source_text ?? undefined,
+    }
   }
-  // Prefer referenced text if present
-  if (mock.sourceText) {
-    mock.fullContent = mock.sourceText
+
+  // 2) Fallback to backend API
+  try {
+    const apiStory = await storiesAPI.getById(id as number)
+    const authorName = (apiStory as any)?.author?.name || (apiStory as any)?.author || 'Unknown'
+    const cover = (apiStory as any)?.media_url || ''
+    const created = (apiStory as any)?.created_at
+    const html = (apiStory as any)?.fullContent || (apiStory as any)?.content || ''
+    const tags: string[] = (apiStory as any)?.tags || []
+    const sourceUrl: string | undefined = (apiStory as any)?.source_url
+    const sourceText: string | undefined = (apiStory as any)?.source_text
+
+    return {
+      id: (apiStory as any).id ?? id,
+      title: (apiStory as any).title ?? 'Story',
+      content: (apiStory as any).excerpt || (apiStory as any).content || 'No content available.',
+      media_url: cover,
+      author: authorName,
+      date: created ? new Date(created).toLocaleDateString() : '',
+      category: (apiStory as any).category || 'community',
+      fullContent: (sourceText ?? html) || 'No content available.',
+      tags,
+      sourceUrl,
+      sourceText,
+    }
+  } catch (err) {
+    // Final safe fallback to avoid UI crash
+    return {
+      id,
+      title: 'Story',
+      content: 'No content available.',
+      media_url: '',
+      author: 'Unknown',
+      date: '',
+      category: 'community',
+      fullContent: 'No content available.',
+      tags: [],
+    }
   }
-  return mock
 }
 
 export function useStory(id?: string) {

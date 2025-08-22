@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { triggerAction } from '../lib/uiActions';
 import { useAuth } from '../contexts/AuthContext';
-import api, { uploadAPI } from '@/services/api';
+import api, { uploadAPI, mediaAPI } from '@/services/api';
 
 interface FeaturedCreation {
   id: number;
@@ -26,6 +26,9 @@ const MediaCreationPage: React.FC = () => {
   const [gallery, setGallery] = useState<Array<{ url: string; path: string; filename: string; size: number; mime_type: string; last_modified: number }>>([]);
   const [isLoadingGallery, setIsLoadingGallery] = useState(false);
   const [galleryError, setGalleryError] = useState<string | null>(null);
+  const [caption, setCaption] = useState('');
+  const maxCaption = 280;
+  const [isPosting, setIsPosting] = useState(false);
 
   // Load uploaded images gallery
   const loadGallery = async () => {
@@ -328,6 +331,62 @@ const MediaCreationPage: React.FC = () => {
             <h2 className="text-3xl font-serif text-cordillera-olive text-center">
               Upload Your Creation Here
             </h2>
+          </div>
+
+          {/* Composer: Caption + Post */}
+          <div className="max-w-5xl mx-auto mb-6">
+            <div className="bg-white rounded-lg shadow-sm border border-cordillera-sage/30 p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex-1">
+                  <textarea
+                    value={caption}
+                    onChange={(e) => setCaption(e.target.value.slice(0, maxCaption))}
+                    placeholder="Share something..."
+                    rows={3}
+                    className="w-full resize-none outline-none text-cordillera-olive placeholder-cordillera-olive/40 p-3 border border-cordillera-sage/40 focus:border-cordillera-gold"
+                  />
+                  <div className="flex justify-between items-center mt-2 text-xs text-cordillera-olive/60">
+                    <span>{caption.length}/{maxCaption}</span>
+                    {!selectedImage && <span className="text-cordillera-olive/60">Attach an image below to enable Post</span>}
+                  </div>
+                </div>
+                <button
+                  onClick={async () => {
+                    if (!selectedFile) return;
+                    if (!isAuthenticated) {
+                      requireAuth('/login');
+                      return;
+                    }
+                    try {
+                      setIsPosting(true);
+                      setSaveError(null);
+                      await mediaAPI.create({ file: selectedFile, caption: caption.trim() || undefined });
+                      triggerAction('Post Media');
+                      // reset state
+                      setCaption('');
+                      setSelectedFile(null);
+                      setSelectedImage(null);
+                      setUploadedUrl(null);
+                      // refresh gallery/feed
+                      loadGallery();
+                    } catch (err: any) {
+                      const status = err?.response?.status;
+                      const msg = err?.response?.data?.message || err?.message || 'Post failed';
+                      setSaveError(`${status ? status + ' - ' : ''}${msg}`);
+                    } finally {
+                      setIsPosting(false);
+                    }
+                  }}
+                  disabled={!selectedFile || isPosting}
+                  className={`ml-2 h-10 px-4 whitespace-nowrap ${!selectedFile || isPosting ? 'bg-cordillera-olive/30 text-white cursor-not-allowed' : 'bg-cordillera-gold text-cordillera-olive hover:bg-cordillera-gold/90'} transition`}
+                >
+                  {isPosting ? 'Posting…' : 'Post'}
+                </button>
+              </div>
+              {saveError && (
+                <div className="mt-2 text-sm text-red-700">{saveError}</div>
+              )}
+            </div>
           </div>
 
           {/* Enhanced Upload Area */}

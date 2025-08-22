@@ -76,7 +76,16 @@ class ProductController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        $request->validate([
+        // Only allow weavers (and admins if applicable) to create
+        $user = Auth::user();
+        if (!$user || !in_array($user->role, ['weaver', 'admin'])) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'category' => 'required|string|max:255',
@@ -85,7 +94,7 @@ class ProductController extends Controller
             'materials' => 'required|array',
             'materials.*' => 'string',
             'care_instructions' => 'required|string',
-            'image' => 'nullable|string',
+            'image' => 'nullable|file|image|mimes:jpg,jpeg,png,webp,jfif|max:4096',
             'stock_quantity' => 'required|integer|min:0',
             'dimensions' => 'nullable|array',
             'tags' => 'nullable|array',
@@ -93,10 +102,30 @@ class ProductController extends Controller
             'featured' => 'boolean',
         ]);
 
-        $product = Product::create([
-            ...$request->all(),
-            'user_id' => Auth::id(),
-        ]);
+        // Handle image upload if present
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $stored = $request->file('image')->store('products', 'public'); // products/<file>
+            $imagePath = 'storage/' . $stored; // storage/products/<file>
+        }
+
+        // Normalize complex fields for multipart
+        if (isset($validated['dimensions']) && is_string($validated['dimensions'])) {
+            $decoded = json_decode($validated['dimensions'], true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $validated['dimensions'] = $decoded;
+            } else {
+                unset($validated['dimensions']);
+            }
+        }
+
+        $product = Product::create(array_merge(
+            $validated,
+            [
+                'image' => $imagePath ?? ($request->string('image')->isNotEmpty() ? $request->string('image')->toString() : null),
+                'user_id' => $user->id,
+            ]
+        ));
 
         return response()->json([
             'status' => 'success',
@@ -121,15 +150,16 @@ class ProductController extends Controller
      */
     public function update(Request $request, Product $product): JsonResponse
     {
-        // Check if user owns the product
-        if ($product->user_id !== Auth::id()) {
+        // Check if user owns the product or is admin
+        $user = Auth::user();
+        if (!$user || ($product->user_id !== $user->id && $user->role !== 'admin')) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Unauthorized',
             ], 403);
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
             'price' => 'sometimes|numeric|min:0',
             'category' => 'sometimes|string|max:255',
@@ -138,7 +168,7 @@ class ProductController extends Controller
             'materials' => 'sometimes|array',
             'materials.*' => 'string',
             'care_instructions' => 'sometimes|string',
-            'image' => 'nullable|string',
+            'image' => 'nullable|file|image|mimes:jpg,jpeg,png,webp,jfif|max:4096',
             'stock_quantity' => 'sometimes|integer|min:0',
             'dimensions' => 'nullable|array',
             'tags' => 'nullable|array',
@@ -146,7 +176,24 @@ class ProductController extends Controller
             'featured' => 'boolean',
         ]);
 
-        $product->update($request->all());
+        $payload = $validated;
+        if (isset($payload['dimensions']) && is_string($payload['dimensions'])) {
+            $decoded = json_decode($payload['dimensions'], true);
+            if (json_last_error() === JSON_ERROR_NONE) {
+                $payload['dimensions'] = $decoded;
+            } else {
+                unset($payload['dimensions']);
+            }
+        }
+        if ($request->hasFile('image')) {
+            $stored = $request->file('image')->store('products', 'public');
+            $payload['image'] = 'storage/' . $stored;
+        } elseif ($request->has('image') && is_string($request->input('image'))) {
+            // allow direct string path update if provided
+            $payload['image'] = $request->input('image');
+        }
+
+        $product->update($payload);
 
         return response()->json([
             'status' => 'success',

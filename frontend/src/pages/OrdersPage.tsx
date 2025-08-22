@@ -95,7 +95,7 @@ const OrdersPage: React.FC = () => {
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <div className="font-medium">{o.product?.name || `Order #${o.id}`}</div>
+                      <div className="font-medium">{o.product?.name || `Order`}</div>
                       <div className="text-cordillera-gold">₱{Number(total).toLocaleString()}</div>
                     </div>
                     <div className="text-sm text-cordillera-cream/70 mt-1 flex items-center gap-2">

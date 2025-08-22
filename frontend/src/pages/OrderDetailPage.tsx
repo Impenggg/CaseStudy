@@ -82,14 +82,14 @@ const OrderDetailPage: React.FC = () => {
           <Link to="/orders" className="text-sm hover:underline">My Orders</Link>
           {id && (<>
             <span className="opacity-50">/</span>
-            <span className="text-sm">Order #{id}</span>
+            <span className="text-sm">Order</span>
           </>)}
         </div>
 
         <div className="bg-white rounded-xl shadow-sm p-6">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-serif text-cordillera-olive">Order #{id}</h1>
+              <h1 className="text-2xl font-serif text-cordillera-olive">Order</h1>
               {order?.created_at && (
                 <p className="text-sm text-cordillera-olive/70 mt-1">Placed on {new Date(order.created_at).toLocaleString()}</p>
               )}
@@ -139,7 +139,6 @@ const OrderDetailPage: React.FC = () => {
                 <div className="bg-cordillera-olive/5 rounded-lg p-4">
                   <h3 className="font-medium text-cordillera-olive mb-2">Order Info</h3>
                   <div className="space-y-1 text-sm text-cordillera-olive/80">
-                    <div>Order ID: {order.id}</div>
                     <div>Status: <span className={statusBadge(order.status)}>{order.status}</span></div>
                     {order.tracking_number && (
                       <div>Tracking #: {order.tracking_number}</div>
@@ -149,7 +148,6 @@ const OrderDetailPage: React.FC = () => {
                 <div className="bg-cordillera-olive/5 rounded-lg p-4">
                   <h3 className="font-medium text-cordillera-olive mb-2">Buyer</h3>
                   <div className="space-y-1 text-sm text-cordillera-olive/80">
-                    <div>ID: {order.buyer?.id ?? order.buyer_id}</div>
                     {order.buyer?.name && <div>Name: {order.buyer.name}</div>}
                     {order.buyer?.email && <div>Email: {order.buyer.email}</div>}
                   </div>

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { triggerAction } from '../lib/uiActions';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
 import BackLink from '@/components/BackLink';
+ 
 
 interface Product {
   id: number;
@@ -22,11 +23,10 @@ interface Product {
 
 const ProductDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { isAuthenticated, requireAuth } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
-  const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useState('story');
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
   // Local cart state (shared via localStorage with marketplace)
   interface CartItem { id: number; name: string; price: number; image: string; quantity: number; stock?: number }
@@ -65,6 +65,21 @@ const ProductDetailPage: React.FC = () => {
     setProduct(sampleProduct);
   }, []);
 
+  // Determine single image to display: prefer first of gallery, else main image
+  const displayImage: string | '' = React.useMemo(() => {
+    if (!product) return '';
+    const g = Array.isArray(product.gallery) ? product.gallery.filter(Boolean) : [];
+    if (g.length > 0) return g[0];
+    return product.image || '';
+  }, [product]);
+
+  // Ensure we always render a non-empty src with a graceful fallback
+  const fallbackImage = React.useMemo(() => `https://source.unsplash.com/800x800/?${encodeURIComponent(product?.category || 'handicraft')}`,[product?.category]);
+  const [imageSrc, setImageSrc] = React.useState<string>(displayImage || '');
+  useEffect(() => {
+    setImageSrc(displayImage || fallbackImage);
+  }, [displayImage, fallbackImage]);
+
   // Reconcile cart item with latest product stock when product loads/changes
   useEffect(() => {
     if (!product) return;
@@ -90,33 +105,7 @@ const ProductDetailPage: React.FC = () => {
     localStorage.setItem('marketplace_cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
-  // Auto-play carousel functionality
-  useEffect(() => {
-    if (!product || !isAutoPlaying) return;
-
-    const interval = setInterval(() => {
-      setSelectedImage((prev) => (prev + 1) % product.gallery.length);
-    }, 4000); // Change image every 4 seconds
-
-    return () => clearInterval(interval);
-  }, [product, isAutoPlaying]);
-
-  const nextImage = () => {
-    if (!product) return;
-    setSelectedImage((prev) => (prev + 1) % product.gallery.length);
-    setIsAutoPlaying(false); // Stop auto-play when user manually navigates
-  };
-
-  const prevImage = () => {
-    if (!product) return;
-    setSelectedImage((prev) => (prev - 1 + product.gallery.length) % product.gallery.length);
-    setIsAutoPlaying(false); // Stop auto-play when user manually navigates
-  };
-
-  const goToImage = (index: number) => {
-    setSelectedImage(index);
-    setIsAutoPlaying(false); // Stop auto-play when user selects
-  };
+  // No carousel behavior: static image only
 
   const addToCart = (qty: number = 1) => {
     if (!product) return;
@@ -187,13 +176,16 @@ const ProductDetailPage: React.FC = () => {
   const cartTotal = cartItems.reduce((sum, i) => sum + i.quantity * i.price, 0);
 
   const handleCheckout = () => {
+    // If not logged in, trigger auth and remember intent
     if (!isAuthenticated) {
       sessionStorage.setItem('resume_checkout', '1');
       requireAuth('/login');
       return;
     }
-    // In a full flow, you might navigate to a dedicated checkout page; for parity we can keep modal-driven flow.
-    triggerAction('Checkout initiated from Product Details');
+    // Close cart modal here and navigate to marketplace which owns the checkout modal
+    setIsCartOpen(false);
+    sessionStorage.setItem('resume_checkout', '1');
+    navigate('/marketplace');
   };
 
   if (!product) {
@@ -252,112 +244,15 @@ const ProductDetailPage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Left: Enhanced Slideshow Carousel */}
+          {/* Left: Static product image (no carousel) */}
           <div className="space-y-6">
-            {/* Main Carousel Container */}
-            <div className="relative aspect-square overflow-hidden border-2 border-cordillera-gold/30 bg-white shadow-lg group">
-              {/* Carousel Images */}
-              <div className="relative w-full h-full">
-                <img
-                  src={product.gallery[selectedImage]}
-                  alt={`${product.name} - Image ${selectedImage + 1}`}
-                  className="w-full h-full object-cover transition-all duration-500"
-                />
-                
-                {/* Gradient Overlays for Navigation */}
-                <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              </div>
-
-              {/* Navigation Arrows */}
-              <button
-                onClick={prevImage}
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-cordillera-olive/80 hover:bg-cordillera-olive text-cordillera-cream p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 backdrop-blur-sm"
-                aria-label="Previous image"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              
-              <button
-                onClick={nextImage}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-cordillera-olive/80 hover:bg-cordillera-olive text-cordillera-cream p-3 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 backdrop-blur-sm"
-                aria-label="Next image"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-
-              {/* Slide Indicators */}
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-                {product.gallery.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => goToImage(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                      selectedImage === index 
-                        ? 'bg-cordillera-gold scale-125' 
-                        : 'bg-cordillera-cream/60 hover:bg-cordillera-cream/80'
-                    }`}
-                    aria-label={`Go to image ${index + 1}`}
-                  />
-                ))}
-              </div>
-
-              {/* Image Counter */}
-              <div className="absolute top-4 right-4 bg-cordillera-olive/80 text-cordillera-cream px-3 py-1 rounded-full text-sm font-medium backdrop-blur-sm">
-                {selectedImage + 1} / {product.gallery.length}
-              </div>
-
-              {/* Auto-play Toggle */}
-              <button
-                onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-                className="absolute top-4 left-4 bg-cordillera-olive/80 hover:bg-cordillera-olive text-cordillera-cream p-2 rounded-full transition-all duration-300 backdrop-blur-sm"
-                aria-label={isAutoPlaying ? "Pause slideshow" : "Play slideshow"}
-                title={isAutoPlaying ? "Pause slideshow" : "Play slideshow"}
-              >
-                {isAutoPlaying ? (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6" />
-                  </svg>
-                ) : (
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h1m4 0h1M9 6h6" />
-                  </svg>
-                )}
-              </button>
-            </div>
-            
-            {/* Enhanced Thumbnail Gallery */}
-            <div className="flex space-x-3 overflow-x-auto pb-2">
-              {product.gallery.map((image, index) => (
-                <button
-                  key={index}
-                  onClick={() => goToImage(index)}
-                  className={`flex-shrink-0 w-20 h-20 overflow-hidden border-2 transition-all duration-300 hover:scale-105 ${
-                    selectedImage === index 
-                      ? 'border-cordillera-gold shadow-lg scale-105' 
-                      : 'border-cordillera-gold/30 hover:border-cordillera-gold/60'
-                  }`}
-                >
-                  <img
-                    src={image}
-                    alt={`${product.name} thumbnail ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
-            </div>
-
-            {/* Gallery Info */}
-            <div className="flex items-center justify-between text-sm text-cordillera-olive/60">
-              <span>View all {product.gallery.length} images</span>
-              <div className="flex items-center space-x-2">
-                <span className={`w-2 h-2 rounded-full ${isAutoPlaying ? 'bg-cordillera-gold animate-pulse' : 'bg-cordillera-olive/30'}`}></span>
-                <span>{isAutoPlaying ? 'Auto-playing' : 'Manual'}</span>
-              </div>
+            <div className="relative aspect-square overflow-hidden border-2 border-cordillera-gold/30 bg-white shadow-lg">
+              <img
+                src={imageSrc || fallbackImage}
+                onError={() => setImageSrc(fallbackImage)}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
 

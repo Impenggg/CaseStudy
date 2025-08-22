@@ -19,27 +19,47 @@ export const RegisterPage = () => {
     e.preventDefault();
     setError('');
 
+    // Normalize inputs
+    const email = formData.email.trim().toLowerCase();
+    const name = formData.name.trim();
+    const role = formData.role === 'customer' ? 'buyer' : 'artisan';
+
+    // Client-side validation
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Please enter a valid email address');
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const success = await register(formData.name, formData.email, formData.password, formData.role);
+      // Correct parameter order: (email, password, name, role)
+      const success = await register(email, formData.password, name, role);
       if (success) {
-        navigate('/');
+        // Redirect to role dashboard by normalized role in localStorage
+        const stored = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
+        let normalizedRole: string | undefined;
+        try {
+          normalizedRole = stored ? (JSON.parse(stored)?.role as string | undefined) : undefined;
+        } catch {}
+        const dash = normalizedRole === 'artisan' ? '/dashboard/artisan' : '/dashboard/customer';
+        navigate(dash, { replace: true });
       } else {
         setError('Registration failed. Email may already be in use.');
       }
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }

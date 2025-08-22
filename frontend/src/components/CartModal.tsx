@@ -34,15 +34,15 @@ const CartModal: React.FC<CartModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-[100] overflow-y-auto pointer-events-auto">
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300"
+        className="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300 z-[90] pointer-events-auto"
         onClick={onClose}
       />
       
       {/* Modal Container */}
-      <div className="flex min-h-full items-center justify-center p-4">
+      <div className="flex min-h-full items-center justify-center p-4 relative z-[100] pointer-events-auto">
         <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-100">
           {/* Modal Header */}
           <div className="bg-gradient-to-r from-cordillera-olive to-cordillera-sage text-cordillera-cream p-6 relative overflow-hidden">

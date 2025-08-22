@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         // Call our custom seeders
         $this->call([
-            UserSeeder::class,
+            // UserSeeder::class, // removed to avoid creating demo users
             ProductSeeder::class,
             StorySeeder::class,
             CampaignSeeder::class,

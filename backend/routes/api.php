@@ -73,8 +73,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Order routes
     Route::get('/orders', [OrderController::class, 'index']);
-    Route::post('/orders/batch', [OrderController::class, 'batchStore']);
-    Route::post('/orders', [OrderController::class, 'store']);
+    Route::post('/orders/batch', [OrderController::class, 'batchStore'])->middleware(\App\Http\Middleware\ArtisanRestrict::class);
+    Route::post('/orders', [OrderController::class, 'store'])->middleware(\App\Http\Middleware\ArtisanRestrict::class);
     Route::get('/orders/{order}', [OrderController::class, 'show']);
     Route::put('/orders/{order}', [OrderController::class, 'update']);
     Route::get('/my-orders', [OrderController::class, 'myOrders']);
@@ -82,7 +82,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Donation routes
     Route::get('/donations', [DonationController::class, 'index']);
-    Route::post('/donations', [DonationController::class, 'store']);
+    Route::post('/donations', [DonationController::class, 'store'])->middleware(\App\Http\Middleware\ArtisanRestrict::class);
     Route::get('/donations/{donation}', [DonationController::class, 'show']);
     Route::get('/my-donations', [DonationController::class, 'myDonations']);
 

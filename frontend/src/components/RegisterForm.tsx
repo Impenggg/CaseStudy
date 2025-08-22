@@ -9,6 +9,7 @@ const RegisterForm = () => {
     password: '',
     confirmPassword: ''
   });
+  const [role, setRole] = React.useState<'buyer' | 'artisan'>('buyer');
   const [error, setError] = React.useState('');
   const navigate = useNavigate();
   const location = useLocation();
@@ -53,7 +54,15 @@ const RegisterForm = () => {
     }
 
     try {
-      const success = await register(formData.email, formData.password, formData.name);
+      // Normalize email and validate format
+      const email = formData.email.trim().toLowerCase();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setError('Please enter a valid email address');
+        return;
+      }
+
+      const success = await register(email, formData.password, formData.name.trim(), role);
       if (success) {
         const fromState = (location.state as any)?.from?.pathname
         const intended = sessionStorage.getItem('intended_path') || undefined
@@ -93,6 +102,34 @@ const RegisterForm = () => {
             </div>
           )}
 
+          <div>
+            <label className="block text-cordillera-cream font-light mb-2">
+              Account Type
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setRole('buyer')}
+                className={`px-4 py-3 border transition-all duration-200 ${role === 'buyer' ? 'bg-cordillera-gold text-cordillera-olive border-cordillera-gold' : 'bg-cordillera-cream/10 text-cordillera-cream border-cordillera-gold/30 hover:bg-cordillera-cream/20'}`}
+                disabled={isLoading}
+                aria-pressed={role === 'buyer'}
+              >
+                Buyer
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole('artisan')}
+                className={`px-4 py-3 border transition-all duration-200 ${role === 'artisan' ? 'bg-cordillera-gold text-cordillera-olive border-cordillera-gold' : 'bg-cordillera-cream/10 text-cordillera-cream border-cordillera-gold/30 hover:bg-cordillera-cream/20'}`}
+                disabled={isLoading}
+                aria-pressed={role === 'artisan'}
+              >
+                Artisan
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-cordillera-cream/70">
+              Artisans can create products, stories, and campaigns but cannot place marketplace orders or support campaigns.
+            </p>
+          </div>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="name" className="block text-cordillera-cream font-light mb-2">
@@ -125,6 +162,7 @@ const RegisterForm = () => {
                 className="w-full px-4 py-3 bg-cordillera-cream/20 border border-cordillera-gold/30 text-cordillera-cream placeholder-cordillera-cream/50 focus:outline-none focus:border-cordillera-gold focus:bg-cordillera-cream/30 transition-all duration-200"
                 placeholder="Enter your email"
                 disabled={isLoading}
+                pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
               />
             </div>
 

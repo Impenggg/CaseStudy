@@ -3,6 +3,8 @@ import LoadingScreen from '../components/LoadingScreen';
 import { triggerAction } from '../lib/uiActions';
 import { Link } from 'react-router-dom';
 import api, { storiesAPI, campaignsAPI } from '@/services/api';
+import { externalStories } from '@/data/storiesExternal';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Story {
   id: number;
@@ -34,6 +36,7 @@ interface Campaign {
 type ContentItem = Story | Campaign;
 
 const StoriesPage: React.FC = () => {
+  const { user } = useAuth();
   const [allContent, setAllContent] = useState<ContentItem[]>([]);
   const [filteredContent, setFilteredContent] = useState<ContentItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -80,6 +83,23 @@ const StoriesPage: React.FC = () => {
           } as Story;
         });
 
+        // Map external stories dataset
+        const mappedExternalStories: Story[] = externalStories.map((e) => {
+          const cover = isImageUrl(e.media_url) ? e.media_url : fallbackImage;
+          return {
+            id: e.id,
+            title: e.title,
+            content: e.excerpt || e.content || '',
+            media_url: cover,
+            author: e.author || 'Unknown',
+            date: e.created_at ? new Date(e.created_at).toLocaleDateString() : '',
+            category: e.category || 'community',
+            readTime: e.reading_time ?? 0,
+            featured: !!e.featured,
+            type: 'story',
+          } as Story;
+        });
+
         // Fetch campaigns (all)
         console.debug('[StoriesPage] Fetching campaigns...');
         const cres = await campaignsAPI.getAll({ per_page: 'all' });
@@ -102,7 +122,8 @@ const StoriesPage: React.FC = () => {
           } as Campaign;
         });
 
-        const combined: ContentItem[] = [...mappedStories, ...mappedCampaigns];
+        // Combine: external stories + API stories + campaigns
+        const combined: ContentItem[] = [...mappedExternalStories, ...mappedStories, ...mappedCampaigns];
         if (mounted) {
           setAllContent(combined);
           setFilteredContent(combined);
@@ -328,12 +349,22 @@ const StoriesPage: React.FC = () => {
                       </div>
 
                       <div className="mt-auto flex flex-col md:flex-row md:justify-between items-stretch md:items-center gap-2.5">
-                        <Link 
-                          to={`/campaign/${item.id}`}
-                          className="bg-cordillera-gold text-cordillera-olive px-5 py-2.5 text-sm font-medium hover:bg-cordillera-gold/90 transition-colors rounded cursor-pointer w-full md:w-auto text-center md:min-w-[128px]"
-                        >
-                          Support Now
-                        </Link>
+                        {user && (user as any).role === 'artisan' ? (
+                          <button
+                            disabled
+                            title="Artisan accounts cannot support campaigns"
+                            className="bg-gray-300 text-gray-600 px-5 py-2.5 text-sm font-medium rounded w-full md:w-auto text-center md:min-w-[128px] cursor-not-allowed"
+                          >
+                            Support Disabled
+                          </button>
+                        ) : (
+                          <Link 
+                            to={`/campaign/${item.id}`}
+                            className="bg-cordillera-gold text-cordillera-olive px-5 py-2.5 text-sm font-medium hover:bg-cordillera-gold/90 transition-colors rounded cursor-pointer w-full md:w-auto text-center md:min-w-[128px]"
+                          >
+                            Support Now
+                          </Link>
+                        )}
                         <div className="text-center md:text-right text-[11px] text-cordillera-olive/60">
                           <p>By {(item as Campaign).organizer}</p>
                           <p>Ends {(item as Campaign).endDate}</p>

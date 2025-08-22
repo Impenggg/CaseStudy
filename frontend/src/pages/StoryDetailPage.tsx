@@ -1,16 +1,62 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import BackLink from '@/components/BackLink';
 import { useStory } from '@/hooks/useStory';
+import { externalStories } from '@/data/storiesExternal';
 
 const StoryDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { data: story, isLoading } = useStory(id);
+  const { data: story, isLoading, error } = useStory(id);
 
-  if (isLoading || !story) {
+  // Normalize story fields to avoid undefined access; do this before any returns
+  const safeStory = {
+    id: story?.id ?? 0,
+    title: story?.title || 'Story',
+    author: story?.author || 'Unknown',
+    date: story?.date || '',
+    category: story?.category || 'community',
+    tags: (story?.tags as string[] | undefined) || [],
+    sourceUrl: story?.sourceUrl,
+    sourceText: story?.sourceText,
+    fullContent: story?.fullContent || '',
+    content: story?.content || '',
+  }
+
+  // Build related stories from external dataset by category/tags, excluding current
+  const related = useMemo(() => {
+    try {
+      const byCategory = externalStories.filter(s => (s.category || 'community') === safeStory.category && s.id !== safeStory.id)
+      const byTags = externalStories.filter(s => s.id !== safeStory.id && (s.tags || []).some(t => safeStory.tags.includes(t)))
+      // Merge unique while preserving order preference: category first then tags
+      const seen = new Set<number>()
+      const merged = [...byCategory, ...byTags].filter(s => {
+        if (seen.has(s.id)) return false
+        seen.add(s.id)
+        return true
+      })
+      return merged.slice(0, 3)
+    } catch (e) {
+      console.error('[StoryDetailPage] related computation failed', e)
+      return []
+    }
+  }, [safeStory.category, safeStory.id, safeStory.tags])
+
+  if (isLoading) {
     return <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
       <div className="text-cordillera-cream">Loading...</div>
     </div>;
+  }
+
+  if (error || !story) {
+    return (
+      <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
+        <div className="text-center px-6">
+          <h2 className="text-2xl text-cordillera-cream mb-3">Unable to load story</h2>
+          <p className="text-cordillera-cream/80 mb-6">Please go back and try another story.</p>
+          <Link to="/stories" className="inline-block bg-cordillera-gold text-cordillera-olive px-5 py-2 rounded">Back to Stories</Link>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -35,14 +81,14 @@ const StoryDetailPage: React.FC = () => {
       <section className="bg-cordillera-olive pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl md:text-5xl font-serif text-cordillera-cream mb-3 leading-tight">
-            {story.title}
+            {safeStory.title}
           </h1>
           <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-cordillera-cream/80">
-            <span className="text-cordillera-gold font-medium">By {story.author}</span>
+            <span className="text-cordillera-gold font-medium">By {safeStory.author}</span>
             <span className="hidden sm:inline">•</span>
-            <span>{story.date}</span>
+            <span>{safeStory.date}</span>
             <span className="hidden sm:inline">•</span>
-            <span className="bg-cordillera-gold/20 px-3 py-1 text-sm">{story.category}</span>
+            <span className="bg-cordillera-gold/20 px-3 py-1 text-sm">{safeStory.category}</span>
           </div>
         </div>
       </section>
@@ -53,19 +99,19 @@ const StoryDetailPage: React.FC = () => {
           <article className="prose prose-lg max-w-none">
             <div 
               className="text-cordillera-olive leading-relaxed space-y-6"
-              dangerouslySetInnerHTML={{ __html: story.sourceText ?? story.fullContent }}
+              dangerouslySetInnerHTML={{ __html: (safeStory.sourceText || safeStory.fullContent || safeStory.content || '').toString() }}
             />
           </article>
 
-          {story.sourceUrl && (
+          {safeStory.sourceUrl && (
             <div className="mt-6 text-sm">
               <a
-                href={story.sourceUrl}
+                href={safeStory.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-cordillera-olive underline hover:text-cordillera-gold"
               >
-                Source: {story.sourceUrl}
+                Source: {safeStory.sourceUrl}
               </a>
             </div>
           )}
@@ -74,7 +120,7 @@ const StoryDetailPage: React.FC = () => {
           <div className="mt-12 pt-8 border-t border-cordillera-sage">
             <h3 className="text-lg font-medium text-cordillera-olive mb-4">Related Topics</h3>
             <div className="flex flex-wrap gap-2">
-              {story.tags.map((tag) => (
+              {safeStory.tags.map((tag) => (
                 <span
                   key={tag}
                   className="bg-cordillera-sage text-cordillera-olive px-3 py-1 text-sm hover:bg-cordillera-gold hover:text-cordillera-olive transition-colors cursor-pointer"
@@ -105,65 +151,7 @@ const StoryDetailPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Related Stories */}
-      <section className="py-16 bg-cordillera-olive">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-serif text-cordillera-cream mb-12 text-center">
-            More Stories
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                id: 2,
-                title: "The Art of Natural Dyeing",
-                author: "Carlos Mendoza",
-                image: "https://images.unsplash.com/photo-1582582494881-41e67beece72?w=500",
-                excerpt: "Learning traditional plant-based coloring methods..."
-              },
-              {
-                id: 3,
-                title: "Young Weavers, Ancient Traditions",
-                author: "Ana Bautista",
-                image: "https://images.unsplash.com/photo-1594736797933-d0051ba0ff29?w=500",
-                excerpt: "How millennials are embracing traditional crafts..."
-              },
-              {
-                id: 4,
-                title: "Preserving Cultural Patterns",
-                author: "Roberto Calam",
-                image: "https://images.unsplash.com/photo-1558618666-fcd25b9cd7db?w=500",
-                excerpt: "The significance of geometric designs in Cordillera textiles..."
-              }
-            ].map((relatedStory) => (
-              <Link
-                key={relatedStory.id}
-                to={`/story/${relatedStory.id}`}
-                className="group block bg-cordillera-olive hover:bg-cordillera-olive/80 transition-colors duration-300"
-              >
-                <div className="aspect-video overflow-hidden">
-                  <img
-                    src={relatedStory.image}
-                    alt={relatedStory.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-serif text-cordillera-cream mb-2 group-hover:text-cordillera-cream/90">
-                    {relatedStory.title}
-                  </h3>
-                  <p className="text-cordillera-cream/70 text-sm mb-3 leading-relaxed">
-                    {relatedStory.excerpt}
-                  </p>
-                  <p className="text-xs uppercase tracking-wider text-cordillera-gold">
-                    By {relatedStory.author}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      
     </div>
   );
 };

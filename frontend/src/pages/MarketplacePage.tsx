@@ -15,10 +15,11 @@ interface Product {
   category: string;
   artisan: string;
   stockQuantity?: number;
+  gallery?: string[];
 }
 
 const MarketplacePage: React.FC = () => {
-  const { isAuthenticated, requireAuth } = useAuth();
+  const { isAuthenticated, requireAuth, user } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -78,7 +79,8 @@ const MarketplacePage: React.FC = () => {
     province: '',
     postalCode: ''
   });
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'gcash' | 'card'>('cod');
+  const [paymentMethod] = useState<'cod'>('cod');
+  const [shippingErrors, setShippingErrors] = useState<Record<string, string>>({});
   const [lastOrderIds, setLastOrderIds] = useState<number[] | null>(null);
   const [confirmationItems, setConfirmationItems] = useState<typeof cartItems>([]);
   const [confirmationTotal, setConfirmationTotal] = useState<number>(0);
@@ -164,20 +166,86 @@ const MarketplacePage: React.FC = () => {
       try {
         console.debug('[Marketplace] BaseURL:', api.defaults.baseURL);
         console.debug('[Marketplace] Fetching products...');
+        // Compute storage bases using backend API base (including path), supporting subpath deployments (e.g., /CaseStudy/backend/public)
+        // Example: if baseURL = http://localhost/CaseStudy/backend/public/api,
+        // backendRoot becomes http://localhost/CaseStudy/backend/public
+        const storageBases: string[] = (() => {
+          try {
+            const base = api?.defaults?.baseURL || '';
+            const url = new URL(base);
+            const originAndPath = `${url.origin}${url.pathname}`; // may end with /api
+            const backendRoot = originAndPath.replace(/\/?api\/?$/, '');
+            return [
+              `${backendRoot}/storage/products/`,
+              `${backendRoot}/storage/productshere/`,
+            ];
+          } catch {
+            return [
+              `/storage/products/`,
+              `/storage/productshere/`,
+            ];
+          }
+        })();
         const res = await productsAPI.getAll({ per_page: 100 });
         console.debug('[Marketplace] Products response:', res);
         // Support both paginated {data: [...]} and raw arrays
         const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : res?.data?.data || []);
-        const mapped: Product[] = list.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-          price: Number(item.price ?? 0),
-          image: resolveImageUrl(item.image),
-          description: item.description || '',
-          category: item.category || 'General',
-          artisan: item.seller?.name || item.user?.name || 'Artisan',
-          stockQuantity: Number(item.stock_quantity ?? item.stockQuantity ?? 0),
-        }));
+        const mapped: Product[] = list.map((item: any) => {
+          const normalized = resolveImageUrl(item.image);
+          const name = (item?.name || '').trim();
+          // Build candidates across possible storage directories
+          const nameNoParens = name.replace(/\s*\(.*?\)\s*/g, '').trim();
+          const firstToken = (nameNoParens.split(/[^A-Za-z0-9]+/)[0] || nameNoParens).trim();
+          const lower = name.toLowerCase();
+          const lowerNoParens = nameNoParens.toLowerCase();
+          const spaceNorm = name.replace(/\s+/g, ' ').trim();
+          const spaceToUnderscore = spaceNorm.replace(/\s+/g, '_');
+          const noPunct = name.replace(/[^A-Za-z0-9\s]+/g, '').replace(/\s+/g, ' ').trim();
+          const noPunctLower = noPunct.toLowerCase();
+          const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+          const uniq = (arr: string[]) => Array.from(new Set(arr.filter(Boolean)));
+          // Prioritize most likely filename patterns first
+          const prioritizedVariants = uniq([
+            name,                     // Exact name
+            nameNoParens,             // Remove parentheses
+            spaceNorm,                // Collapsed spaces
+            spaceToUnderscore,        // Underscore instead of spaces
+            lower,                    // lowercase
+            lowerNoParens,
+            noPunct,                  // remove punctuation
+            noPunctLower,
+            firstToken,               // first word
+            slug,                     // slug
+          ]);
+          // Try common extensions with jpg first
+          const exts = ['jpg', 'jpeg', 'png', 'webp', 'jfif'];
+          const storageCandidates = uniq(
+            storageBases.flatMap(baseDir =>
+              prioritizedVariants.flatMap(v => {
+                const enc = encodeURIComponent(v);
+                return [
+                  // Plain (as-is) and encoded variants
+                  ...exts.map(ext => `${baseDir}${v}.${ext}`),
+                  ...exts.map(ext => `${baseDir}${enc}.${ext}`),
+                ];
+              })
+            )
+          );
+          // Build a gallery: prefer backend URL if present, then our candidates
+          const gallery = uniq([normalized, ...storageCandidates]);
+          // Prefer backend URL if present; otherwise start with the first storage candidate
+          return {
+            id: item.id,
+            name: item.name,
+            price: Number(item.price ?? 0),
+            image: gallery[0] || '',
+            description: item.description || '',
+            category: item.category || 'General',
+            artisan: item.seller?.name || item.user?.name || 'Artisan',
+            stockQuantity: Number(item.stock_quantity ?? item.stockQuantity ?? 0),
+            gallery,
+          };
+        });
         if (mounted) {
           setProducts(mapped);
           setFilteredProducts(mapped);
@@ -252,6 +320,11 @@ const MarketplacePage: React.FC = () => {
   const cartTotal = cartItems.reduce((sum, i) => sum + i.quantity * i.price, 0);
 
   const handleCheckout = () => {
+    // Block artisans from ordering
+    if (user && (user as any).role === 'artisan') {
+      setErrorMsg('Artisan accounts cannot place marketplace orders.');
+      return;
+    }
     // Require auth to proceed to checkout
     if (!isAuthenticated) {
       sessionStorage.setItem('resume_checkout', '1');
@@ -264,6 +337,26 @@ const MarketplacePage: React.FC = () => {
   };
 
   const handleShippingSubmit = () => {
+    const errors: Record<string, string> = {};
+    const emailRe = /.+@.+\..+/;
+    if (!shippingDetails.fullName.trim()) errors.fullName = 'Full name is required';
+    if (!shippingDetails.email.trim()) errors.email = 'Email is required';
+    else if (!emailRe.test(shippingDetails.email.trim())) errors.email = 'Enter a valid email';
+    const phone = shippingDetails.phone.trim();
+    const phoneRe = /^(?:\+63\d{10}|0\d{10})$/; // +63 then 10 digits OR 0 then 10 digits
+    if (!phone) errors.phone = 'Phone is required';
+    else if (!phoneRe.test(phone)) errors.phone = 'Phone must be +63XXXXXXXXXX or 0XXXXXXXXXX (10 digits after prefix)';
+    if (!shippingDetails.city.trim()) errors.city = 'City is required';
+    if (!shippingDetails.province.trim()) errors.province = 'Province is required';
+    if (!shippingDetails.address.trim()) errors.address = 'Address is required';
+    if (!shippingDetails.postalCode.trim()) errors.postalCode = 'Postal code is required';
+
+    setShippingErrors(errors);
+    if (Object.keys(errors).length > 0) {
+      setErrorMsg('Please correct the highlighted shipping fields.');
+      return;
+    }
+    setErrorMsg(null);
     setCheckoutStep('payment');
   };
 
@@ -372,6 +465,11 @@ const MarketplacePage: React.FC = () => {
       // Resume checkout
       if (sessionStorage.getItem('resume_checkout') === '1') {
         sessionStorage.removeItem('resume_checkout');
+        // If artisan, do not open checkout and show message
+        if (user && (user as any).role === 'artisan') {
+          setErrorMsg('Artisan accounts cannot place marketplace orders.');
+          return;
+        }
         if (cartItems.length > 0) {
           setIsCartOpen(false);
           setIsCheckoutOpen(true);
@@ -379,7 +477,7 @@ const MarketplacePage: React.FC = () => {
         }
       }
     }
-  }, [isAuthenticated, products]);
+  }, [isAuthenticated, products, user]);
 
   // Filter and search functionality
   useEffect(() => {
@@ -419,6 +517,50 @@ const MarketplacePage: React.FC = () => {
   if (isLoading) {
     return <LoadingScreen title="Loading Marketplace" subtitle="Fetching products from artisans..." />;
   }
+
+  // Product image component: static single image (no carousel)
+  const ProductCardImage: React.FC<{ product: Product }> = ({ product }) => {
+    const list = (product.gallery && product.gallery.length > 0) ? product.gallery : [product.image].filter(Boolean);
+    const fallback = `https://source.unsplash.com/800x600/?${encodeURIComponent(product.category || 'handicraft')}`;
+    const [idx, setIdx] = React.useState<number>(0);
+    const [src, setSrc] = React.useState<string>(list[0] || fallback);
+
+    // When the candidate list changes (product change), reset index and src
+    React.useEffect(() => {
+      setIdx(0);
+      setSrc(list[0] || fallback);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [product.id, product.gallery?.join('|')]);
+
+    const onErr: React.ReactEventHandler<HTMLImageElement> = () => {
+      // Try next candidate if available; otherwise use fallback
+      const nextIdx = idx + 1;
+      if (nextIdx < list.length) {
+        setIdx(nextIdx);
+        setSrc(list[nextIdx]);
+      } else {
+        setSrc(fallback);
+      }
+    };
+
+    return (
+      <div className="relative h-56 overflow-hidden">
+        <img
+          src={src || fallback}
+          onError={onErr}
+          alt={product.name}
+          loading="lazy"
+          decoding="async"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+        />
+        {/* Top-left badge */}
+        <div className="absolute top-3 left-3 bg-cordillera-gold text-cordillera-olive text-xs font-semibold px-2 py-1 rounded">
+          {product.category}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-cordillera-cream">
@@ -644,20 +786,7 @@ const MarketplacePage: React.FC = () => {
                   to={`/product/${product.id}`}
                 >
                   <div className="group bg-white rounded-xl shadow-md hover:shadow-lg overflow-hidden flex flex-col h-full">
-                    <div className="relative h-56 overflow-hidden">
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        loading="lazy"
-                        decoding="async"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                      {/* Top-left badge */}
-                      <div className="absolute top-3 left-3 bg-cordillera-gold text-cordillera-olive text-xs font-semibold px-2 py-1 rounded">
-                        {product.category}
-                      </div>
-                    </div>
+                    <ProductCardImage product={product} />
                     <div className="p-5 flex flex-col flex-grow text-center">
                       <h3 className="text-lg font-serif text-cordillera-olive mb-2 leading-tight group-hover:text-cordillera-gold transition-colors duration-300 line-clamp-2">
                         {product.name}
@@ -888,9 +1017,14 @@ const MarketplacePage: React.FC = () => {
                           type="text"
                           value={shippingDetails.fullName}
                           onChange={(e) => setShippingDetails(prev => ({ ...prev, fullName: e.target.value }))}
-                          className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                          required
+                          aria-invalid={!!shippingErrors.fullName}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent ${shippingErrors.fullName ? 'border-red-500' : 'border-cordillera-olive/20'}`}
                           placeholder="Enter your full name"
                         />
+                        {shippingErrors.fullName && (
+                          <p className="text-red-600 text-sm mt-1">{shippingErrors.fullName}</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-cordillera-olive mb-2">Email</label>
@@ -898,9 +1032,14 @@ const MarketplacePage: React.FC = () => {
                           type="email"
                           value={shippingDetails.email}
                           onChange={(e) => setShippingDetails(prev => ({ ...prev, email: e.target.value }))}
-                          className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                          required
+                          aria-invalid={!!shippingErrors.email}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent ${shippingErrors.email ? 'border-red-500' : 'border-cordillera-olive/20'}`}
                           placeholder="Enter your email"
                         />
+                        {shippingErrors.email && (
+                          <p className="text-red-600 text-sm mt-1">{shippingErrors.email}</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-cordillera-olive mb-2">Phone</label>
@@ -908,9 +1047,16 @@ const MarketplacePage: React.FC = () => {
                           type="tel"
                           value={shippingDetails.phone}
                           onChange={(e) => setShippingDetails(prev => ({ ...prev, phone: e.target.value }))}
-                          className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
-                          placeholder="Enter your phone number"
+                          inputMode="tel"
+                          pattern="^(?:\+63\d{10}|0\d{10})$"
+                          required
+                          aria-invalid={!!shippingErrors.phone}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent ${shippingErrors.phone ? 'border-red-500' : 'border-cordillera-olive/20'}`}
+                          placeholder="+63XXXXXXXXXX or 0XXXXXXXXXX"
                         />
+                        {shippingErrors.phone && (
+                          <p className="text-red-600 text-sm mt-1">{shippingErrors.phone}</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-cordillera-olive mb-2">City</label>
@@ -918,9 +1064,14 @@ const MarketplacePage: React.FC = () => {
                           type="text"
                           value={shippingDetails.city}
                           onChange={(e) => setShippingDetails(prev => ({ ...prev, city: e.target.value }))}
-                          className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                          required
+                          aria-invalid={!!shippingErrors.city}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent ${shippingErrors.city ? 'border-red-500' : 'border-cordillera-olive/20'}`}
                           placeholder="Enter your city"
                         />
+                        {shippingErrors.city && (
+                          <p className="text-red-600 text-sm mt-1">{shippingErrors.city}</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-cordillera-olive mb-2">Province</label>
@@ -928,19 +1079,29 @@ const MarketplacePage: React.FC = () => {
                           type="text"
                           value={shippingDetails.province}
                           onChange={(e) => setShippingDetails(prev => ({ ...prev, province: e.target.value }))}
-                          className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                          required
+                          aria-invalid={!!shippingErrors.province}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent ${shippingErrors.province ? 'border-red-500' : 'border-cordillera-olive/20'}`}
                           placeholder="Enter your province"
                         />
+                        {shippingErrors.province && (
+                          <p className="text-red-600 text-sm mt-1">{shippingErrors.province}</p>
+                        )}
                       </div>
                       <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-cordillera-olive mb-2">Address</label>
                         <textarea
                           value={shippingDetails.address}
                           onChange={(e) => setShippingDetails(prev => ({ ...prev, address: e.target.value }))}
-                          className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                          required
+                          aria-invalid={!!shippingErrors.address}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent ${shippingErrors.address ? 'border-red-500' : 'border-cordillera-olive/20'}`}
                           rows={3}
                           placeholder="Enter your complete address"
                         />
+                        {shippingErrors.address && (
+                          <p className="text-red-600 text-sm mt-1">{shippingErrors.address}</p>
+                        )}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-cordillera-olive mb-2">Postal Code</label>
@@ -948,9 +1109,14 @@ const MarketplacePage: React.FC = () => {
                           type="text"
                           value={shippingDetails.postalCode}
                           onChange={(e) => setShippingDetails(prev => ({ ...prev, postalCode: e.target.value }))}
-                          className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                          required
+                          aria-invalid={!!shippingErrors.postalCode}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent ${shippingErrors.postalCode ? 'border-red-500' : 'border-cordillera-olive/20'}`}
                           placeholder="Enter postal code"
                         />
+                        {shippingErrors.postalCode && (
+                          <p className="text-red-600 text-sm mt-1">{shippingErrors.postalCode}</p>
+                        )}
                       </div>
                     </div>
                     <div className="flex justify-end pt-4">
@@ -966,50 +1132,12 @@ const MarketplacePage: React.FC = () => {
 
                 {checkoutStep === 'payment' && (
                   <div className="space-y-6">
-                    <h3 className="text-xl font-serif text-cordillera-olive mb-4">Payment Method</h3>
-                    <div className="space-y-4">
-                      <label className="flex items-center p-4 border border-cordillera-olive/20 rounded-lg cursor-pointer hover:bg-cordillera-olive/5">
-                        <input
-                          type="radio"
-                          name="payment"
-                          value="cod"
-                          checked={paymentMethod === 'cod'}
-                          onChange={(e) => setPaymentMethod(e.target.value as 'cod')}
-                          className="mr-3"
-                        />
-                        <div>
-                          <div className="font-medium text-cordillera-olive">Cash on Delivery</div>
-                          <div className="text-sm text-cordillera-olive/60">Pay when you receive your order</div>
-                        </div>
-                      </label>
-                      <label className="flex items-center p-4 border border-cordillera-olive/20 rounded-lg cursor-pointer hover:bg-cordillera-olive/5">
-                        <input
-                          type="radio"
-                          name="payment"
-                          value="gcash"
-                          checked={paymentMethod === 'gcash'}
-                          onChange={(e) => setPaymentMethod(e.target.value as 'gcash')}
-                          className="mr-3"
-                        />
-                        <div>
-                          <div className="font-medium text-cordillera-olive">GCash</div>
-                          <div className="text-sm text-cordillera-olive/60">Pay using GCash mobile wallet</div>
-                        </div>
-                      </label>
-                      <label className="flex items-center p-4 border border-cordillera-olive/20 rounded-lg cursor-pointer hover:bg-cordillera-olive/5">
-                        <input
-                          type="radio"
-                          name="payment"
-                          value="card"
-                          checked={paymentMethod === 'card'}
-                          onChange={(e) => setPaymentMethod(e.target.value as 'card')}
-                          className="mr-3"
-                        />
-                        <div>
-                          <div className="font-medium text-cordillera-olive">Credit/Debit Card</div>
-                          <div className="text-sm text-cordillera-olive/60">Pay securely with your card</div>
-                        </div>
-                      </label>
+                    <h3 className="text-xl font-serif text-cordillera-olive mb-4">Payment</h3>
+                    <div className="p-5 border border-cordillera-olive/20 rounded-lg bg-cordillera-olive/5">
+                      <div className="font-medium text-cordillera-olive">Cash on Delivery</div>
+                      <div className="text-sm text-cordillera-olive/70 mt-1">
+                        We currently accept Cash on Delivery (COD). You will pay the courier upon receiving your order.
+                      </div>
                     </div>
                     <div className="flex justify-between pt-4">
                       <button

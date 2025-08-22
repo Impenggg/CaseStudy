@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -11,6 +11,7 @@ import { useAuth } from '../contexts/AuthContext';
 export const ProductDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const product = sampleProducts.find(p => p.id === parseInt(id || '1'));
+  const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = React.useState(0);
   const [quantity, setQuantity] = React.useState(1);
   const { toast, showToast, hideToast } = useToast();
@@ -120,6 +121,9 @@ export const ProductDetailsPage: React.FC = () => {
       requireAuth('/login');
       return;
     }
+    // Close cart and move to marketplace which owns the checkout steps
+    sessionStorage.setItem('resume_checkout', '1');
+    navigate('/marketplace');
   };
 
   if (!product) {

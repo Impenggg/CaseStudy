@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -18,20 +19,50 @@ class AuthController extends Controller
     public function register(Request $request): JsonResponse
     {
         try {
+            // Debug: log incoming email and payload (without password)
+            try {
+                $input = $request->except(['password']);
+                $email = (string)($request->input('email', ''));
+                Log::info('Register request received', [
+                    'email' => $email,
+                    'email_hex' => bin2hex($email),
+                    'payload' => $input,
+                ]);
+            } catch (\Throwable $t) {}
+
+            // Normalize/sanitize fields before validation
+            $emailNormalized = strtolower(trim(preg_replace('/\s+/', '', (string) $request->input('email', ''))));
+            $nameNormalized = trim((string) $request->input('name', ''));
+            if ($emailNormalized !== '') {
+                $request->merge(['email' => $emailNormalized]);
+            }
+            if ($nameNormalized !== '') {
+                $request->merge(['name' => $nameNormalized]);
+            }
+
             $request->validate([
                 'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
+                'email' => 'required|string|email:filter|max:255|unique:users,email',
                 'password' => 'required|string|min:8',
-                'role' => 'sometimes|in:weaver,buyer',
+                // Accept legacy/frontend role labels and normalize below
+                'role' => 'sometimes|in:weaver,buyer,artisan,customer',
                 'bio' => 'nullable|string|max:1000',
                 'location' => 'nullable|string|max:255',
             ]);
+
+            // Normalize role inputs: artisan -> weaver, customer -> buyer
+            $incomingRole = strtolower((string) $request->input('role', ''));
+            if ($incomingRole === 'artisan') {
+                $incomingRole = 'weaver';
+            } elseif ($incomingRole === 'customer') {
+                $incomingRole = 'buyer';
+            }
 
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
-                'role' => $request->role ?? 'buyer',
+                'role' => $incomingRole ?: 'buyer',
                 'bio' => $request->bio,
                 'location' => $request->location,
             ]);
