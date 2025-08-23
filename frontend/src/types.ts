@@ -7,7 +7,7 @@ export interface User {
   name: string;
   email: string;
   avatar?: string | null;
-  role?: 'weaver' | 'buyer' | string;
+  role?: 'weaver' | 'customer' | string;
   bio?: string;
   location?: string;
   phone?: string;

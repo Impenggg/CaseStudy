@@ -8,6 +8,7 @@ const MediaFeedPage: React.FC = () => {
   const [caption, setCaption] = useState('');
   const [posting, setPosting] = useState(false);
   const [postError, setPostError] = useState<string | null>(null);
+  const [isComposerOpen, setIsComposerOpen] = useState(false);
 
   const { user } = useAuth();
 
@@ -50,6 +51,26 @@ const MediaFeedPage: React.FC = () => {
   useEffect(() => {
     loadFeed(1);
   }, []);
+
+  // Close modal with Escape
+  useEffect(() => {
+    if (!isComposerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsComposerOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isComposerOpen]);
+
+  // Lock body scroll when modal open
+  useEffect(() => {
+    if (isComposerOpen) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    return () => document.body.classList.remove('overflow-hidden');
+  }, [isComposerOpen]);
 
   // Load current user's posts
   useEffect(() => {
@@ -103,6 +124,8 @@ const MediaFeedPage: React.FC = () => {
       if (fileRef.current) fileRef.current.value = '';
       // Optimistically add to my grid
       if (newPost) setMyPosts((prev) => [newPost, ...prev]);
+      // Close modal on success
+      setIsComposerOpen(false);
     } catch (err: any) {
       const status = err?.response?.status;
       const msg = err?.response?.data?.message || err?.message || 'Failed to post';
@@ -153,40 +176,14 @@ const MediaFeedPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left: 1/3 column */}
           <div className="space-y-6">
-            {/* Composer at top */}
-            <div className="bg-white rounded-md shadow-sm border border-cordillera-sage/30 p-4">
-              <div className="flex items-start gap-3">
-                <div className="flex-1">
-                  <textarea
-                    value={caption}
-                    onChange={(e) => setCaption(e.target.value)}
-                    placeholder="Share something..."
-                    className="w-full border border-cordillera-sage/30 rounded-md p-2 mb-2 focus:outline-none focus:ring-1 focus:ring-cordillera-gold"
-                    rows={2}
-                  />
-                  <input
-                    ref={fileRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0] || null;
-                      if (f && !f.type.startsWith('image/')) return;
-                      if (f && f.size > 10 * 1024 * 1024) return; // 10MB
-                      setFile(f);
-                    }}
-                    className="block text-sm text-cordillera-olive/80"
-                  />
-                  {postError && <p className="text-sm text-red-700 mt-2">{postError}</p>}
-                </div>
-                <button
-                  onClick={handleCreatePost}
-                  disabled={posting || !file}
-                  className={`self-start bg-cordillera-gold text-cordillera-olive px-4 py-2 rounded-md ${posting || !file ? 'opacity-50 cursor-not-allowed' : 'hover:bg-cordillera-gold/90'}`}
-                >
-                  {posting ? 'Posting…' : 'Post'}
-                </button>
-              </div>
-            </div>
+            {/* Composer trigger */}
+            <button
+              type="button"
+              onClick={() => setIsComposerOpen(true)}
+              className="w-full text-left bg-white rounded-md shadow-sm border border-cordillera-sage/30 p-4 hover:bg-cordillera-gold/5 transition-colors"
+            >
+              <div className="text-cordillera-olive/70">Share something…</div>
+            </button>
 
             {/* User's images grid */}
             <div>
@@ -290,6 +287,128 @@ const MediaFeedPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal Uploader */}
+      {isComposerOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+        >
+          {/* Overlay */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setIsComposerOpen(false)}
+          />
+          {/* Dialog */}
+          <div
+            className="relative bg-white w-full max-w-lg mx-4 rounded-lg shadow-xl border border-cordillera-sage/30"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-5 py-4 border-b border-cordillera-sage/20 flex items-center justify-between">
+              <h3 className="text-lg font-medium text-cordillera-olive">Create post</h3>
+              <button
+                onClick={() => setIsComposerOpen(false)}
+                className="text-cordillera-olive/70 hover:text-cordillera-olive"
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-5">
+              <textarea
+                value={caption}
+                onChange={(e) => setCaption(e.target.value)}
+                placeholder="Say something about your image…"
+                className="w-full border border-cordillera-sage/30 rounded-md p-2 mb-3 focus:outline-none focus:ring-1 focus:ring-cordillera-gold"
+                rows={3}
+              />
+
+              {/* Hidden input */}
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const f = e.target.files?.[0] || null;
+                  if (f && !f.type.startsWith('image/')) return;
+                  if (f && f.size > 10 * 1024 * 1024) return; // 10MB
+                  setFile(f);
+                }}
+                className="hidden"
+              />
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex items-center gap-2 text-sm min-w-0">
+                  <button
+                    type="button"
+                    onClick={() => fileRef.current?.click()}
+                    className="inline-flex items-center gap-2 border border-cordillera-gold text-cordillera-olive px-3 py-1.5 rounded-md hover:bg-cordillera-gold/10 transition-colors"
+                  >
+                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Attach image
+                  </button>
+
+                  {file && (
+                    <>
+                      <span className="text-cordillera-olive/70 truncate max-w-[10rem] sm:max-w-[14rem]" title={file.name}>{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => { setFile(null); if (fileRef.current) fileRef.current.value = ''; }}
+                        className="inline-flex items-center gap-1 text-cordillera-olive/80 hover:text-cordillera-olive px-2 py-1 rounded-md hover:bg-cordillera-sage/20 whitespace-nowrap"
+                      >
+                        <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        Clear
+                      </button>
+                    </>
+                  )}
+                </div>
+
+                <div className="ms-auto flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => setIsComposerOpen(false)}
+                    className="px-4 py-2 rounded-md border border-cordillera-sage/40 text-cordillera-olive hover:bg-cordillera-sage/10"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreatePost}
+                    disabled={posting || !file}
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-md shadow-sm transition-colors whitespace-nowrap ${
+                      posting || !file
+                        ? 'bg-cordillera-olive/30 text-white cursor-not-allowed'
+                        : 'bg-cordillera-gold text-cordillera-olive hover:bg-cordillera-gold/90'
+                    }`}
+                  >
+                    {posting ? (
+                      <>
+                        <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeWidth="2" d="M12 3v3m0 12v3m9-9h-3M6 12H3m13.364 6.364l-2.121-2.121M8.757 8.757L6.636 6.636m10.728 0l-2.121 2.121M8.757 15.243l-2.121 2.121" />
+                        </svg>
+                        Posting…
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Post
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {postError && <p className="text-sm text-red-700 mt-3">{postError}</p>}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

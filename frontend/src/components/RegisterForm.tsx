@@ -9,7 +9,7 @@ const RegisterForm = () => {
     password: '',
     confirmPassword: ''
   });
-  const [role, setRole] = React.useState<'buyer' | 'artisan'>('buyer');
+  const [role, setRole] = React.useState<'customer' | 'artisan'>('customer');
   const [error, setError] = React.useState('');
   const navigate = useNavigate();
   const location = useLocation();
@@ -109,12 +109,12 @@ const RegisterForm = () => {
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setRole('buyer')}
-                className={`px-4 py-3 border transition-all duration-200 ${role === 'buyer' ? 'bg-cordillera-gold text-cordillera-olive border-cordillera-gold' : 'bg-cordillera-cream/10 text-cordillera-cream border-cordillera-gold/30 hover:bg-cordillera-cream/20'}`}
+                onClick={() => setRole('customer')}
+                className={`px-4 py-3 border transition-all duration-200 ${role === 'customer' ? 'bg-cordillera-gold text-cordillera-olive border-cordillera-gold' : 'bg-cordillera-cream/10 text-cordillera-cream border-cordillera-gold/30 hover:bg-cordillera-cream/20'}`}
                 disabled={isLoading}
-                aria-pressed={role === 'buyer'}
+                aria-pressed={role === 'customer'}
               >
-                Buyer
+                Customer
               </button>
               <button
                 type="button"

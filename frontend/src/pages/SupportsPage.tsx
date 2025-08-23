@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { donationsAPI } from '@/services/api'
 import type { Donation } from '@/types'
@@ -30,6 +31,9 @@ const SupportsPage: React.FC = () => {
 
   return (
     <div className="min-h-[60vh] px-4 py-10 max-w-5xl mx-auto text-cordillera-cream">
+      <div className="mb-4">
+        <Link to="/" className="inline-block bg-cordillera-gold text-cordillera-olive px-4 py-1.5 rounded hover:bg-cordillera-gold/90 transition-colors">← Back to Home</Link>
+      </div>
       <h1 className="text-3xl font-serif mb-6">Support & Fundraising History</h1>
       <div className="rounded-lg border border-cordillera-gold/30 bg-cordillera-olive/40 p-6">
         {isLoading && (

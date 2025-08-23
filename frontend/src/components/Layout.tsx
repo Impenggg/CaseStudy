@@ -116,11 +116,30 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         <p className="text-cordillera-cream truncate">{user?.name || user?.email}</p>
                       </div>
                       <div className="py-1">
-                        <Link to="/account" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Account Information</Link>
-                        <Link to="/my-products" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">My Products</Link>
-                        <Link to="/my-stories" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">My Stories</Link>
-                        <Link to="/my-campaigns" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">My Campaigns</Link>
-                        <Link to="/media-creation" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Media Uploads</Link>
+                        {/* Role-specific menus */}
+                        {user?.role === 'artisan' ? (
+                          // Artisan menu
+                          <>
+                            <Link to="/dashboard/artisan" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Account Information</Link>
+                            <Link to="/my-products" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">My Products</Link>
+                            <Link to="/my-stories" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">My Stories</Link>
+                            <Link to="/my-campaigns" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">My Campaigns</Link>
+                            <Link to="/media-creation" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Media Uploads</Link>
+                          </>
+                        ) : user?.role === 'customer' ? (
+                          // Customer menu
+                          <>
+                            <Link to="/dashboard/customer" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Account Information</Link>
+                            <Link to="/my-purchases" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">My Purchases</Link>
+                            <Link to="/campaigns-supported" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Campaigns Supported</Link>
+                            <Link to="/media-creation" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Media Uploads</Link>
+                          </>
+                        ) : (
+                          // Other roles: minimal
+                          <>
+                            <Link to="/account" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Account Information</Link>
+                          </>
+                        )}
                         <button
                           onClick={async () => {
                             setIsAccountOpen(false);
@@ -197,11 +216,26 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {isAuthenticated ? (
                 <>
                   <div className="px-3 pt-3 text-cordillera-cream/70 text-xs">Account</div>
-                  <Link to="/account" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Account Information</Link>
-                  <Link to="/my-products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">My Products</Link>
-                  <Link to="/my-stories" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">My Stories</Link>
-                  <Link to="/my-campaigns" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">My Campaigns</Link>
-                  <Link to="/media-creation" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Media Uploads</Link>
+                  {user?.role === 'artisan' ? (
+                    <>
+                      <Link to="/dashboard/artisan" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Account Information</Link>
+                      <Link to="/my-products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">My Products</Link>
+                      <Link to="/my-stories" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">My Stories</Link>
+                      <Link to="/my-campaigns" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">My Campaigns</Link>
+                      <Link to="/media-creation" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Media Uploads</Link>
+                    </>
+                  ) : user?.role === 'customer' ? (
+                    <>
+                      <Link to="/dashboard/customer" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Account Information</Link>
+                      <Link to="/my-purchases" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">My Purchases</Link>
+                      <Link to="/campaigns-supported" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Campaigns Supported</Link>
+                      <Link to="/media-creation" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Media Uploads</Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/account" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Account Information</Link>
+                    </>
+                  )}
                   <button
                     onClick={async () => { setIsMobileMenuOpen(false); await logout(); navigate('/'); }}
                     className="w-full text-left px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors border-t border-cordillera-gold/20"

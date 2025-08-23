@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackLink from '@/components/BackLink';
 import { productsAPI } from '@/services/api';
-import { useAuth } from '@/contexts/AuthContext';
 
 const ProductCreatePage: React.FC = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   const [form, setForm] = useState({
     name: '',
@@ -18,7 +16,6 @@ const ProductCreatePage: React.FC = () => {
     care_instructions: '',
     stock_quantity: '0',
     tags: '', // comma-separated
-    featured: false,
   });
   const [image, setImage] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -76,7 +73,6 @@ const ProductCreatePage: React.FC = () => {
         care_instructions: form.care_instructions.trim(),
         stock_quantity: Number(form.stock_quantity),
         tags: tags.length ? tags : undefined,
-        featured: !!form.featured,
         image,
       });
 
@@ -98,12 +94,16 @@ const ProductCreatePage: React.FC = () => {
     <div className="min-h-screen bg-cordillera-olive text-cordillera-cream py-10">
       <div className="max-w-3xl mx-auto bg-cordillera-olive/40 border border-cordillera-cream/20 p-6">
         <div className="mb-4">
-          <BackLink to="/my-products" variant="dark">Back to My Products</BackLink>
+          <BackLink
+            to="/marketplace"
+            variant="dark"
+            className="bg-cordillera-gold text-cordillera-olive px-4 py-1.5 hover:bg-cordillera-gold/90"
+          >
+            ← Back to Marketplace
+          </BackLink>
         </div>
         <h1 className="text-3xl font-serif mb-6">Create Product</h1>
-        {user?.role && (
-          <p className="text-sm text-cordillera-cream/70 mb-4">Signed in as: <span className="font-medium">{user.role}</span></p>
-        )}
+        {/* Removed signed-in role display per request */}
         {error && (
           <div className="mb-4 p-3 bg-red-900/40 border border-red-700 text-red-100">{error}</div>
         )}
@@ -147,10 +147,7 @@ const ProductCreatePage: React.FC = () => {
             <label className="block mb-1">Tags (comma-separated)</label>
             <input name="tags" value={form.tags} onChange={onChange} className="w-full p-2 bg-cordillera-cream text-cordillera-olive" />
           </div>
-          <div className="flex items-center gap-2">
-            <input id="featured" type="checkbox" name="featured" checked={form.featured} onChange={onChange} />
-            <label htmlFor="featured">Featured</label>
-          </div>
+          {/* Removed 'Featured' checkbox; featuring is admin-controlled */}
           <div>
             <label className="block mb-1">Product Image</label>
             <input type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/jfif" onChange={onFile} className="w-full" />
@@ -160,7 +157,7 @@ const ProductCreatePage: React.FC = () => {
             <button disabled={submitting} className="bg-cordillera-gold text-cordillera-olive px-6 py-2 font-medium hover:bg-cordillera-gold/90 disabled:opacity-60">
               {submitting ? 'Creating…' : 'Create Product'}
             </button>
-            <button type="button" onClick={() => navigate(-1)} className="ml-3 px-6 py-2 border border-cordillera-cream/40 hover:bg-cordillera-cream/10">
+            <button type="button" onClick={() => navigate('/marketplace')} className="ml-3 px-6 py-2 border border-cordillera-cream/40 hover:bg-cordillera-cream/10">
               Cancel
             </button>
           </div>

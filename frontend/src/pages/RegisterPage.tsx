@@ -22,7 +22,7 @@ export const RegisterPage = () => {
     // Normalize inputs
     const email = formData.email.trim().toLowerCase();
     const name = formData.name.trim();
-    const role = formData.role === 'customer' ? 'buyer' : 'artisan';
+    const role = formData.role === 'customer' ? 'customer' : 'artisan';
 
     // Client-side validation
     if (formData.password !== formData.confirmPassword) {

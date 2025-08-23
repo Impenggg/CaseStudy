@@ -25,7 +25,7 @@ class UploadController extends Controller
             'status' => 'success',
             'message' => 'File uploaded successfully',
             'data' => [
-                'url' => Storage::url($path),
+                'url' => url(Storage::url($path)),
                 'path' => $path,
                 'filename' => $file->getClientOriginalName(),
                 'size' => $file->getSize(),

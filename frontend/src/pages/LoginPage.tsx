@@ -27,14 +27,8 @@ export const LoginPage = () => {
         if (redirectTo) {
           navigate(redirectTo, { replace: true });
         } else {
-          // Determine dashboard by role
-          const stored = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
-          let role: string | undefined;
-          try {
-            role = stored ? (JSON.parse(stored)?.role as string | undefined) : undefined;
-          } catch {}
-          const dash = role === 'artisan' ? '/dashboard/artisan' : '/dashboard/customer';
-          navigate(dash, { replace: true });
+          // Default to homepage when there is no intended path
+          navigate('/', { replace: true });
         }
       } else {
         setError('Invalid email or password.');

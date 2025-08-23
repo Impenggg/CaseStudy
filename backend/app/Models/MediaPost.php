@@ -38,6 +38,6 @@ class MediaPost extends Model
 
     public function getImageUrlAttribute(): string
     {
-        return \Illuminate\Support\Facades\Storage::url($this->image_path);
+        return url(\Illuminate\Support\Facades\Storage::url($this->image_path));
     }
 }

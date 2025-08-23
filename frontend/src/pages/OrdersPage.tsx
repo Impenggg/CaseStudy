@@ -59,6 +59,9 @@ const OrdersPage: React.FC = () => {
 
   return (
     <div className="min-h-[60vh] px-4 py-10 max-w-5xl mx-auto text-cordillera-cream">
+      <div className="mb-4">
+        <Link to="/" className="inline-block bg-cordillera-gold text-cordillera-olive px-4 py-1.5 rounded hover:bg-cordillera-gold/90 transition-colors">← Back to Home</Link>
+      </div>
       <h1 className="text-3xl font-serif mb-6">Orders & Purchase History</h1>
 
       {loading && (

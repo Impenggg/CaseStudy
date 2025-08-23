@@ -159,6 +159,17 @@ const App: React.FC = () => {
               </Layout>
             }
           />
+          {/* Customer alias to OrdersPage */}
+          <Route
+            path="/my-purchases"
+            element={
+              <Layout>
+                <RoleProtectedRoute allowed={['customer', 'admin']}>
+                  <OrdersPage />
+                </RoleProtectedRoute>
+              </Layout>
+            }
+          />
           <Route
             path="/orders/:id"
             element={
@@ -239,7 +250,7 @@ const App: React.FC = () => {
             path="/dashboard/customer"
             element={
               <Layout>
-                <RoleProtectedRoute allowed={['buyer', 'admin']}>
+                <RoleProtectedRoute allowed={['customer', 'admin']}>
                   <UserDashboard />
                 </RoleProtectedRoute>
               </Layout>
@@ -253,6 +264,17 @@ const App: React.FC = () => {
                 <ProtectedRoute>
                   <SupportsPage />
                 </ProtectedRoute>
+              </Layout>
+            }
+          />
+          {/* Customer alias to SupportsPage */}
+          <Route
+            path="/campaigns-supported"
+            element={
+              <Layout>
+                <RoleProtectedRoute allowed={['customer', 'admin']}>
+                  <SupportsPage />
+                </RoleProtectedRoute>
               </Layout>
             }
           />

@@ -64,7 +64,7 @@ export const authAPI = {
     email: string;
     password: string;
     password_confirmation: string;
-    role: 'weaver' | 'buyer';
+    role: 'weaver' | 'customer';
     bio?: string;
     location?: string;
     phone?: string;

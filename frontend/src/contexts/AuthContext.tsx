@@ -30,12 +30,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true)
   const [loadingMessage, setLoadingMessage] = useState<string | undefined>('Checking session...')
 
-  // Normalize backend roles to frontend: 'weaver' -> 'artisan'
+  // Normalize backend roles to frontend: 'weaver' -> 'artisan', 'customer' -> 'customer', legacy 'buyer' -> 'customer'
   const normalizeRole = (role?: string): string | undefined => {
     if (!role) return role
     const r = role.toLowerCase()
     if (r === 'weaver') return 'artisan'
-    if (r === 'customer') return 'buyer'
+    if (r === 'buyer') return 'customer'
+    if (r === 'customer') return 'customer'
     return r
   }
 
@@ -88,12 +89,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const register = async (email: string, password: string, name: string, role: string = 'buyer'): Promise<boolean> => {
+  const register = async (email: string, password: string, name: string, role: string = 'customer'): Promise<boolean> => {
     try {
       setIsLoading(true)
       setLoadingMessage('Creating your account...')
-      // Map frontend 'artisan' to backend 'weaver'
-      const backendRole = role?.toLowerCase() === 'artisan' ? 'weaver' : (role?.toLowerCase() || 'buyer')
+      // Map frontend 'artisan' to backend 'weaver'. Customers rely on backend default.
+      const backendRole = role?.toLowerCase() === 'artisan' ? 'weaver' : (role?.toLowerCase() || 'customer')
       const normalizedEmail = email.trim().toLowerCase().replace(/\s+/g, '').normalize('NFKC')
       const normalizedName = name.trim().normalize('NFKC')
       const payload: any = { email: normalizedEmail, password, name: normalizedName }

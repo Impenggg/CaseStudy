@@ -9,7 +9,7 @@ type Product = {
   image?: string | null;
 };
 
-type Buyer = {
+type Customer = {
   id: number;
   name?: string;
   email?: string;
@@ -25,7 +25,7 @@ export type Order = {
   tracking_number?: string | null;
   created_at?: string;
   product?: Product;
-  buyer?: Buyer;
+  buyer?: Customer;
 };
 
 const OrderDetailPage: React.FC = () => {
@@ -146,7 +146,7 @@ const OrderDetailPage: React.FC = () => {
                   </div>
                 </div>
                 <div className="bg-cordillera-olive/5 rounded-lg p-4">
-                  <h3 className="font-medium text-cordillera-olive mb-2">Buyer</h3>
+                  <h3 className="font-medium text-cordillera-olive mb-2">Customer</h3>
                   <div className="space-y-1 text-sm text-cordillera-olive/80">
                     {order.buyer?.name && <div>Name: {order.buyer.name}</div>}
                     {order.buyer?.email && <div>Email: {order.buyer.email}</div>}

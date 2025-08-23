@@ -24,20 +24,13 @@ export const UserDashboard = () => {
       <div className="max-w-6xl mx-auto px-6">
         {/* Header */}
         <div className="mb-12">
-          <div className="flex items-center space-x-4 mb-6">
-            <img
-              src={user.avatar || 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face'}
-              alt={user.name || 'User avatar'}
-              className="w-20 h-20 rounded-full object-cover border-2 border-cordillera-gold"
-            />
-            <div>
-              <h1 className="text-4xl font-serif font-light text-cordillera-olive tracking-wide">
-                Welcome, {user.name || 'Member'}
-              </h1>
-              <p className="text-cordillera-olive/70 font-light capitalize">
-                {(user.role || 'member')} • Member since {user.created_at ? new Date(user.created_at).getFullYear() : new Date().getFullYear()}
-              </p>
-            </div>
+          <div className="mb-6">
+            <h1 className="text-4xl font-serif font-light text-cordillera-olive tracking-wide">
+              Welcome, {user.name || 'Member'}
+            </h1>
+            <p className="text-cordillera-olive/70 font-light capitalize">
+              {(user.role || 'member')} • Member since {user.created_at ? new Date(user.created_at).getFullYear() : new Date().getFullYear()}
+            </p>
           </div>
         </div>
 
@@ -146,25 +139,6 @@ export const UserDashboard = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Profile Completion */}
-            <div className="bg-cordillera-sage p-6">
-              <h3 className="text-lg font-serif font-light text-cordillera-olive mb-4 tracking-wide">
-                Profile Status
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-cordillera-olive/70">Profile Complete</span>
-                  <span className="text-cordillera-olive font-medium">85%</span>
-                </div>
-                <div className="w-full bg-cordillera-olive/20 h-2">
-                  <div className="bg-cordillera-gold h-2" style={{ width: '85%' }}></div>
-                </div>
-                <p className="text-xs text-cordillera-olive/60">
-                  Add a bio and location to complete your profile
-                </p>
-              </div>
-            </div>
-
             {/* Quick Actions */}
             <div className="bg-white p-6 border border-cordillera-sage/20">
               <h3 className="text-lg font-serif font-light text-cordillera-olive mb-4 tracking-wide">
@@ -173,15 +147,19 @@ export const UserDashboard = () => {
               <div className="space-y-3">
                 {user.role === 'artisan' ? (
                   <>
-                    <button className="w-full bg-cordillera-gold text-cordillera-olive py-2 px-4 text-sm font-medium tracking-wide hover:bg-cordillera-gold/90 transition-colors">
-                      Add New Product
-                    </button>
-                    <button className="w-full border border-cordillera-olive text-cordillera-olive py-2 px-4 text-sm font-light tracking-wide hover:bg-cordillera-olive hover:text-cordillera-cream transition-colors">
-                      View Orders
-                    </button>
-                    <Link to="/stories">
+                    <Link to="/create-product">
+                      <button className="w-full bg-cordillera-gold text-cordillera-olive py-2 px-4 text-sm font-medium tracking-wide hover:bg-cordillera-gold/90 transition-colors">
+                        Add New Product
+                      </button>
+                    </Link>
+                    <Link to="/submit-story">
                       <button className="w-full border border-cordillera-olive text-cordillera-olive py-2 px-4 text-sm font-light tracking-wide hover:bg-cordillera-olive hover:text-cordillera-cream transition-colors">
                         Share Your Story
+                      </button>
+                    </Link>
+                    <Link to="/create-campaign">
+                      <button className="w-full border border-cordillera-olive text-cordillera-olive py-2 px-4 text-sm font-light tracking-wide hover:bg-cordillera-olive hover:text-cordillera-cream transition-colors">
+                        Submit Campaign
                       </button>
                     </Link>
                   </>

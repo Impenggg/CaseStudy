@@ -3,7 +3,7 @@ export interface User {
   id: number;
   name: string;
   email: string;
-  role: 'weaver' | 'buyer' | 'admin';
+  role: 'artisan' | 'customer' | 'admin';
   avatar?: string;
   bio?: string;
   location?: string;
@@ -175,7 +175,7 @@ export interface RegisterForm {
   email: string;
   password: string;
   password_confirmation: string;
-  role: 'weaver' | 'buyer';
+  role: 'artisan' | 'customer';
 }
 
 export interface ContactForm {
