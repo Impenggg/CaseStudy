@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { triggerAction } from '../lib/uiActions';
+import { useAuth } from '../contexts/AuthContext';
 
 interface Campaign {
   id: number;
@@ -15,6 +16,7 @@ interface Campaign {
 }
 
 const FundraisingPage: React.FC = () => {
+  const { user } = useAuth();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
@@ -341,21 +343,23 @@ const FundraisingPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Call to Action Section */}
-      <section className="py-20 bg-cordillera-sage">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-serif text-cordillera-olive mb-6">
-            Start Your Own Campaign
-          </h2>
-          <p className="text-cordillera-olive/80 text-lg mb-8 leading-relaxed">
-            Have a project that supports Cordillera weaving heritage? Launch your own fundraising campaign 
-            and rally community support for preserving our cultural traditions.
-          </p>
-              <button onClick={() => triggerAction('Create Campaign CTA')} className="bg-cordillera-gold text-cordillera-olive px-8 py-4 text-lg font-medium hover:bg-cordillera-gold/90 transition-colors">
-            Create Campaign
-          </button>
-        </div>
-      </section>
+      {/* Call to Action Section - artisans only */}
+      {user && (user as any).role === 'artisan' && (
+        <section className="py-20 bg-cordillera-sage">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 className="text-4xl font-serif text-cordillera-olive mb-6">
+              Start Your Own Campaign
+            </h2>
+            <p className="text-cordillera-olive/80 text-lg mb-8 leading-relaxed">
+              Have a project that supports Cordillera weaving heritage? Launch your own fundraising campaign 
+              and rally community support for preserving our cultural traditions.
+            </p>
+            <button onClick={() => triggerAction('Create Campaign CTA')} className="bg-cordillera-gold text-cordillera-olive px-8 py-4 text-lg font-medium hover:bg-cordillera-gold/90 transition-colors">
+              Create Campaign
+            </button>
+          </div>
+        </section>
+      )}
 
       {/* Campaign Details Modal */}
       {isDetailsModalOpen && selectedCampaign && (

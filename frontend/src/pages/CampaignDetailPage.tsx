@@ -236,7 +236,9 @@ const CampaignDetailPage: React.FC = () => {
           {campaign.title}
         </h1>
         <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-cordillera-olive/80">
-          <span className="bg-cordillera-gold/30 text-cordillera-olive px-2.5 py-1 text-xs uppercase tracking-wider rounded">Campaign</span>
+          {!(user && (user as any).role === 'customer') && (
+            <span className="bg-cordillera-gold/30 text-cordillera-olive px-2.5 py-1 text-xs uppercase tracking-wider rounded">Campaign</span>
+          )}
           <span className="hidden sm:inline">•</span>
           <span>By {campaign.organizer}</span>
           {campaign.endDate && (<>
@@ -250,9 +252,11 @@ const CampaignDetailPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="px-6 py-4">
-            <span className="inline-block bg-cordillera-gold/90 text-cordillera-olive px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded">
-              Campaign
-            </span>
+            {!(user && (user as any).role === 'customer') && (
+              <span className="inline-block bg-cordillera-gold/90 text-cordillera-olive px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded">
+                Campaign
+              </span>
+            )}
           </div>
         </div>
       </div>

@@ -247,7 +247,7 @@ const StoriesPage: React.FC = () => {
               <span className="text-sm font-medium">Heritage Preservation</span>
             </div>
           </div>
-          {user && (
+          {user && ((user as any).role === 'artisan' || (user as any).role === 'weaver') && (
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 to="/submit-story"
@@ -391,31 +391,35 @@ const StoriesPage: React.FC = () => {
       <section className="py-14 bg-cordillera-sage">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div className="text-center md:text-left">
-              <h3 className="text-2xl font-serif text-cordillera-olive mb-4">Share Your Story</h3>
-              <p className="text-cordillera-olive/80 text-base mb-5 leading-relaxed">
-                Are you a weaver with a story to tell? We'd love to feature your journey.
-              </p>
-              <Link 
-                to="/submit-story"
-                className="group relative inline-flex items-center justify-center border-2 border-cordillera-olive text-cordillera-olive px-6 py-3 text-base font-medium rounded-lg bg-cordillera-cream/10 backdrop-blur-sm shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:bg-cordillera-gold hover:text-cordillera-olive hover:border-cordillera-gold"
-              >
-                Submit Your Story
-              </Link>
-            </div>
+            {user && ((user as any).role === 'artisan' || (user as any).role === 'weaver') && (
+              <div className="text-center md:text-left">
+                <h3 className="text-2xl font-serif text-cordillera-olive mb-4">Share Your Story</h3>
+                <p className="text-cordillera-olive/80 text-base mb-5 leading-relaxed">
+                  Are you a weaver with a story to tell? We'd love to feature your journey.
+                </p>
+                <Link 
+                  to="/submit-story"
+                  className="group relative inline-flex items-center justify-center border-2 border-cordillera-olive text-cordillera-olive px-6 py-3 text-base font-medium rounded-lg bg-cordillera-cream/10 backdrop-blur-sm shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:bg-cordillera-gold hover:text-cordillera-olive hover:border-cordillera-gold"
+                >
+                  Submit Your Story
+                </Link>
+              </div>
+            )}
 
-            <div className="text-center md:text-left">
-              <h3 className="text-2xl font-serif text-cordillera-olive mb-4">Start Your Campaign</h3>
-              <p className="text-cordillera-olive/80 text-base mb-5 leading-relaxed">
-                Have a project that supports Cordillera weaving heritage? Launch your own campaign.
-              </p>
-              <Link 
-                to="/create-campaign"
-                className="group relative inline-flex items-center justify-center border-2 border-cordillera-olive text-cordillera-olive px-6 py-3 text-base font-medium rounded-lg bg-cordillera-cream/10 backdrop-blur-sm shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:bg-cordillera-gold hover:text-cordillera-olive hover:border-cordillera-gold"
-              >
-                Create Campaign
-              </Link>
-            </div>
+            {user && (user as any).role === 'artisan' && (
+              <div className="text-center md:text-left">
+                <h3 className="text-2xl font-serif text-cordillera-olive mb-4">Start Your Campaign</h3>
+                <p className="text-cordillera-olive/80 text-base mb-5 leading-relaxed">
+                  Have a project that supports Cordillera weaving heritage? Launch your own campaign.
+                </p>
+                <Link 
+                  to="/create-campaign"
+                  className="group relative inline-flex items-center justify-center border-2 border-cordillera-olive text-cordillera-olive px-6 py-3 text-base font-medium rounded-lg bg-cordillera-cream/10 backdrop-blur-sm shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:bg-cordillera-gold hover:text-cordillera-olive hover:border-cordillera-gold"
+                >
+                  Create Campaign
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </section>

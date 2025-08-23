@@ -4,18 +4,52 @@ import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Toast, useToast } from '../components/ui/toast';
-import { sampleProducts } from '../data/placeholders';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
+import api, { productsAPI } from '@/services/api';
+import type { Product } from '@/types';
 
 export const ProductDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const product = sampleProducts.find(p => p.id === parseInt(id || '1'));
+  const [product, setProduct] = React.useState<Product | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = React.useState(0);
   const [quantity, setQuantity] = React.useState(1);
   const { toast, showToast, hideToast } = useToast();
   const { isAuthenticated, requireAuth, user } = useAuth();
+
+  // Fetch product by ID
+  React.useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!id) return;
+      setIsLoading(true);
+      try {
+        const data = await productsAPI.getById(Number(id));
+        const API_ORIGIN = (api.defaults.baseURL || '').replace(/\/api\/?$/, '');
+        const resolveUrl = (u?: string | null) => {
+          if (!u) return '';
+          if (u.startsWith('http://') || u.startsWith('https://')) return u;
+          return `${API_ORIGIN}/${u.replace(/^\/?/, '')}`;
+        };
+        // Normalize images array and main image to absolute URLs
+        const normalized: Product = {
+          ...data,
+          image: resolveUrl((data as any).image),
+          images: Array.isArray((data as any).images) ? (data as any).images.map(resolveUrl) : [],
+          seller: (data as any).seller,
+        } as Product;
+        if (mounted) setProduct(normalized);
+      } catch (e) {
+        console.error('[ProductDetailsPage] fetch failed', e);
+        if (mounted) setProduct(null);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [id]);
 
   // Cart state synced with localStorage (shared with Marketplace)
   type CartItem = { id: number; name: string; price: number; image: string; quantity: number; stock?: number };
@@ -132,10 +166,10 @@ export const ProductDetailsPage: React.FC = () => {
     navigate('/marketplace');
   };
 
-  if (!product) {
+  if (isLoading || !product) {
     return (
       <div className="py-20 text-center">
-        <h1 className="text-2xl text-yellow-100">Product not found</h1>
+        <h1 className="text-2xl text-yellow-100">Loading product...</h1>
       </div>
     );
   }

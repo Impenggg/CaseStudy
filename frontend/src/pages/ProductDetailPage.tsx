@@ -4,6 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
 import BackLink from '@/components/BackLink';
+import api, { productsAPI } from '@/services/api';
  
 
 interface Product {
@@ -39,31 +40,51 @@ const ProductDetailPage: React.FC = () => {
     }
   });
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Sample product data - in real app, fetch from API
-    const sampleProduct: Product = {
-      id: parseInt(id || '1'),
-      name: "Traditional Ikat Blanket",
-      price: 2500,
-      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800",
-      description: "Handwoven with indigenous patterns passed down through generations",
-      category: "Blankets",
-      culturalBackground: "This traditional Ikat blanket represents centuries of Cordillera weaving heritage. The intricate patterns tell stories of mountain spirits and natural elements, woven with techniques preserved by master artisans in the remote villages of Northern Luzon.",
-      materials: ["100% Natural Cotton", "Plant-based Dyes", "Traditional Hand-spun Threads"],
-      careInstructions: ["Hand wash in cold water", "Air dry away from direct sunlight", "Store in cool, dry place", "Iron on low heat if needed"],
-      artisan: "Maria Santos - Master Weaver from Bontoc",
-      gallery: [
-        "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800",
-        "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800",
-        "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800",
-        "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800",
-        "https://images.unsplash.com/photo-1607081692251-5bb4c0940e1e?w=800"
-      ],
-      stockQuantity: 7,
-    };
-    setProduct(sampleProduct);
-  }, []);
+    let mounted = true;
+    (async () => {
+      if (!id) return;
+      setIsLoading(true);
+      try {
+        const data = await productsAPI.getById(Number(id));
+        // Resolve image URLs if backend returns relative paths
+        const API_ORIGIN = (api.defaults.baseURL || '').replace(/\/api\/?$/, '');
+        const resolveUrl = (u?: string | null) => {
+          if (!u) return '';
+          if (u.startsWith('http://') || u.startsWith('https://')) return u;
+          return `${API_ORIGIN}/${u.replace(/^\/?/, '')}`;
+        };
+        const gallery = Array.isArray((data as any).images) ? (data as any).images.map(resolveUrl).filter(Boolean) : [];
+        const careStr = (data as any).care_instructions as string | undefined;
+        const careInstructions = careStr
+          ? careStr.split(/\r?\n|;|,/).map(s => s.trim()).filter(Boolean)
+          : [];
+        const mapped: Product = {
+          id: data.id,
+          name: data.name,
+          price: Number((data as any).price ?? 0),
+          image: resolveUrl((data as any).image),
+          description: (data as any).description || '',
+          category: (data as any).category || 'general',
+          culturalBackground: (data as any).cultural_background || '',
+          materials: Array.isArray((data as any).materials) ? (data as any).materials : [],
+          careInstructions,
+          artisan: (data as any).seller?.name || 'Artisan',
+          gallery,
+          stockQuantity: typeof (data as any).stock_quantity === 'number' ? (data as any).stock_quantity : undefined,
+        };
+        if (mounted) setProduct(mapped);
+      } catch (e) {
+        console.error('[ProductDetail] Fetch failed', e);
+        if (mounted) setProduct(null);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [id]);
 
   // Determine single image to display: prefer first of gallery, else main image
   const displayImage: string | '' = React.useMemo(() => {
@@ -194,7 +215,7 @@ const ProductDetailPage: React.FC = () => {
     navigate('/marketplace');
   };
 
-  if (!product) {
+  if (isLoading || !product) {
     return <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
       <div className="text-cordillera-cream">Loading...</div>
     </div>;
