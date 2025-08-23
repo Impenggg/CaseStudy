@@ -3,7 +3,6 @@ import LoadingScreen from '../components/LoadingScreen';
 import { triggerAction } from '../lib/uiActions';
 import { Link } from 'react-router-dom';
 import api, { storiesAPI, campaignsAPI } from '@/services/api';
-import { externalStories } from '@/data/storiesExternal';
 import { useAuth } from '../contexts/AuthContext';
 
 interface Story {
@@ -83,22 +82,7 @@ const StoriesPage: React.FC = () => {
           } as Story;
         });
 
-        // Map external stories dataset
-        const mappedExternalStories: Story[] = externalStories.map((e) => {
-          const cover = isImageUrl(e.media_url) ? e.media_url : fallbackImage;
-          return {
-            id: e.id,
-            title: e.title,
-            content: e.excerpt || e.content || '',
-            media_url: cover,
-            author: e.author || 'Unknown',
-            date: e.created_at ? new Date(e.created_at).toLocaleDateString() : '',
-            category: e.category || 'community',
-            readTime: e.reading_time ?? 0,
-            featured: !!e.featured,
-            type: 'story',
-          } as Story;
-        });
+        // Removed static external stories to ensure UI reflects live DB only
 
         // Fetch campaigns (all)
         console.debug('[StoriesPage] Fetching campaigns...');
@@ -122,8 +106,8 @@ const StoriesPage: React.FC = () => {
           } as Campaign;
         });
 
-        // Combine: external stories + API stories + campaigns
-        const combined: ContentItem[] = [...mappedExternalStories, ...mappedStories, ...mappedCampaigns];
+        // Combine: API stories + campaigns (no static external stories)
+        const combined: ContentItem[] = [...mappedStories, ...mappedCampaigns];
         if (mounted) {
           setAllContent(combined);
           setFilteredContent(combined);

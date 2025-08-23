@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import BackLink from '@/components/BackLink';
 import { triggerAction } from '../lib/uiActions';
+import { storiesAPI } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 const StorySubmissionPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -14,34 +19,69 @@ const StorySubmissionPage: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // UI labels -> backend enum mapping
+  const CATEGORY_MAP: Record<string, 'tradition' | 'technique' | 'artisan' | 'community'> = {
+    'Artisan Profile': 'artisan',
+    'Artisan': 'artisan',
+    'Techniques': 'technique',
+    'Technique': 'technique',
+    'Cultural Heritage': 'tradition',
+    'Tradition': 'tradition',
+    'Community': 'community',
+    // Fallback labels route to a sensible default
+    'Business': 'community',
+    'Education': 'community',
+  };
 
   const categories = [
     'Artisan Profile',
     'Techniques',
     'Cultural Heritage',
-    'Business',
-    'Community',
-    'Education'
+    'Community'
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
+    setErrorMsg(null);
+
+    try {
+      if (!user) {
+        // Preserve intent and redirect to login
+        sessionStorage.setItem('intended_path', '/submit-story');
+        navigate('/login');
+        return;
+      }
+
+      // Build payload. Excerpt from first 160 chars; server will associate author from auth.
+      const excerpt = formData.content.slice(0, 160);
+      const backendCategory = CATEGORY_MAP[formData.category] ?? 'community';
+
+      const payload: any = {
+        title: formData.title,
+        content: formData.content,
+        excerpt,
+        category: backendCategory,
+        media_url: '',
+        media_type: 'image',
+        tags: [],
+        featured: false,
+        published: true,
+        reading_time: Number(formData.readTime) || 1,
+      };
+
+      await storiesAPI.create(payload as any);
       triggerAction(`Story submitted: ${formData.title}`);
-      setIsSubmitting(false);
       setShowSuccess(true);
-      setFormData({
-        title: '',
-        content: '',
-        category: '',
-        author: '',
-        email: '',
-        readTime: 5
-      });
-    }, 2000);
+      setFormData({ title: '', content: '', category: '', author: '', email: '', readTime: 5 });
+    } catch (err: any) {
+      console.error('[StorySubmissionPage] create failed', err?.response?.data || err);
+      setErrorMsg(err?.response?.data?.message || 'Failed to submit story');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -67,10 +107,10 @@ const StorySubmissionPage: React.FC = () => {
           </p>
           <div className="space-y-3">
             <Link
-              to="/stories"
+              to="/my-stories"
               className="block w-full bg-cordillera-gold text-cordillera-olive py-3 px-6 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
             >
-              Back to Stories
+              Go to My Stories
             </Link>
             <button
               onClick={() => setShowSuccess(false)}
@@ -119,6 +159,11 @@ const StorySubmissionPage: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {errorMsg && (
+              <div className="p-3 rounded bg-red-50 text-red-700 border border-red-200">
+                {errorMsg}
+              </div>
+            )}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-cordillera-olive mb-2">

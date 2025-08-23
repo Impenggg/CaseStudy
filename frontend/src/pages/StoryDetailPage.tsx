@@ -1,8 +1,7 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useParams, Link } from 'react-router-dom';
 import BackLink from '@/components/BackLink';
 import { useStory } from '@/hooks/useStory';
-import { externalStories } from '@/data/storiesExternal';
 
 const StoryDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,24 +21,7 @@ const StoryDetailPage: React.FC = () => {
     content: story?.content || '',
   }
 
-  // Build related stories from external dataset by category/tags, excluding current
-  const related = useMemo(() => {
-    try {
-      const byCategory = externalStories.filter(s => (s.category || 'community') === safeStory.category && s.id !== safeStory.id)
-      const byTags = externalStories.filter(s => s.id !== safeStory.id && (s.tags || []).some(t => safeStory.tags.includes(t)))
-      // Merge unique while preserving order preference: category first then tags
-      const seen = new Set<number>()
-      const merged = [...byCategory, ...byTags].filter(s => {
-        if (seen.has(s.id)) return false
-        seen.add(s.id)
-        return true
-      })
-      return merged.slice(0, 3)
-    } catch (e) {
-      console.error('[StoryDetailPage] related computation failed', e)
-      return []
-    }
-  }, [safeStory.category, safeStory.id, safeStory.tags])
+  // Removed external related stories; consider adding backend-powered related in the future
 
   if (isLoading) {
     return <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">

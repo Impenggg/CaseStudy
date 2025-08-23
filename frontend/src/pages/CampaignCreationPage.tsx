@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import BackLink from '@/components/BackLink';
 import { triggerAction } from '../lib/uiActions';
+import { campaignsAPI } from '@/services/api';
+import { useAuth } from '@/contexts/AuthContext';
 
 const CampaignCreationPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -16,6 +21,17 @@ const CampaignCreationPage: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // UI labels -> backend enum mapping
+  const CATEGORY_MAP: Record<string, 'preservation' | 'education' | 'equipment' | 'community'> = {
+    'Documentation': 'preservation',
+    'Preservation': 'preservation',
+    'Education': 'education',
+    'Equipment': 'equipment',
+    'Support': 'community',
+    'Community': 'community',
+  };
 
   const categories = [
     'Documentation',
@@ -29,23 +45,39 @@ const CampaignCreationPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      triggerAction(`Campaign created: ${formData.title} with goal ₱${parseInt(formData.goalAmount).toLocaleString()}`);
-      setIsSubmitting(false);
+    setErrorMsg(null);
+
+    try {
+      if (!user) {
+        sessionStorage.setItem('intended_path', '/create-campaign');
+        navigate('/login');
+        return;
+      }
+
+      const backendCategory = CATEGORY_MAP[formData.category] ?? 'community';
+
+      const payload: any = {
+        title: formData.title,
+        description: formData.description,
+        category: backendCategory,
+        image: '',
+        goal_amount: Number(formData.goalAmount) || 0,
+        end_date: formData.endDate,
+        status: 'active',
+      };
+
+      await campaignsAPI.create(payload as any);
+      triggerAction(`Campaign created: ${formData.title}`);
       setShowSuccess(true);
       setFormData({
-        title: '',
-        description: '',
-        category: '',
-        organizer: '',
-        email: '',
-        phone: '',
-        goalAmount: '',
-        endDate: ''
+        title: '', description: '', category: '', organizer: '', email: '', phone: '', goalAmount: '', endDate: ''
       });
-    }, 2000);
+    } catch (err: any) {
+      console.error('[CampaignCreationPage] create failed', err?.response?.data || err);
+      setErrorMsg(err?.response?.data?.message || 'Failed to create campaign');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -71,10 +103,10 @@ const CampaignCreationPage: React.FC = () => {
           </p>
           <div className="space-y-3">
             <Link
-              to="/stories"
+              to="/my-campaigns"
               className="block w-full bg-cordillera-gold text-cordillera-olive py-3 px-6 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
             >
-              Back to Stories
+              Go to My Campaigns
             </Link>
             <button
               onClick={() => setShowSuccess(false)}
@@ -123,6 +155,9 @@ const CampaignCreationPage: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <div className="bg-white rounded-lg shadow-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
+            {errorMsg && (
+              <div className="p-3 rounded bg-red-50 text-red-700 border border-red-200">{errorMsg}</div>
+            )}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-cordillera-olive mb-2">

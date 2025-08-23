@@ -15,10 +15,10 @@ class DatabaseSeeder extends Seeder
     {
         // Call our custom seeders
         $this->call([
-            // UserSeeder::class, // removed to avoid creating demo users
-            ProductSeeder::class,
-            StorySeeder::class,
-            CampaignSeeder::class,
+            // UserSeeder::class, // keep disabled to avoid creating demo users
+            // ProductSeeder::class, // disabled: avoid auto-seeding products
+            // StorySeeder::class, // disabled: avoid auto-seeding stories
+            // CampaignSeeder::class, // disabled: avoid auto-seeding campaigns
         ]);
     }
 }

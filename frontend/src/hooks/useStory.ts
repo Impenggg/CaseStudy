@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query'
-import { externalStories } from '@/data/storiesExternal'
 import { storiesAPI } from '@/services/api'
 
 export interface Story {
@@ -18,28 +17,8 @@ export interface Story {
   sourceText?: string
 }
 
-// Fetch a story by ID, preferring local external dataset and falling back to backend API
+// Fetch a story by ID solely from backend API
 async function fetchStory(id: number): Promise<Story> {
-  // 1) Try external dataset
-  const ext = externalStories.find((s) => s.id === id)
-  if (ext) {
-    const fullContent = ext.source_text ?? ext.content
-    return {
-      id: ext.id,
-      title: ext.title,
-      content: ext.excerpt || ext.content,
-      media_url: ext.media_url,
-      author: typeof ext.author === 'string' ? ext.author : (ext as any).author?.name || 'Unknown',
-      date: ext.created_at ? new Date(ext.created_at).toLocaleDateString() : '',
-      category: ext.category || 'community',
-      fullContent,
-      tags: ext.tags || [],
-      sourceUrl: ext.source_url,
-      sourceText: ext.source_text ?? undefined,
-    }
-  }
-
-  // 2) Fallback to backend API
   try {
     const apiStory = await storiesAPI.getById(id as number)
     const authorName = (apiStory as any)?.author?.name || (apiStory as any)?.author || 'Unknown'
