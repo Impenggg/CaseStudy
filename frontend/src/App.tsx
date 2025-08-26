@@ -12,7 +12,6 @@ const StoryDetailPage = lazy(() => import('./pages/StoryDetailPage'));
 const CampaignDetailPage = lazy(() => import('./pages/CampaignDetailPage'));
 const StorySubmissionPage = lazy(() => import('./pages/StorySubmissionPage'));
 const CampaignCreationPage = lazy(() => import('./pages/CampaignCreationPage'));
-const MediaCreationPage = lazy(() => import('./pages/MediaCreationPage'));
 const MediaFeedPage = lazy(() => import('./pages/MediaFeedPage'));
 const AccountPage = lazy(() => import('./pages/AccountPage'));
 const UserDashboard = lazy(() => import('./pages/UserDashboard').then(m => ({ default: m.UserDashboard })));

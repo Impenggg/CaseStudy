@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { triggerAction } from '../lib/uiActions';
 import { Link } from 'react-router-dom';
+import api, { productsAPI } from '@/services/api';
 
 interface Product {
   id: number;
@@ -11,87 +12,88 @@ interface Product {
   category: string;
 }
 
-interface Story {
-  id: number;
-  title: string;
-  content: string;
-  media_url: string;
-  author: string;
-}
-
 const HomePage: React.FC = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [featuredStories, setFeaturedStories] = useState<Story[]>([]);
   const [currentProductSlide, setCurrentProductSlide] = useState(0);
-  const [currentStorySlide, setCurrentStorySlide] = useState(0);
 
+  // Helpers consistent with Marketplace/Stories pages
+  const API_ORIGIN = React.useMemo(() => (api.defaults.baseURL || '').replace(/\/api\/?$/, ''), []);
+  const PLACEHOLDER_IMG = 'https://via.placeholder.com/800x500?text=No+Image';
+
+  const resolveImageUrl = (image?: string) => {
+    if (!image) return '';
+    if (image.startsWith('http://') || image.startsWith('https://')) return image;
+    return `${API_ORIGIN}/${image.replace(/^\/?/, '')}`;
+  };
+
+  // stories removed
+
+  // Fetch live featured products and stories; poll periodically for near real-time updates
   useEffect(() => {
-    // Sample featured products data for carousel
-    setFeaturedProducts([
-      {
-        id: 1,
-        name: "Traditional Ikat Blanket",
-        price: 2500,
-        image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800",
-        description: "Handwoven with indigenous patterns passed down through generations",
-        category: "Blankets"
-      },
-      {
-        id: 2,
-        name: "Cordillera Table Runner",
-        price: 850,
-        image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800",
-        description: "Elegant dining centerpiece with traditional motifs",
-        category: "Home Decor"
-      },
-      {
-        id: 3,
-        name: "Mountain Pattern Shawl",
-        price: 1800,
-        image: "https://images.unsplash.com/photo-1594736797933-d0051ba0ff29?w=800",
-        description: "Intricate geometric designs representing mountain landscapes",
-        category: "Clothing"
+    let mounted = true;
+    let timer: number | undefined;
+
+    const fetchFeatured = async () => {
+      try {
+        // Products: prefer featured flag, fallback to recent if not supported by backend
+        const pres = await productsAPI.getAll({ featured: true as any, per_page: 10 });
+        const plist = Array.isArray(pres?.data) ? pres.data : (Array.isArray(pres) ? pres : pres?.data?.data || []);
+        let mappedProducts: Product[] = plist.map((item: any) => {
+          const rawImage = item.image || item.image_url || item.imagePath || item.image_path || item.thumbnail || item.media_url || '';
+          return {
+            id: item.id,
+            name: item.name,
+            price: Number(item.price ?? 0),
+            image: resolveImageUrl(rawImage),
+            description: item.description || '',
+            category: item.category || 'General',
+          };
+        });
+        // Fallback: if none marked featured, fetch latest items
+        if ((!mappedProducts || mappedProducts.length === 0)) {
+          const pAlt = await productsAPI.getAll({ per_page: 10, sort_by: 'latest' as any });
+          const pAltList = Array.isArray(pAlt?.data) ? pAlt.data : (Array.isArray(pAlt) ? pAlt : pAlt?.data?.data || []);
+          mappedProducts = pAltList.map((item: any) => {
+            const rawImage = item.image || item.image_url || item.imagePath || item.image_path || item.thumbnail || item.media_url || '';
+            return {
+              id: item.id,
+              name: item.name,
+              price: Number(item.price ?? 0),
+              image: resolveImageUrl(rawImage),
+              description: item.description || '',
+              category: item.category || 'General',
+            };
+          });
+        }
+        if (mounted) setFeaturedProducts(mappedProducts);
+      } catch (e) {
+        // Fail silently on homepage; keep current lists
+        // Optionally could log: console.debug('[Home] fetchFeatured failed', e);
       }
-    ]);
+    };
 
-    // Sample featured stories data
-    setFeaturedStories([
-      {
-        id: 1,
-        title: "Master Weaver Maria's Journey",
-        content: "Discover how Maria preserves 300-year-old weaving techniques...",
-        media_url: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=500",
-        author: "Maria Santos"
-      },
-      {
-        id: 2,
-        title: "The Art of Natural Dyeing",
-        content: "Learning traditional plant-based coloring methods...",
-        media_url: "https://images.unsplash.com/photo-1582582494881-41e67beece72?w=500",
-        author: "Carlos Mendoza"
-      }
-    ]);
-  }, []);
-
-  // Carousel auto-play functionality
-  useEffect(() => {
-    const productTimer = setInterval(() => {
-      setCurrentProductSlide((prevSlide) => 
-        prevSlide === featuredProducts.length - 1 ? 0 : prevSlide + 1
-      );
-    }, 5000);
-
-    const storyTimer = setInterval(() => {
-      setCurrentStorySlide((prevSlide) => 
-        prevSlide === featuredStories.length - 1 ? 0 : prevSlide + 1
-      );
-    }, 6000);
+    fetchFeatured();
+    // Poll every 30s
+    timer = window.setInterval(fetchFeatured, 30000);
 
     return () => {
-      clearInterval(productTimer);
-      clearInterval(storyTimer);
+      mounted = false;
+      if (timer) window.clearInterval(timer);
     };
-  }, [featuredProducts.length, featuredStories.length]);
+  }, [API_ORIGIN]);
+
+  // Carousel auto-play functionality (products only)
+  useEffect(() => {
+    const productTimer = featuredProducts.length > 1 ? setInterval(() => {
+      setCurrentProductSlide((prevSlide) =>
+        prevSlide === featuredProducts.length - 1 ? 0 : prevSlide + 1
+      );
+    }, 5000) : undefined;
+
+    return () => {
+      if (productTimer) clearInterval(productTimer);
+    };
+  }, [featuredProducts.length]);
 
   // Product carousel functions
   const nextProductSlide = () => {
@@ -104,19 +106,6 @@ const HomePage: React.FC = () => {
 
   const goToProductSlide = (index: number) => {
     setCurrentProductSlide(index);
-  };
-
-  // Story carousel functions
-  const nextStorySlide = () => {
-    setCurrentStorySlide(currentStorySlide === featuredStories.length - 1 ? 0 : currentStorySlide + 1);
-  };
-
-  const prevStorySlide = () => {
-    setCurrentStorySlide(currentStorySlide === 0 ? featuredStories.length - 1 : currentStorySlide - 1);
-  };
-
-  const goToStorySlide = (index: number) => {
-    setCurrentStorySlide(index);
   };
 
   return (
@@ -189,18 +178,14 @@ const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* Featured Collections & Stories Section */}
+      {/* Featured Products Section */}
       <section className="py-16 sm:py-20 bg-cordillera-olive">
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-light text-cordillera-cream mb-4">
-              Featured Collections & Stories
+              Featured
             </h2>
-            <p className="text-cordillera-cream/90 text-base sm:text-lg max-w-3xl mx-auto leading-relaxed">
-              Discover handpicked masterpieces and the personal journeys of master artisans
-            </p>
           </div>
-
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Products Carousel */}
             <div>
@@ -208,127 +193,57 @@ const HomePage: React.FC = () => {
                 Featured Products
               </h3>
               <div className="relative">
-            <div className="overflow-hidden relative">
-              <div 
-                className="flex transition-transform duration-500 ease-in-out"
+                <div className="overflow-hidden">
+                  <div
+                    className="flex transition-transform duration-500 ease-in-out"
                     style={{ transform: `translateX(-${currentProductSlide * 100}%)` }}
-              >
-                {featuredProducts.map((product) => (
+                  >
+                    {featuredProducts.map((product) => (
                       <div key={product.id} className="w-full flex-shrink-0 px-2">
                         <div className="bg-cordillera-cream rounded-xl shadow-2xl overflow-hidden h-[380px] transform transition-all duration-300 hover:scale-[1.02]">
                           <div className="h-[250px] relative overflow-hidden">
-                      <img
-                        src={product.image}
-                        alt={product.name}
+                            <img
+                              src={product.image || PLACEHOLDER_IMG}
+                              alt={product.name}
                               className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                              loading="lazy"
+                              onError={(e) => {
+                                const target = e.currentTarget as HTMLImageElement;
+                                if (target.src !== PLACEHOLDER_IMG) {
+                                  target.src = PLACEHOLDER_IMG;
+                                }
+                              }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
                           </div>
                           <div className="p-4 flex flex-col h-[130px]">
                             <h3 className="text-lg sm:text-xl font-serif text-cordillera-olive mb-2 font-medium">
-                          {product.name}
-                        </h3>
+                              {product.name}
+                            </h3>
                             <p className="text-cordillera-olive/70 mb-auto text-xs leading-relaxed line-clamp-2">
-                          {product.description}
-                        </p>
+                              {product.description}
+                            </p>
                             <div className="flex justify-between items-center pt-3 border-t border-cordillera-olive/20">
                               <span className="text-lg sm:text-xl font-light text-cordillera-gold">
-                            ₱{product.price.toLocaleString()}
-                          </span>
-                          <Link
-                            to={`/product/${product.id}`}
+                                ₱{product.price.toLocaleString()}
+                              </span>
+                              <Link
+                                to={`/product/${product.id}`}
                                 className="bg-cordillera-olive text-cordillera-cream px-3 py-1.5 rounded-lg hover:bg-cordillera-olive/90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl text-xs"
-                          >
-                            View Details
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-                {/* Product Carousel Controls */}
-            <button
-                  onClick={prevProductSlide}
-                  className="absolute -left-4 top-1/2 transform -translate-y-1/2 bg-cordillera-olive/80 text-white p-3 rounded-full hover:bg-cordillera-olive transition-all duration-300 shadow-lg hover:shadow-xl"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button
-                  onClick={nextProductSlide}
-                  className="absolute -right-4 top-1/2 transform -translate-y-1/2 bg-cordillera-olive/80 text-white p-3 rounded-full hover:bg-cordillera-olive transition-all duration-300 shadow-lg hover:shadow-xl"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
-                {/* Product Carousel Indicators */}
-                <div className="flex justify-center mt-6 space-x-3">
-              {featuredProducts.map((_, index) => (
-                <button
-                  key={index}
-                      onClick={() => goToProductSlide(index)}
-                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                        index === currentProductSlide ? 'bg-cordillera-gold shadow-lg' : 'bg-cordillera-olive/30 hover:bg-cordillera-olive/50'
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-
-            {/* Stories Carousel */}
-            <div>
-              <h3 className="text-2xl font-serif font-light text-cordillera-cream mb-6 text-center lg:text-left">
-              Stories of Heritage
-              </h3>
-              <div className="relative">
-                <div className="overflow-hidden relative">
-                  <div 
-                    className="flex transition-transform duration-500 ease-in-out"
-                    style={{ transform: `translateX(-${currentStorySlide * 100}%)` }}
-                  >
-            {featuredStories.map((story) => (
-                      <div key={story.id} className="w-full flex-shrink-0 px-2">
-              <Link
-                to={`/story/${story.id}`}
-                          className="group block bg-cordillera-cream rounded-xl overflow-hidden hover:bg-cordillera-cream/95 transition-all duration-300 shadow-2xl transform hover:-translate-y-2 h-[380px]"
-              >
-                          <div className="h-[230px] overflow-hidden relative">
-                  <img
-                    src={story.media_url}
-                    alt={story.title}
-                              className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                  />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"></div>
-                </div>
-                          <div className="p-6 flex flex-col h-[150px]">
-                            <h3 className="text-xl sm:text-2xl font-serif text-cordillera-olive mb-3 font-medium">
-                    {story.title}
-                  </h3>
-                            <p className="text-cordillera-olive/70 mb-auto text-sm leading-relaxed line-clamp-2">
-                    {story.content}
-                  </p>
-                            <div className="pt-4 border-t border-cordillera-olive/20">
-                              <p className="text-cordillera-gold text-sm font-semibold uppercase tracking-wide">
-                    By {story.author}
-                  </p>
+                              >
+                                View Details
+                              </Link>
                             </div>
                           </div>
-                        </Link>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
 
-                {/* Story Carousel Controls */}
+                {/* Product Carousel Controls */}
                 <button
-                  onClick={prevStorySlide}
+                  onClick={prevProductSlide}
                   className="absolute -left-4 top-1/2 transform -translate-y-1/2 bg-cordillera-olive/80 text-white p-3 rounded-full hover:bg-cordillera-olive transition-all duration-300 shadow-lg hover:shadow-xl"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -336,7 +251,7 @@ const HomePage: React.FC = () => {
                   </svg>
                 </button>
                 <button
-                  onClick={nextStorySlide}
+                  onClick={nextProductSlide}
                   className="absolute -right-4 top-1/2 transform -translate-y-1/2 bg-cordillera-olive/80 text-white p-3 rounded-full hover:bg-cordillera-olive transition-all duration-300 shadow-lg hover:shadow-xl"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -344,17 +259,73 @@ const HomePage: React.FC = () => {
                   </svg>
                 </button>
 
-                {/* Story Carousel Indicators */}
+                {/* Product Carousel Indicators */}
                 <div className="flex justify-center mt-6 space-x-3">
-                  {featuredStories.map((_, index) => (
+                  {featuredProducts.map((_, index) => (
                     <button
                       key={index}
-                      onClick={() => goToStorySlide(index)}
+                      onClick={() => goToProductSlide(index)}
                       className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                        index === currentStorySlide ? 'bg-cordillera-gold shadow-lg' : 'bg-cordillera-olive/30 hover:bg-cordillera-olive/50'
+                        index === currentProductSlide
+                          ? 'bg-cordillera-gold shadow-lg'
+                          : 'bg-cordillera-olive/30 hover:bg-cordillera-olive/50'
                       }`}
                     />
                   ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Want to Support - Campaign Card (no image) */}
+            <div>
+              <h3 className="text-2xl font-serif font-light text-cordillera-cream mb-6 text-center lg:text-left">
+                Want to Support
+              </h3>
+              <div className="px-2">
+                <div className="bg-white border border-[#e3e3d9] rounded-xl shadow-sm p-6 sm:p-7 h-[380px] flex flex-col overflow-hidden">
+                  {/* Top badge */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="inline-block text-xs font-semibold tracking-wide uppercase px-3 py-1 rounded-md bg-[#cfd4b4] text-cordillera-olive">
+                      Campaign
+                    </span>
+                    <span className="text-xs font-semibold tracking-wide uppercase text-cordillera-olive/70">
+                      Community
+                    </span>
+                </div>
+
+                {/* Title */}
+                <h3 className="text-xl sm:text-2xl font-serif text-cordillera-olive font-medium mb-3">
+                  Cordillera Fashion for a Cause
+                </h3>
+
+                {/* Description */}
+                <p className="text-[#4a4a3f] mb-5 leading-relaxed line-clamp-3">
+                  This campaign will host a cultural fashion show highlighting clothes and accessories made with authentic Cordillera weaves. Local designers will collaborate with artisans to showcase traditions with contemporary relevance.
+                </p>
+
+                {/* Progress */}
+                <div className="mb-3 flex items-center justify-between text-sm text-cordillera-olive/80">
+                  <span>0% funded</span>
+                  <span>₱0</span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-[#ececdf] overflow-hidden mb-2">
+                  <div className="h-full w-[0%] bg-cordillera-gold" />
+                </div>
+                <div className="text-xs text-cordillera-olive/70 mb-5">Goal: ₱250,000</div>
+
+                {/* CTA and meta */}
+                <div className="mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <button
+                    disabled
+                    className="px-4 py-2.5 rounded-lg bg-[#cfd1d6] text-[#4a4a3f] font-medium cursor-not-allowed"
+                  >
+                    Support Disabled
+                  </button>
+                  <div className="flex items-center gap-6 text-xs text-cordillera-olive/70">
+                    <span>By Test Artisan</span>
+                    <span>Ends 12/12/2025</span>
+                  </div>
+                </div>
                 </div>
               </div>
             </div>

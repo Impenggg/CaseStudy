@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import BackLink from '@/components/BackLink';
-import { productsAPI } from '@/services/api';
+import api, { productsAPI } from '@/services/api';
 import type { Product } from '@/types';
 
 const MyProductsPage: React.FC = () => {
@@ -9,6 +9,15 @@ const MyProductsPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+
+  // Resolve image URL helper and placeholder
+  const API_ORIGIN = useMemo(() => (api.defaults.baseURL || '').replace(/\/api\/?$/, ''), []);
+  const resolveImageUrl = (image?: string) => {
+    if (!image) return '';
+    if (image.startsWith('http://') || image.startsWith('https://')) return image;
+    return `${API_ORIGIN}/${image.replace(/^\/?/, '')}`;
+  };
+  const PLACEHOLDER_IMG = 'https://via.placeholder.com/48?text=%20';
 
   const load = async () => {
     try {
@@ -81,9 +90,20 @@ const MyProductsPage: React.FC = () => {
                   <tr key={p.id} className="border-b last:border-b-0 border-cordillera-olive/10">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        {p.image && (
-                          <img src={typeof p.image === 'string' ? p.image : (p as any).image_url || ''} alt={p.name} className="w-12 h-12 object-cover rounded" />
-                        )}
+                        <img
+                          src={
+                            resolveImageUrl(
+                              (p as any).image || (p as any).image_url || (p as any).image_path || (p as any).imagePath || (p as any).thumbnail || ''
+                            ) || PLACEHOLDER_IMG
+                          }
+                          alt={p.name}
+                          className="w-12 h-12 object-cover rounded"
+                          loading="lazy"
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLImageElement;
+                            if (target.src !== PLACEHOLDER_IMG) target.src = PLACEHOLDER_IMG;
+                          }}
+                        />
                         <div>
                           <Link to={`/product/${p.id}`} className="text-cordillera-olive font-medium hover:underline">{p.name}</Link>
                           <div className="text-xs text-cordillera-olive/60 line-clamp-1">{p.description}</div>
