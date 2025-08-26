@@ -17,8 +17,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             // UserSeeder::class, // keep disabled to avoid creating demo users
             // ProductSeeder::class, // disabled: avoid auto-seeding products
-            // StorySeeder::class, // disabled: avoid auto-seeding stories
-            // CampaignSeeder::class, // disabled: avoid auto-seeding campaigns
+            StorySeeder::class,
+            CampaignSeeder::class,
         ]);
     }
 }

@@ -183,7 +183,7 @@ const MediaFeedPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsComposerOpen(true)}
-              className="w-full text-left bg-white rounded-md shadow-sm border border-cordillera-sage/30 p-4 hover:bg-cordillera-gold/5 transition-colors"
+              className="w-full text-left bg-white rounded-md shadow-sm hover:shadow-md transition-shadow border border-cordillera-sage/30 p-4 hover:bg-cordillera-gold/5"
             >
               <div className="text-cordillera-olive/70">Share something…</div>
             </button>
@@ -195,10 +195,11 @@ const MediaFeedPage: React.FC = () => {
                 {loadingMyPosts && <span className="text-sm text-cordillera-olive/60">Loading…</span>}
               </div>
               {myError && <div className="text-sm text-red-700 mb-2">{myError}</div>}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {myPosts.map((p) => (
-                  <div key={p.id} className="relative bg-white rounded-md overflow-hidden border border-cordillera-sage/30">
-                    <img src={p.image_url} alt={p.caption || `my-${p.id}`} className="w-full h-32 object-cover" />
+                  <div key={p.id} className="group relative bg-white rounded-md overflow-hidden border border-cordillera-sage/30 shadow-sm hover:shadow-md transition-all">
+                    <img src={p.image_url} alt={p.caption || `my-${p.id}`} className="w-full h-32 object-cover transform transition-transform duration-300 group-hover:scale-[1.03]" />
+                    <div className="pointer-events-none absolute inset-0 bg-cordillera-olive/0 group-hover:bg-cordillera-olive/5 transition-colors" />
                   </div>
                 ))}
                 {!loadingMyPosts && myPosts.length === 0 && !myError && (
@@ -236,9 +237,9 @@ const MediaFeedPage: React.FC = () => {
               </div>
             )}
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               {feed.map((post, i) => (
-                <div key={post.id} className="bg-white rounded-md shadow-sm border border-cordillera-sage/30">
+                <div key={post.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-cordillera-sage/30">
                   <div className="p-3 border-b border-cordillera-sage/20 flex items-center justify-between">
                     <div>
                       <div className="text-sm font-medium text-cordillera-olive">{post.user?.name || 'User'}</div>
@@ -247,11 +248,14 @@ const MediaFeedPage: React.FC = () => {
                   </div>
                   <div className="p-3">
                     {post.caption && <p className="mb-2 text-cordillera-olive">{post.caption}</p>}
-                    <img src={post.image_url} alt={post.caption || `post-${post.id}`} className="w-full rounded-md object-cover" />
+                    <div className="relative overflow-hidden rounded-md group">
+                      <img src={post.image_url} alt={post.caption || `post-${post.id}`} className="w-full object-cover transform transition-transform duration-500 group-hover:scale-[1.02]" />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </div>
                   </div>
                   <div className="px-3 pb-3 flex items-center gap-4 text-sm text-cordillera-olive/80">
                     <button
-                      className="hover:text-cordillera-olive"
+                      className="hover:text-cordillera-olive transition-colors"
                       onClick={() => toggleLike(post.id, i)}
                     >
                       👍 Like {post.reactions_count ? `(${post.reactions_count})` : ''}
@@ -275,12 +279,12 @@ const MediaFeedPage: React.FC = () => {
 
             {/* Infinite scroll sentinel + fallback button */}
             <div ref={sentinelRef} className="h-1" />
-            <div className="mt-6 text-center">
+            <div className="mt-8 text-center">
               {loadingFeed && <div className="text-cordillera-olive/60 text-sm">Loading…</div>}
               {hasMore && !loadingFeed && (
                 <button
                   onClick={() => loadFeed(page + 1)}
-                  className={`border border-cordillera-gold text-cordillera-olive px-4 py-2 rounded-md hover:bg-cordillera-gold/10`}
+                  className={`border border-cordillera-gold text-cordillera-olive px-4 py-2 rounded-md hover:bg-cordillera-gold/10 shadow-sm hover:shadow-md transition-shadow`}
                 >
                   Load more
                 </button>

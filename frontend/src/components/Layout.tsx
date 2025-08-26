@@ -41,7 +41,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-cordillera-olive">
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-cordillera-olive/95 backdrop-blur-sm shadow-lg transition-all duration-300">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-cordillera-olive/95 backdrop-blur-sm shadow-lg transition-all duration-300 border-b border-cordillera-gold/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
 
@@ -56,37 +56,33 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="hidden md:flex items-center space-x-8">
               <Link
                 to="/"
-                className={`text-cordillera-cream hover:text-cordillera-gold transition-colors ${
-                  isActive('/') ? 'text-cordillera-gold' : ''
-                }`}
-                style={{ color: isActive('/') ? '#8A784E' : '#E7EFC7' }}
+                className={`relative text-cordillera-cream/90 hover:text-cordillera-gold transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-cordillera-gold after:transition-all after:duration-200 after:w-0 hover:after:w-full ${
+                  isActive('/') ? 'text-cordillera-gold after:w-full' : ''
+                } focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40 rounded`}
               >
                 Home
               </Link>
               <Link
                 to="/marketplace"
-                className={`text-cordillera-cream hover:text-cordillera-gold transition-colors ${
-                  isActive('/marketplace') ? 'text-cordillera-gold' : ''
-                }`}
-                style={{ color: isActive('/marketplace') ? '#8A784E' : '#E7EFC7' }}
+                className={`relative text-cordillera-cream/90 hover:text-cordillera-gold transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-cordillera-gold after:transition-all after:duration-200 after:w-0 hover:after:w-full ${
+                  isActive('/marketplace') ? 'text-cordillera-gold after:w-full' : ''
+                } focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40 rounded`}
               >
                 Marketplace
               </Link>
               <Link
                 to="/stories"
-                className={`text-cordillera-cream hover:text-cordillera-gold transition-colors ${
-                  isActive('/stories') ? 'text-cordillera-gold' : ''
-                }`}
-                style={{ color: isActive('/stories') ? '#8A784E' : '#E7EFC7' }}
+                className={`relative text-cordillera-cream/90 hover:text-cordillera-gold transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-cordillera-gold after:transition-all after:duration-200 after:w-0 hover:after:w-full ${
+                  isActive('/stories') ? 'text-cordillera-gold after:w-full' : ''
+                } focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40 rounded`}
               >
                 Stories
               </Link>
               <Link
                 to="/media-creation"
-                className={`text-cordillera-cream hover:text-cordillera-gold transition-colors ${
-                  isActive('/media-creation') ? 'text-cordillera-gold' : ''
-                }`}
-                style={{ color: isActive('/media-creation') ? '#8A784E' : '#E7EFC7' }}
+                className={`relative text-cordillera-cream/90 hover:text-cordillera-gold transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-cordillera-gold after:transition-all after:duration-200 after:w-0 hover:after:w-full ${
+                  isActive('/media-creation') ? 'text-cordillera-gold after:w-full' : ''
+                } focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40 rounded`}
               >
                 Media Creation
               </Link>
@@ -99,7 +95,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <div className="relative" ref={accountRef}>
                   <button
                     onClick={() => setIsAccountOpen(v => !v)}
-                    className="ml-2 inline-flex items-center px-3 py-1.5 rounded-full bg-cordillera-cream/10 text-cordillera-cream hover:bg-cordillera-cream/20 transition-colors"
+                    className="ml-2 inline-flex items-center px-3 py-1.5 rounded-full bg-cordillera-cream/10 text-cordillera-cream hover:bg-cordillera-cream/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40"
                     aria-haspopup="menu"
                     aria-expanded={isAccountOpen}
                   >
@@ -110,7 +106,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
                   </button>
                   {isAccountOpen && (
-                    <div className="absolute right-0 mt-2 w-64 rounded-md border border-cordillera-gold/30 bg-cordillera-olive shadow-lg z-50">
+                    <div className="absolute right-0 mt-2 w-64 rounded-lg border border-cordillera-gold/30 bg-cordillera-olive shadow-xl overflow-hidden z-50" role="menu" aria-label="Account">
                       <div className="px-4 py-3 border-b border-cordillera-gold/20">
                         <p className="text-sm text-cordillera-cream/70">Signed in as</p>
                         <p className="text-cordillera-cream truncate">{user?.name || user?.email}</p>
@@ -120,24 +116,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         {user?.role === 'artisan' ? (
                           // Artisan menu
                           <>
-                            <Link to="/dashboard/artisan" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Account Information</Link>
-                            <Link to="/my-products" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">My Products</Link>
-                            <Link to="/my-stories" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">My Stories</Link>
-                            <Link to="/my-campaigns" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">My Campaigns</Link>
-                            <Link to="/media-creation" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Media Uploads</Link>
+                            <Link to="/dashboard/artisan" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Account Information</Link>
+                            <Link to="/my-products" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">My Products</Link>
+                            <Link to="/my-stories" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">My Stories</Link>
+                            <Link to="/my-campaigns" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">My Campaigns</Link>
+                            <Link to="/media-creation" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Media Uploads</Link>
                           </>
                         ) : user?.role === 'customer' ? (
                           // Customer menu
                           <>
-                            <Link to="/dashboard/customer" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Account Information</Link>
-                            <Link to="/my-purchases" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">My Purchases</Link>
-                            <Link to="/campaigns-supported" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Campaigns Supported</Link>
-                            <Link to="/media-creation" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Media Uploads</Link>
+                            <Link to="/dashboard/customer" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Account Information</Link>
+                            <Link to="/my-purchases" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">My Purchases</Link>
+                            <Link to="/campaigns-supported" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Campaigns Supported</Link>
+                            <Link to="/media-creation" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Media Uploads</Link>
                           </>
                         ) : (
                           // Other roles: minimal
                           <>
-                            <Link to="/account" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10">Account Information</Link>
+                            <Link to="/account" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Account Information</Link>
                           </>
                         )}
                         <button
@@ -146,7 +142,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             await logout();
                             navigate('/');
                           }}
-                          className="w-full text-left px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 border-t border-cordillera-gold/20"
+                          className="w-full text-left px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 border-t border-cordillera-gold/20 transition-colors"
+                          role="menuitem"
                         >
                           Log out
                         </button>
@@ -156,8 +153,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
               ) : (
                 <div className="flex items-center space-x-3">
-                  <Link to="/login" className="text-cordillera-cream hover:text-cordillera-gold transition-colors">Login</Link>
-                  <Link to="/register" className="bg-cordillera-gold text-cordillera-olive px-4 py-1.5 hover:bg-cordillera-gold/90 transition-colors">Create account</Link>
+                  <Link to="/login" className="text-cordillera-cream/90 hover:text-cordillera-gold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40 rounded">Login</Link>
+                  <Link to="/register" className="bg-cordillera-gold text-cordillera-olive px-4 py-1.5 rounded-full shadow-sm hover:bg-cordillera-gold/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40">Create account</Link>
                 </div>
               )}
             </div>
@@ -182,32 +179,28 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div className="px-2 pt-2 pb-3 space-y-1 bg-cordillera-olive">
               <Link
                 to="/"
-                className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors"
-                style={{ color: isActive('/') ? '#8A784E' : '#E7EFC7' }}
+                className={`block px-3 py-2 transition-colors ${isActive('/') ? 'text-cordillera-gold' : 'text-cordillera-cream/90 hover:text-cordillera-gold'}`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Home
               </Link>
               <Link
                 to="/marketplace"
-                className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors"
-                style={{ color: isActive('/marketplace') ? '#8A784E' : '#E7EFC7' }}
+                className={`block px-3 py-2 transition-colors ${isActive('/marketplace') ? 'text-cordillera-gold' : 'text-cordillera-cream/90 hover:text-cordillera-gold'}`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Marketplace
               </Link>
               <Link
                 to="/stories"
-                className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors"
-                style={{ color: isActive('/stories') ? '#8A784E' : '#E7EFC7' }}
+                className={`block px-3 py-2 transition-colors ${isActive('/stories') ? 'text-cordillera-gold' : 'text-cordillera-cream/90 hover:text-cordillera-gold'}`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Stories
               </Link>
               <Link
                 to="/media-creation"
-                className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors"
-                style={{ color: isActive('/media-creation') ? '#8A784E' : '#E7EFC7' }}
+                className={`block px-3 py-2 transition-colors ${isActive('/media-creation') ? 'text-cordillera-gold' : 'text-cordillera-cream/90 hover:text-cordillera-gold'}`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Media Creation

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Card, CardContent } from '@/components/ui/card';
 
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -119,7 +120,8 @@ export const RegisterPage = () => {
 
           {/* Form card */}
           <div className="relative">
-            <div className="mx-auto max-w-md w-full space-y-8 rounded-md border border-cordillera-gold/20 bg-black/10 backdrop-blur-sm p-8">
+            <Card className="mx-auto max-w-md w-full">
+              <CardContent className="space-y-8">
               {/* Header */}
               <div className="text-center">
                 <Link to="/" className="text-3xl sm:text-4xl font-serif font-light text-cordillera-cream tracking-wide">
@@ -291,21 +293,21 @@ export const RegisterPage = () => {
                   </p>
                 </div>
               </form>
-
               {/* Role Information */}
-              <div className="mt-8 pt-6 border-t border-cordillera-gold/20">
-                <div className="text-sm text-cordillera-cream/70 space-y-2">
-                  <p className="font-medium text-cordillera-cream">Join as:</p>
-                  <div className="space-y-1">
-                    <p><span className="text-cordillera-gold">Customer:</span> Browse, purchase, and support traditional artisans</p>
-                    <p><span className="text-cordillera-gold">Artisan:</span> Showcase and sell your handcrafted creations</p>
+                <div className="mt-8 pt-6 border-t border-cordillera-gold/20">
+                  <div className="text-sm text-cordillera-cream/70 space-y-2">
+                    <p className="font-medium text-cordillera-cream">Join as:</p>
+                    <div className="space-y-1">
+                        <p><span className="text-cordillera-gold">Customer:</span> Browse, purchase, and support traditional artisans</p>
+                        <p><span className="text-cordillera-gold">Artisan:</span> Showcase and sell your handcrafted creations</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
 };

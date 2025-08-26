@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\DonationController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\MediaPostController;
+use App\Http\Controllers\Api\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -96,4 +97,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/media', [MediaPostController::class, 'store']);
     Route::post('/media/{media}/react', [MediaPostController::class, 'react']);
     Route::post('/media/{media}/comments', [MediaPostController::class, 'comment']);
+
+    // Dashboard route (authenticated)
+    Route::get('/dashboard/{role}', [DashboardController::class, 'show']);
 });

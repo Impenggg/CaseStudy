@@ -14,12 +14,14 @@ class StorySeeder extends Seeder
      */
     public function run(): void
     {
-        $weavers = User::where('role', 'weaver')->get();
-
-        $maria = $weavers->where('name', 'Maria Santos')->first();
-        $rosa = $weavers->where('name', 'Rosa Dulawan')->first();
-        $elena = $weavers->where('name', 'Elena Badiw')->first();
-        $defaultAuthorId = $maria?->id ?? $rosa?->id ?? $elena?->id ?? $weavers->first()?->id;
+        // Include both 'weaver' and 'artisan' roles, prefer a specific test artisan if present
+        $authors = User::whereIn('role', ['weaver', 'artisan'])->get();
+        $preferred = $authors->where('name', 'Test Artisan')->first()
+            ?? $authors->first();
+        $maria = $authors->where('name', 'Maria Santos')->first();
+        $rosa = $authors->where('name', 'Rosa Dulawan')->first();
+        $elena = $authors->where('name', 'Elena Badiw')->first();
+        $defaultAuthorId = $preferred?->id ?? $maria?->id ?? $rosa?->id ?? $elena?->id;
 
         // 1) UNESCO World Heritage: Rice Terraces of the Philippine Cordilleras
         Story::create([

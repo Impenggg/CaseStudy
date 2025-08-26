@@ -1,9 +1,113 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import api from '@/services/api';
 
 export const UserDashboard = () => {
   const { user, isAuthenticated } = useAuth();
+
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  const [stats, setStats] = React.useState<
+    | {
+        // Artisan quick stats
+        totalSales?: number;
+        storiesShared?: number;
+        campaignsStarted?: number;
+        // Legacy/product or buyer fields (for non-artisan)
+        productsListed?: number;
+        itemsPurchased?: number;
+        favorites?: number;
+        totalSpent?: number;
+        totalRevenue?: number; // kept for backwards compat
+        // Community group (role-dependent keys)
+        community?: {
+          // Artisan community
+          totalRevenue?: number;
+          storiesViewed?: number;
+          fundsRaised?: number;
+          // Customer/community fallback
+          artisansSupported?: number;
+          culturalContributions?: number;
+          storiesShared?: number;
+        };
+        activity: Array<{ id: string | number; title: string; subtitle?: string; at: string | number | Date }>;
+      }
+    | null
+  >(null);
+
+  const isArtisanRole = React.useMemo(() => {
+    const r = (user?.role || '').toLowerCase();
+    return ['artisan', 'weaver', 'seller'].includes(r);
+  }, [user?.role]);
+
+  // Simple time-ago formatter without extra deps
+  const timeAgo = (dateInput: string | number | Date) => {
+    const d = new Date(dateInput);
+    const diff = Date.now() - d.getTime();
+    const sec = Math.floor(diff / 1000);
+    if (sec < 60) return `${sec}s ago`;
+    const min = Math.floor(sec / 60);
+    if (min < 60) return `${min}m ago`;
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return `${hr}h ago`;
+    const day = Math.floor(hr / 24);
+    return `${day}d ago`;
+  };
+
+  React.useEffect(() => {
+    if (!user) return;
+    let mounted = true;
+    const controller = new AbortController();
+
+    const fetchData = async () => {
+      try {
+        setError(null);
+        const role = user.role || 'customer';
+        const res = await api.get(`/dashboard/${role}`, { signal: controller.signal as any });
+        const data = res.data;
+        if (!mounted) return;
+        // Expected shape documented above; tolerate partials
+        const storiesShared =
+          data.storiesShared ?? data.stories_shared ?? data.community?.storiesShared ?? 0;
+        const campaignsStarted =
+          data.campaignsStarted ?? data.campaigns_started ?? (Array.isArray(data.campaigns) ? data.campaigns.length : 0);
+        setStats({
+          // artisan quick stats
+          totalSales: data.totalSales,
+          storiesShared,
+          campaignsStarted,
+          // buyer/legacy fields if present
+          productsListed: data.productsListed,
+          totalRevenue: data.totalRevenue,
+          itemsPurchased: data.itemsPurchased,
+          favorites: data.favorites,
+          totalSpent: data.totalSpent,
+          community: data.community || {},
+          activity: Array.isArray(data.activity) ? data.activity : [],
+        });
+      } catch (e: any) {
+        // Ignore cancellations from unmount/re-render
+        const code = e?.code || e?.name;
+        if (code === 'ERR_CANCELED' || code === 'CanceledError' || code === 'AbortError') {
+          return;
+        }
+        setError(e instanceof Error ? e.message : 'Failed to load dashboard');
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    // Initial load
+    fetchData();
+    // Poll every 15s for near-realtime updates
+    const id = setInterval(fetchData, 15000);
+    return () => {
+      mounted = false;
+      controller.abort();
+      clearInterval(id);
+    };
+  }, [user]);
 
   if (!isAuthenticated || !user) {
     return (
@@ -41,41 +145,56 @@ export const UserDashboard = () => {
             {/* Quick Stats */}
             <div className="bg-white p-8 border border-cordillera-sage/20">
               <h2 className="text-2xl font-serif font-light text-cordillera-olive mb-6 tracking-wide">
-                {user.role === 'artisan' ? 'Your Artisan Stats' : 'Your Activity'}
+                {isArtisanRole ? 'Your Artisan Stats' : 'Your Activity'}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {user.role === 'artisan' ? (
+                {isArtisanRole ? (
                   <>
                     <div className="text-center">
-                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">12</div>
-                      <div className="text-sm text-cordillera-olive/70">Products Listed</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">45</div>
+                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">
+                        {loading ? '—' : (stats?.totalSales ?? 0)}
+                      </div>
                       <div className="text-sm text-cordillera-olive/70">Total Sales</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">₱85,600</div>
-                      <div className="text-sm text-cordillera-olive/70">Total Revenue</div>
+                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">
+                        {loading ? '—' : (stats?.storiesShared ?? 0)}
+                      </div>
+                      <div className="text-sm text-cordillera-olive/70">Stories Shared</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">
+                        {loading ? '—' : (stats?.campaignsStarted ?? 0)}
+                      </div>
+                      <div className="text-sm text-cordillera-olive/70">Campaigns Started</div>
                     </div>
                   </>
                 ) : (
                   <>
                     <div className="text-center">
-                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">8</div>
+                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">
+                        {loading ? '—' : (stats?.itemsPurchased ?? 0)}
+                      </div>
                       <div className="text-sm text-cordillera-olive/70">Items Purchased</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">15</div>
+                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">
+                        {loading ? '—' : (stats?.favorites ?? 0)}
+                      </div>
                       <div className="text-sm text-cordillera-olive/70">Favorites</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">₱12,400</div>
+                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">
+                        {loading ? '—' : `₱${(stats?.totalSpent ?? 0).toLocaleString()}`}
+                      </div>
                       <div className="text-sm text-cordillera-olive/70">Total Spent</div>
                     </div>
                   </>
                 )}
               </div>
+              {!loading && error && (
+                <div className="mt-4 text-sm text-red-600">{error}</div>
+              )}
             </div>
 
             {/* Recent Activity */}
@@ -84,54 +203,27 @@ export const UserDashboard = () => {
                 Recent Activity
               </h3>
               <div className="space-y-4">
-                {user.role === 'artisan' ? (
+                {loading ? (
+                  // Simple loading placeholders
                   <>
-                    <div className="flex items-center justify-between py-3 border-b border-cordillera-sage/10">
-                      <div>
-                        <p className="text-cordillera-olive font-light">New order received</p>
-                        <p className="text-sm text-cordillera-olive/60">Traditional Tapis Skirt - ₱2,500</p>
-                      </div>
-                      <span className="text-xs text-cordillera-olive/50">2 hours ago</span>
-                    </div>
-                    <div className="flex items-center justify-between py-3 border-b border-cordillera-sage/10">
-                      <div>
-                        <p className="text-cordillera-olive font-light">Product view milestone</p>
-                        <p className="text-sm text-cordillera-olive/60">Kalinga Blanket reached 100 views</p>
-                      </div>
-                      <span className="text-xs text-cordillera-olive/50">1 day ago</span>
-                    </div>
-                    <div className="flex items-center justify-between py-3 border-b border-cordillera-sage/10">
-                      <div>
-                        <p className="text-cordillera-olive font-light">New product added</p>
-                        <p className="text-sm text-cordillera-olive/60">Ceremonial Cloth listed for ₱3,200</p>
-                      </div>
-                      <span className="text-xs text-cordillera-olive/50">3 days ago</span>
-                    </div>
+                    <div className="h-12 bg-cordillera-sage/10" />
+                    <div className="h-12 bg-cordillera-sage/10" />
+                    <div className="h-12 bg-cordillera-sage/10" />
                   </>
+                ) : stats?.activity && stats.activity.length > 0 ? (
+                  stats.activity.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between py-3 border-b border-cordillera-sage/10">
+                      <div>
+                        <p className="text-cordillera-olive font-light">{item.title}</p>
+                        {item.subtitle && (
+                          <p className="text-sm text-cordillera-olive/60">{item.subtitle}</p>
+                        )}
+                      </div>
+                      <span className="text-xs text-cordillera-olive/50">{timeAgo(item.at)}</span>
+                    </div>
+                  ))
                 ) : (
-                  <>
-                    <div className="flex items-center justify-between py-3 border-b border-cordillera-sage/10">
-                      <div>
-                        <p className="text-cordillera-olive font-light">Order delivered</p>
-                        <p className="text-sm text-cordillera-olive/60">Table Runner by Rosa Mendoza</p>
-                      </div>
-                      <span className="text-xs text-cordillera-olive/50">1 day ago</span>
-                    </div>
-                    <div className="flex items-center justify-between py-3 border-b border-cordillera-sage/10">
-                      <div>
-                        <p className="text-cordillera-olive font-light">Added to favorites</p>
-                        <p className="text-sm text-cordillera-olive/60">Wall Hanging by Maria Santos</p>
-                      </div>
-                      <span className="text-xs text-cordillera-olive/50">2 days ago</span>
-                    </div>
-                    <div className="flex items-center justify-between py-3 border-b border-cordillera-sage/10">
-                      <div>
-                        <p className="text-cordillera-olive font-light">Order placed</p>
-                        <p className="text-sm text-cordillera-olive/60">Traditional Bahag - ₱1,200</p>
-                      </div>
-                      <span className="text-xs text-cordillera-olive/50">5 days ago</span>
-                    </div>
-                  </>
+                  <p className="text-sm text-cordillera-olive/60">No recent activity yet.</p>
                 )}
               </div>
             </div>
@@ -186,20 +278,37 @@ export const UserDashboard = () => {
               <h3 className="text-lg font-serif font-light mb-4 tracking-wide">
                 Community Impact
               </h3>
-              <div className="space-y-3 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-cordillera-cream/80">Artisans Supported</span>
-                  <span className="font-medium">8</span>
+              {isArtisanRole ? (
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-cordillera-cream/80">Total Revenue</span>
+                    <span className="font-medium">{loading ? '—' : `₱${(stats?.community?.totalRevenue ?? 0).toLocaleString()}`}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-cordillera-cream/80">Stories Viewed</span>
+                    <span className="font-medium">{loading ? '—' : (stats?.community?.storiesViewed ?? 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-cordillera-cream/80">Funds Raised</span>
+                    <span className="font-medium">{loading ? '—' : `₱${(stats?.community?.fundsRaised ?? 0).toLocaleString()}`}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-cordillera-cream/80">Cultural Contributions</span>
-                  <span className="font-medium">₱12,400</span>
+              ) : (
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-cordillera-cream/80">Artisans Supported</span>
+                    <span className="font-medium">{loading ? '—' : (stats?.community?.artisansSupported ?? 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-cordillera-cream/80">Cultural Contributions</span>
+                    <span className="font-medium">{loading ? '—' : `₱${(stats?.community?.culturalContributions ?? 0).toLocaleString()}`}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-cordillera-cream/80">Stories Shared</span>
+                    <span className="font-medium">{loading ? '—' : (stats?.community?.storiesShared ?? 0)}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-cordillera-cream/80">Stories Shared</span>
-                  <span className="font-medium">3</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

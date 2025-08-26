@@ -4,6 +4,7 @@ import { triggerAction } from '../lib/uiActions';
 import { Link } from 'react-router-dom';
 import api, { storiesAPI, campaignsAPI } from '@/services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface Story {
   id: number;
@@ -293,9 +294,9 @@ const StoriesPage: React.FC = () => {
       {/* Content Grid */}
       <section className="py-20 bg-cordillera-cream">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
             {regularContent.map((item) => (
-              <div key={`${item.type}-${item.id}`} className="group block bg-white shadow-md hover:shadow-2xl transition-all duration-500 overflow-hidden rounded-lg border border-cordillera-sage/20 h-full">
+              <Card key={`${item.type}-${item.id}`} className="group block overflow-hidden h-full">
                 {item.type === 'story' ? (
                   // Story Card (no image preview)
                   <Link to={`/story/${item.id}`} className="block h-full">
@@ -304,7 +305,7 @@ const StoriesPage: React.FC = () => {
                         Story
                       </span>
                     </div>
-                    <div className="p-6 pt-4 flex flex-col h-full">
+                    <CardContent className="pt-4 flex flex-col h-full">
                       <span className="text-cordillera-gold text-[11px] font-medium uppercase tracking-wider">
                         {item.category}
                       </span>
@@ -320,7 +321,7 @@ const StoriesPage: React.FC = () => {
                         <span>By {(item as Story).author}</span>
                         <span>{(item as Story).readTime} min read</span>
                       </div>
-                    </div>
+                    </CardContent>
                   </Link>
                 ) : (
                   // Campaign Card (no image preview)
@@ -330,7 +331,7 @@ const StoriesPage: React.FC = () => {
                         Campaign
                       </span>
                     </div>
-                    <div className="p-6 pt-4 flex flex-col h-full">
+                    <CardContent className="pt-4 flex flex-col h-full">
                       <span className="text-cordillera-gold text-[11px] font-medium uppercase tracking-wider">
                         {item.category}
                       </span>
@@ -378,10 +379,10 @@ const StoriesPage: React.FC = () => {
                           <p>Ends {(item as Campaign).endDate}</p>
                         </div>
                       </div>
-                    </div>
+                    </CardContent>
                   </div>
                 )}
-              </div>
+              </Card>
             ))}
           </div>
         </div>

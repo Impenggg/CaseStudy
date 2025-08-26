@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Card, CardContent } from '@/components/ui/card';
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -87,7 +88,8 @@ export const LoginPage = () => {
 
           {/* Form card */}
           <div className="relative">
-            <div className="mx-auto max-w-md w-full space-y-8 rounded-md border border-cordillera-gold/20 bg-black/10 backdrop-blur-sm p-8">
+            <Card className="mx-auto max-w-md w-full">
+              <CardContent className="space-y-8">
               {/* Header */}
               <div className="text-center">
                 <Link to="/" className="text-3xl sm:text-4xl font-serif font-light text-cordillera-cream tracking-wide">
@@ -225,7 +227,8 @@ export const LoginPage = () => {
                   <span className="px-3 py-1 text-xs bg-cordillera-cream/5 border border-cordillera-gold/20 text-cordillera-cream/80">Community-driven</span>
                 </div>
               </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>

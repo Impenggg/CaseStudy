@@ -109,9 +109,9 @@ const HomePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cordillera-cream">
       {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center overflow-hidden">
+      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0">
           <img 
             src="https://images.unsplash.com/photo-1571816065864-c36e568cccdb?w=1920&h=1080&fit=crop"
@@ -119,31 +119,31 @@ const HomePage: React.FC = () => {
             className="w-full h-full object-cover select-none"
             aria-hidden="true"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-cordillera-olive/95 via-cordillera-olive/90 to-cordillera-olive/85"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-cordillera-olive/20"></div>
+          <div className="absolute inset-0 bg-cordillera-olive/80"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-cordillera-olive/30"></div>
         </div>
         
-        <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-serif font-light text-cordillera-cream mb-8 tracking-wide leading-none">
+        <div className="relative z-10 max-w-6xl mx-auto px-6 sm:px-8">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-5xl sm:text-6xl font-serif font-light text-cordillera-cream mb-6 tracking-tight leading-tight">
               Cordillera Heritage
             </h1>
-            <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-sans text-cordillera-cream/95 mb-8 leading-relaxed font-medium">
+            <h2 className="text-xl sm:text-2xl font-sans text-cordillera-cream/95 mb-6 leading-relaxed font-medium">
               Preserving Indigenous Weaving Through Digital Innovation
             </h2>
             
-            <p className="text-base sm:text-lg md:text-xl text-cordillera-cream/90 mb-12 max-w-3xl mx-auto font-light leading-relaxed">
+            <p className="text-base sm:text-lg text-cordillera-cream/90 mb-10 max-w-2xl mx-auto font-light leading-relaxed">
               Discover authentic handwoven treasures, immerse yourself in cultural stories, 
               and support preservation initiatives that keep centuries-old traditions alive.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center">
               <Link
                 to="/marketplace"
-                className="group relative border-2 border-cordillera-cream text-cordillera-cream px-6 sm:px-8 lg:px-10 py-4 sm:py-5 text-base sm:text-lg font-medium tracking-wide inline-flex items-center justify-center rounded-lg bg-cordillera-cream/10 backdrop-blur-sm shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:bg-cordillera-gold hover:text-cordillera-olive hover:border-cordillera-gold"
+                className="group relative border border-cordillera-gold text-cordillera-olive px-6 py-3 text-base font-medium inline-flex items-center justify-center rounded-md bg-cordillera-gold hover:bg-cordillera-gold/90 transition-colors shadow-sm hover:shadow"
               >
                 <span className="relative z-10 flex items-center justify-center">
-                  <svg className="w-5 h-5 mr-2 sm:mr-3 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                   </svg>
                   Explore Marketplace
@@ -152,10 +152,10 @@ const HomePage: React.FC = () => {
 
               <Link
                 to="/stories"
-                className="group relative border-2 border-cordillera-cream text-cordillera-cream px-6 sm:px-8 lg:px-10 py-4 sm:py-5 text-base sm:text-lg font-medium tracking-wide inline-flex items-center justify-center rounded-lg bg-cordillera-cream/10 backdrop-blur-sm shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:bg-cordillera-gold hover:text-cordillera-olive hover:border-cordillera-gold"
+                className="group relative border border-cordillera-cream text-cordillera-cream px-6 py-3 text-base font-medium inline-flex items-center justify-center rounded-md bg-transparent hover:bg-cordillera-cream/10 transition-colors shadow-sm hover:shadow"
               >
                 <span className="relative z-10 flex items-center justify-center">
-                  <svg className="w-5 h-5 mr-2 sm:mr-3 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                   Discover Stories
@@ -164,10 +164,10 @@ const HomePage: React.FC = () => {
 
               <Link
                 to="/media-creation"
-                className="group relative border-2 border-cordillera-cream text-cordillera-cream px-6 sm:px-8 lg:px-10 py-4 sm:py-5 text-base sm:text-lg font-medium tracking-wide inline-flex items-center justify-center rounded-lg bg-cordillera-cream/10 backdrop-blur-sm shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:bg-cordillera-gold hover:text-cordillera-olive hover:border-cordillera-gold"
+                className="group relative border border-cordillera-cream text-cordillera-cream px-6 py-3 text-base font-medium inline-flex items-center justify-center rounded-md bg-transparent hover:bg-cordillera-cream/10 transition-colors shadow-sm hover:shadow"
               >
                 <span className="relative z-10 flex items-center justify-center">
-                  <svg className="w-5 h-5 mr-2 sm:mr-3 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
                   Media Creation
@@ -179,17 +179,18 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Featured Products Section */}
-      <section className="py-16 sm:py-20 bg-cordillera-olive">
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+      <section className="py-16 sm:py-20 bg-cordillera-cream">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-light text-cordillera-cream mb-4">
+            <h2 className="text-3xl sm:text-4xl font-serif font-light text-cordillera-olive mb-2">
               Featured
             </h2>
+            <p className="text-cordillera-olive/70">Handpicked products and campaigns</p>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Products Carousel */}
             <div>
-              <h3 className="text-2xl font-serif font-light text-cordillera-cream mb-6 text-center lg:text-left">
+              <h3 className="text-2xl font-serif font-light text-cordillera-olive mb-4 text-center lg:text-left">
                 Featured Products
               </h3>
               <div className="relative">
@@ -200,12 +201,12 @@ const HomePage: React.FC = () => {
                   >
                     {featuredProducts.map((product) => (
                       <div key={product.id} className="w-full flex-shrink-0 px-2">
-                        <div className="bg-cordillera-cream rounded-xl shadow-2xl overflow-hidden h-[380px] transform transition-all duration-300 hover:scale-[1.02]">
-                          <div className="h-[250px] relative overflow-hidden">
+                        <div className="bg-white rounded-lg border border-cordillera-sage/30 shadow-sm overflow-hidden h-[360px]">
+                          <div className="h-[220px] relative overflow-hidden">
                             <img
                               src={product.image || PLACEHOLDER_IMG}
                               alt={product.name}
-                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                              className="w-full h-full object-cover"
                               loading="lazy"
                               onError={(e) => {
                                 const target = e.currentTarget as HTMLImageElement;
@@ -214,22 +215,22 @@ const HomePage: React.FC = () => {
                                 }
                               }}
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
                           </div>
-                          <div className="p-4 flex flex-col h-[130px]">
-                            <h3 className="text-lg sm:text-xl font-serif text-cordillera-olive mb-2 font-medium">
+                          <div className="p-4 flex flex-col h-[140px]">
+                            <h3 className="text-lg font-serif text-cordillera-olive mb-1 font-medium">
                               {product.name}
                             </h3>
                             <p className="text-cordillera-olive/70 mb-auto text-xs leading-relaxed line-clamp-2">
                               {product.description}
                             </p>
-                            <div className="flex justify-between items-center pt-3 border-t border-cordillera-olive/20">
-                              <span className="text-lg sm:text-xl font-light text-cordillera-gold">
+                            <div className="flex justify-between items-center pt-3 border-t border-cordillera-sage/30">
+                              <span className="text-lg font-light text-cordillera-gold">
                                 ₱{product.price.toLocaleString()}
                               </span>
                               <Link
                                 to={`/product/${product.id}`}
-                                className="bg-cordillera-olive text-cordillera-cream px-3 py-1.5 rounded-lg hover:bg-cordillera-olive/90 transition-all duration-300 font-medium shadow-lg hover:shadow-xl text-xs"
+                                className="border border-cordillera-gold text-cordillera-olive px-3 py-1.5 rounded-md hover:bg-cordillera-gold/10 transition-colors font-medium text-xs"
                               >
                                 View Details
                               </Link>
@@ -244,7 +245,7 @@ const HomePage: React.FC = () => {
                 {/* Product Carousel Controls */}
                 <button
                   onClick={prevProductSlide}
-                  className="absolute -left-4 top-1/2 transform -translate-y-1/2 bg-cordillera-olive/80 text-white p-3 rounded-full hover:bg-cordillera-olive transition-all duration-300 shadow-lg hover:shadow-xl"
+                  className="absolute -left-3 top-1/2 -translate-y-1/2 bg-cordillera-olive text-white p-2 rounded-full hover:bg-cordillera-olive/90 shadow"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -252,7 +253,7 @@ const HomePage: React.FC = () => {
                 </button>
                 <button
                   onClick={nextProductSlide}
-                  className="absolute -right-4 top-1/2 transform -translate-y-1/2 bg-cordillera-olive/80 text-white p-3 rounded-full hover:bg-cordillera-olive transition-all duration-300 shadow-lg hover:shadow-xl"
+                  className="absolute -right-3 top-1/2 -translate-y-1/2 bg-cordillera-olive text-white p-2 rounded-full hover:bg-cordillera-olive/90 shadow"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -260,14 +261,14 @@ const HomePage: React.FC = () => {
                 </button>
 
                 {/* Product Carousel Indicators */}
-                <div className="flex justify-center mt-6 space-x-3">
+                <div className="flex justify-center mt-5 space-x-2.5">
                   {featuredProducts.map((_, index) => (
                     <button
                       key={index}
                       onClick={() => goToProductSlide(index)}
-                      className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      className={`w-2.5 h-2.5 rounded-full transition-colors ${
                         index === currentProductSlide
-                          ? 'bg-cordillera-gold shadow-lg'
+                          ? 'bg-cordillera-gold'
                           : 'bg-cordillera-olive/30 hover:bg-cordillera-olive/50'
                       }`}
                     />
@@ -278,14 +279,14 @@ const HomePage: React.FC = () => {
 
             {/* Want to Support - Campaign Card (no image) */}
             <div>
-              <h3 className="text-2xl font-serif font-light text-cordillera-cream mb-6 text-center lg:text-left">
+              <h3 className="text-2xl font-serif font-light text-cordillera-olive mb-4 text-center lg:text-left">
                 Want to Support
               </h3>
               <div className="px-2">
-                <div className="bg-white border border-[#e3e3d9] rounded-xl shadow-sm p-6 sm:p-7 h-[380px] flex flex-col overflow-hidden">
+                <div className="bg-white border border-cordillera-sage/30 rounded-lg shadow-sm p-6 sm:p-7 h-[360px] flex flex-col overflow-hidden">
                   {/* Top badge */}
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="inline-block text-xs font-semibold tracking-wide uppercase px-3 py-1 rounded-md bg-[#cfd4b4] text-cordillera-olive">
+                    <span className="inline-block text-xs font-semibold tracking-wide uppercase px-3 py-1 rounded-md bg-cordillera-sage text-cordillera-olive">
                       Campaign
                     </span>
                     <span className="text-xs font-semibold tracking-wide uppercase text-cordillera-olive/70">
@@ -294,21 +295,21 @@ const HomePage: React.FC = () => {
                 </div>
 
                 {/* Title */}
-                <h3 className="text-xl sm:text-2xl font-serif text-cordillera-olive font-medium mb-3">
+                <h3 className="text-xl font-serif text-cordillera-olive font-medium mb-2">
                   Cordillera Fashion for a Cause
                 </h3>
 
                 {/* Description */}
-                <p className="text-[#4a4a3f] mb-5 leading-relaxed line-clamp-3">
+                <p className="text-cordillera-olive/80 mb-4 leading-relaxed line-clamp-3">
                   This campaign will host a cultural fashion show highlighting clothes and accessories made with authentic Cordillera weaves. Local designers will collaborate with artisans to showcase traditions with contemporary relevance.
                 </p>
 
                 {/* Progress */}
-                <div className="mb-3 flex items-center justify-between text-sm text-cordillera-olive/80">
+                <div className="mb-2 flex items-center justify-between text-sm text-cordillera-olive/80">
                   <span>0% funded</span>
                   <span>₱0</span>
                 </div>
-                <div className="h-2 w-full rounded-full bg-[#ececdf] overflow-hidden mb-2">
+                <div className="h-2 w-full rounded-full bg-cordillera-sage/30 overflow-hidden mb-2">
                   <div className="h-full w-[0%] bg-cordillera-gold" />
                 </div>
                 <div className="text-xs text-cordillera-olive/70 mb-5">Goal: ₱250,000</div>
@@ -317,7 +318,7 @@ const HomePage: React.FC = () => {
                 <div className="mt-auto flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <button
                     disabled
-                    className="px-4 py-2.5 rounded-lg bg-[#cfd1d6] text-[#4a4a3f] font-medium cursor-not-allowed"
+                    className="px-4 py-2 rounded-md bg-cordillera-sage text-cordillera-olive font-medium cursor-not-allowed"
                   >
                     Support Disabled
                   </button>
@@ -334,25 +335,9 @@ const HomePage: React.FC = () => {
       </section>
 
       {/* Footer */}
-      <footer className="relative overflow-hidden bg-gradient-to-b from-[#1b200a] to-[#0f1206] text-cordillera-cream py-16">
+      <footer className="relative overflow-hidden bg-cordillera-olive text-cordillera-cream py-16">
         {/* Layered wave divider to clearly separate from previous section */}
-        <div className="absolute -top-9 left-0 right-0" aria-hidden="true">
-          {/* Top light wave */}
-          <div className="text-cordillera-cream/90 drop-shadow-[0_4px_8px_rgba(0,0,0,0.35)]">
-            <svg viewBox="0 0 1440 90" preserveAspectRatio="none" className="w-full h-10">
-              <path fill="currentColor" d="M0,64L60,58.7C120,53,240,43,360,40C480,37,600,43,720,53.3C840,64,960,80,1080,77.3C1200,75,1320,53,1380,42.7L1440,32L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z" />
-            </svg>
-          </div>
-          {/* Slightly darker wave behind for depth */}
-          <div className="-mt-5 text-[#1b200a] opacity-95">
-            <svg viewBox="0 0 1440 90" preserveAspectRatio="none" className="w-full h-10">
-              <path fill="currentColor" d="M0,64L60,58.7C120,53,240,43,360,40C480,37,600,43,720,53.3C840,64,960,80,1080,77.3C1200,75,1320,53,1380,42.7L1440,32L1440,0L1380,0C1320,0,1200,0,1080,0C960,0,840,0,720,0C600,0,480,0,360,0C240,0,120,0,60,0L0,0Z" />
-            </svg>
-          </div>
-        </div>
-        {/* Top shadow for extra separation */}
-        <div className="pointer-events-none absolute -top-px inset-x-0 h-8 bg-gradient-to-b from-black/30 via-black/20 to-transparent" aria-hidden="true" />
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="max-w-6xl mx-auto px-6 sm:px-8">
           <div className="grid grid-cols-1 gap-6">
             {/* Contact Information */}
             <div className="max-w-5xl mx-auto">
@@ -388,7 +373,7 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
             </div>
- 
+
             {/* Contact Form removed as requested */}
           </div>
 

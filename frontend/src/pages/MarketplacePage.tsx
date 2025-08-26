@@ -5,6 +5,7 @@ import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
 import api, { productsAPI, ordersAPI } from '@/services/api';
 import LoadingScreen from '../components/LoadingScreen';
+import { Card, CardContent } from '@/components/ui/card';
 
 interface Product {
   id: number;
@@ -573,7 +574,7 @@ const MarketplacePage: React.FC = () => {
     };
 
     return (
-      <div className="relative h-56 overflow-hidden">
+      <div className="relative h-56 overflow-hidden rounded-t-xl bg-cordillera-sage/10">
         <img
           src={src || fallback}
           onError={onErr}
@@ -697,13 +698,13 @@ const MarketplacePage: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-12">
                      {/* Enhanced Sidebar Filters - Sage Green Background */}
            <div className="lg:w-1/4">
-             <div className="bg-cordillera-sage p-6 sticky top-8 shadow-lg">
-               <div className="flex items-center mb-4">
-                 <svg className="w-5 h-5 text-cordillera-gold mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                 </svg>
-                 <h3 className="text-xl font-serif text-cordillera-olive">Refine Search</h3>
-               </div>
+            <div className="bg-cordillera-sage p-6 sticky top-8 shadow-lg rounded-xl border border-cordillera-olive/15">
+              <div className="flex items-center mb-4">
+                <svg className="w-5 h-5 text-cordillera-gold mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                <h3 className="text-xl font-serif text-cordillera-olive">Refine Search</h3>
+              </div>
                
                {/* Enhanced Search */}
                <div className="mb-4">
@@ -830,7 +831,7 @@ const MarketplacePage: React.FC = () => {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+            <div ref={productsGridRef} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {filteredProducts.length === 0 ? (
                 <div className="col-span-full text-center py-12">
                   <div className="w-24 h-24 mx-auto mb-6 bg-cordillera-sage/20 rounded-full flex items-center justify-center">
@@ -861,11 +862,11 @@ const MarketplacePage: React.FC = () => {
                 </div>
               ) : (
                 filteredProducts.map((product) => (
-                  <div key={product.id} className="group bg-white rounded-xl shadow-md hover:shadow-lg overflow-hidden flex flex-col h-full">
+                  <Card key={product.id} className="group overflow-hidden flex flex-col h-full">
                     <Link to={`/product/${product.id}`} className="block">
                       <ProductCardImage product={product} />
                     </Link>
-                    <div className="p-5 flex flex-col flex-grow text-center">
+                    <CardContent className="flex flex-col flex-grow text-center">
                       <Link to={`/product/${product.id}`} className="block">
                         <h3 className="text-lg font-serif text-cordillera-olive mb-2 leading-tight group-hover:text-cordillera-gold transition-colors duration-300 line-clamp-2">
                           {product.name}
@@ -941,8 +942,8 @@ const MarketplacePage: React.FC = () => {
                           )}
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 ))
               )}
             </div>

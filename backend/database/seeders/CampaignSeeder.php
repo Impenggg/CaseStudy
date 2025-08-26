@@ -14,8 +14,10 @@ class CampaignSeeder extends Seeder
      */
     public function run(): void
     {
-        $weavers = User::where('role', 'weaver')->get();
-        $fallbackOrganizer = $weavers->first();
+        // Combine 'artisan' and 'weaver' as eligible organizers
+        $organizers = User::whereIn('role', ['artisan', 'weaver'])->get();
+        $preferred = $organizers->where('name', 'Test Artisan')->first();
+        $fallbackOrganizer = $preferred ?? $organizers->first();
 
         // 1. Cordillera Heritage Fair (community)
         Campaign::create([
@@ -24,7 +26,7 @@ class CampaignSeeder extends Seeder
             'goal_amount' => 150000.00,
             'current_amount' => 60000.00,
             'end_date' => now()->addMonths(4)->toDateString(),
-            'organizer_id' => optional($weavers->where('name', 'Maria Santos')->first())->id ?? optional($fallbackOrganizer)->id,
+            'organizer_id' => optional($organizers->where('name', 'Maria Santos')->first())->id ?? optional($fallbackOrganizer)->id,
             'image' => 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200',
             'category' => 'community',
             'status' => 'active',
@@ -38,7 +40,7 @@ class CampaignSeeder extends Seeder
             'goal_amount' => 80000.00,
             'current_amount' => 35000.00,
             'end_date' => now()->addMonths(3)->toDateString(),
-            'organizer_id' => optional($weavers->where('name', 'Rosa Dulawan')->first())->id ?? optional($fallbackOrganizer)->id,
+            'organizer_id' => optional($organizers->where('name', 'Rosa Dulawan')->first())->id ?? optional($fallbackOrganizer)->id,
             'image' => 'https://images.unsplash.com/photo-1607081692251-5bb4c0940e1e?w=1200',
             'category' => 'education',
             'status' => 'active',
@@ -52,7 +54,7 @@ class CampaignSeeder extends Seeder
             'goal_amount' => 100000.00,
             'current_amount' => 42000.00,
             'end_date' => now()->addMonths(2)->toDateString(),
-            'organizer_id' => optional($weavers->where('name', 'Elena Badiw')->first())->id ?? optional($fallbackOrganizer)->id,
+            'organizer_id' => optional($organizers->where('name', 'Elena Badiw')->first())->id ?? optional($fallbackOrganizer)->id,
             'image' => 'https://images.unsplash.com/photo-1520975954732-35dd222996f7?w=1200',
             'category' => 'community',
             'status' => 'active',
@@ -66,7 +68,7 @@ class CampaignSeeder extends Seeder
             'goal_amount' => 60000.00,
             'current_amount' => 20000.00,
             'end_date' => now()->addMonth()->toDateString(),
-            'organizer_id' => optional($weavers->where('name', 'Ben Talugtug')->first())->id ?? optional($fallbackOrganizer)->id,
+            'organizer_id' => optional($organizers->where('name', 'Ben Talugtug')->first())->id ?? optional($fallbackOrganizer)->id,
             'image' => 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=1200',
             'category' => 'preservation',
             'status' => 'active',
@@ -80,7 +82,7 @@ class CampaignSeeder extends Seeder
             'goal_amount' => 200000.00,
             'current_amount' => 76000.00,
             'end_date' => now()->addMonths(5)->toDateString(),
-            'organizer_id' => optional($weavers->where('name', 'Carlos Mendoza')->first())->id ?? optional($fallbackOrganizer)->id,
+            'organizer_id' => optional($organizers->where('name', 'Carlos Mendoza')->first())->id ?? optional($fallbackOrganizer)->id,
             'image' => 'https://images.unsplash.com/photo-1512521743077-c9f923b6f21e?w=1200',
             'category' => 'preservation',
             'status' => 'active',
