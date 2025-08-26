@@ -213,7 +213,7 @@ const CampaignDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-cordillera-cream">
+    <div className="min-h-screen bg-cordillera-olive">
       {/* Breadcrumb */}
       <div className="bg-cordillera-olive py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -227,46 +227,38 @@ const CampaignDetailPage: React.FC = () => {
 
       {/* Return Button */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        <BackLink to="/stories" className="mb-6">Back to Stories</BackLink>
+        <BackLink to="/stories" variant="light" className="mb-6">Back to Stories</BackLink>
       </div>
 
-      {/* Title & Meta below breadcrumb and return button (consistent with StoryDetailPage) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4">
-        <h1 className="text-3xl md:text-4xl font-serif text-cordillera-olive mb-2 leading-tight">
-          {campaign.title}
-        </h1>
-        <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-cordillera-olive/80">
-          {!(user && (user as any).role === 'customer') && (
-            <span className="bg-cordillera-gold/30 text-cordillera-olive px-2.5 py-1 text-xs uppercase tracking-wider rounded">Campaign</span>
-          )}
-          <span className="hidden sm:inline">•</span>
-          <span>By {campaign.organizer}</span>
-          {campaign.endDate && (<>
-            <span className="hidden sm:inline">•</span>
-            <span>Ends {campaign.endDate}</span>
-          </>)}
-        </div>
-      </div>
-
-             {/* Campaign Header (no image) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="px-6 py-4">
+      {/* Title & Meta below breadcrumb and return button (match StoryDetailPage) */}
+      <section className="bg-cordillera-olive pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-4xl md:text-5xl font-serif text-cordillera-cream mb-3 leading-tight">
+            {campaign.title}
+          </h1>
+          <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-cordillera-cream/80">
             {!(user && (user as any).role === 'customer') && (
-              <span className="inline-block bg-cordillera-gold/90 text-cordillera-olive px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded">
-                Campaign
-              </span>
+              <span className="bg-cordillera-gold/20 px-3 py-1 text-sm text-cordillera-cream/90">campaign</span>
             )}
+            <span className="hidden sm:inline">•</span>
+            <span className="text-cordillera-gold font-medium">By {campaign.organizer}</span>
+            {campaign.endDate && (<>
+              <span className="hidden sm:inline">•</span>
+              <span>Ends {campaign.endDate}</span>
+            </>)}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Campaign Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Removed extra header card to match StoryDetailPage */}
+
+      {/* Campaign Content (cream section like StoryDetailPage) */}
+      <section className="py-16 bg-cordillera-cream">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <div className="bg-cordillera-cream border border-cordillera-sage p-8 mb-8">
               <h2 className="text-2xl font-serif text-cordillera-olive mb-6">About This Campaign</h2>
               <p className="text-cordillera-olive/80 leading-relaxed mb-6">
                 {campaign.description}
@@ -298,7 +290,7 @@ const CampaignDetailPage: React.FC = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-lg p-6 sticky top-6">
+            <div className="bg-cordillera-cream border border-cordillera-sage p-6 sticky top-6">
               <h3 className="text-xl font-serif text-cordillera-olive mb-4">Support This Campaign</h3>
               
               {/* Progress */}
@@ -327,6 +319,7 @@ const CampaignDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
+      </section>
 
       {/* Support Modal */}
       {showSupportModal && (
