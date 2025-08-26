@@ -30,6 +30,9 @@ export const UserDashboard = () => {
           artisansSupported?: number;
           culturalContributions?: number;
           storiesShared?: number;
+          // New buyer community metrics
+          pendingOrders?: number;
+          totalCampaignsSupported?: number;
         };
         activity: Array<{ id: string | number; title: string; subtitle?: string; at: string | number | Date }>;
       }
@@ -296,16 +299,16 @@ export const UserDashboard = () => {
               ) : (
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-cordillera-cream/80">Artisans Supported</span>
-                    <span className="font-medium">{loading ? '—' : (stats?.community?.artisansSupported ?? 0)}</span>
+                    <span className="text-cordillera-cream/80">Pending Orders</span>
+                    <span className="font-medium">{loading ? '—' : (stats?.community?.pendingOrders ?? 0)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-cordillera-cream/80">Cultural Contributions</span>
-                    <span className="font-medium">{loading ? '—' : `₱${(stats?.community?.culturalContributions ?? 0).toLocaleString()}`}</span>
+                    <span className="text-cordillera-cream/80">Stories Viewed</span>
+                    <span className="font-medium">{loading ? '—' : (stats?.community?.storiesViewed ?? 0)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-cordillera-cream/80">Stories Shared</span>
-                    <span className="font-medium">{loading ? '—' : (stats?.community?.storiesShared ?? 0)}</span>
+                    <span className="text-cordillera-cream/80">Total Campaigns Supported</span>
+                    <span className="font-medium">{loading ? '—' : (stats?.community?.totalCampaignsSupported ?? 0)}</span>
                   </div>
                 </div>
               )}

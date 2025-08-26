@@ -1,11 +1,47 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import BackLink from '@/components/BackLink';
 import { useStory } from '@/hooks/useStory';
+import { useAuth } from '@/contexts/AuthContext';
+import { storyLikesAPI } from '@/services/api';
 
 const StoryDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { data: story, isLoading, error } = useStory(id);
+  const { isAuthenticated, requireAuth } = useAuth();
+  const [liked, setLiked] = useState<boolean>(false);
+
+  // Initialize liked state when authenticated
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!isAuthenticated || !id) { setLiked(false); return; }
+      try {
+        const list = await storyLikesAPI.list();
+        if (!mounted) return;
+        const likedIds = new Set(list.map(x => x.story_id));
+        setLiked(likedIds.has(Number(id)));
+      } catch {
+        // ignore
+      }
+    })();
+    return () => { mounted = false; };
+  }, [isAuthenticated, id]);
+
+  const toggleLike = async () => {
+    if (!id) return;
+    if (!isAuthenticated) {
+      sessionStorage.setItem('pending_like_story_id', String(id));
+      requireAuth('/login');
+      return;
+    }
+    try {
+      const res = await storyLikesAPI.toggle(Number(id));
+      setLiked(res.liked);
+    } catch {
+      // ignore
+    }
+  };
 
   // Normalize story fields to avoid undefined access; do this before any returns
   const safeStory = {
@@ -62,9 +98,21 @@ const StoryDetailPage: React.FC = () => {
       {/* Title & Meta below breadcrumb and return button */}
       <section className="bg-cordillera-olive pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl md:text-5xl font-serif text-cordillera-cream mb-3 leading-tight">
-            {safeStory.title}
-          </h1>
+          <div className="flex items-start justify-between gap-4">
+            <h1 className="text-4xl md:text-5xl font-serif text-cordillera-cream mb-3 leading-tight">
+              {safeStory.title}
+            </h1>
+            <button
+              type="button"
+              onClick={toggleLike}
+              aria-label={liked ? 'Unlike story' : 'Like story'}
+              className={`mt-1 rounded-full p-2 border transition-colors ${liked ? 'bg-red-600 text-white border-transparent' : 'bg-transparent text-cordillera-cream border-cordillera-cream/30 hover:bg-cordillera-cream/10'}`}
+            >
+              <svg className="w-6 h-6" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+            </button>
+          </div>
           <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-cordillera-cream/80">
             <span className="text-cordillera-gold font-medium">By {safeStory.author}</span>
             <span className="hidden sm:inline">•</span>

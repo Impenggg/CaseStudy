@@ -10,6 +10,9 @@ use App\Models\Product;
 use App\Models\Order;
 use App\Models\Story;
 use App\Models\User;
+use App\Models\Favorite;
+use App\Models\StoryLike;
+use App\Models\Donation;
 
 class DashboardController extends Controller
 {
@@ -97,9 +100,15 @@ class DashboardController extends Controller
         }
 
         // Buyer/customer view
-        $itemsPurchased = Order::where('buyer_id', $user->id)->count();
-        $favorites = 0; // If you have a favorites table, replace this with actual count
-        $totalSpent = (float) Order::where('buyer_id', $user->id)->sum('total_amount');
+        $itemsPurchased = Schema::hasTable('orders')
+            ? Order::where('buyer_id', $user->id)->count()
+            : 0;
+        $favorites = Schema::hasTable('favorites')
+            ? Favorite::where('user_id', $user->id)->count()
+            : 0;
+        $totalSpent = Schema::hasTable('orders')
+            ? (float) Order::where('buyer_id', $user->id)->sum('total_amount')
+            : 0.0;
 
         $recentOrders = Order::with(['product:id,name,user_id'])
             ->where('buyer_id', $user->id)
@@ -115,14 +124,24 @@ class DashboardController extends Controller
                 ];
             });
 
+        $pendingOrders = Schema::hasTable('orders')
+            ? Order::where('buyer_id', $user->id)->where('status', 'pending')->count()
+            : 0;
+        $likedStories = Schema::hasTable('story_likes')
+            ? StoryLike::where('user_id', $user->id)->count()
+            : 0;
+        $campaignsSupported = Schema::hasTable('donations')
+            ? Donation::where('donor_id', $user->id)->distinct('campaign_id')->count('campaign_id')
+            : 0;
+
         return response()->json([
             'itemsPurchased' => $itemsPurchased,
             'favorites' => $favorites,
             'totalSpent' => $totalSpent,
             'community' => [
-                'artisansSupported' => User::where('role', 'weaver')->count(),
-                'culturalContributions' => (float)($totalSpent * 0.05),
-                'storiesShared' => Story::where('author_id', $user->id)->count(),
+                'pendingOrders' => $pendingOrders,
+                'storiesViewed' => $likedStories,
+                'totalCampaignsSupported' => $campaignsSupported,
             ],
             'activity' => $recentOrders->values()->all(),
         ]);

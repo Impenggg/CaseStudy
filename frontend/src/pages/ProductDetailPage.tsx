@@ -4,7 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
 import BackLink from '@/components/BackLink';
-import api, { productsAPI } from '@/services/api';
+import api, { productsAPI, favoritesAPI } from '@/services/api';
  
 
 interface Product {
@@ -28,6 +28,17 @@ const ProductDetailPage: React.FC = () => {
   const { isAuthenticated, requireAuth, user } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [activeTab, setActiveTab] = useState('story');
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [related, setRelated] = useState<Array<{ id: number; name: string; price: number; image?: string }>>([]);
+  const [isFavorited, setIsFavorited] = useState<boolean>(false);
+
+  // Helper: resolve relative URLs coming from the API
+  const API_ORIGIN = (api.defaults.baseURL || '').replace(/\/api\/?$/, '');
+  const resolveUrl = React.useCallback((u?: string | null) => {
+    if (!u) return '';
+    if (u.startsWith('http://') || u.startsWith('https://')) return u;
+    return `${API_ORIGIN}/${u.replace(/^\/?/, '')}`;
+  }, [API_ORIGIN]);
 
   // Local cart state (shared via localStorage with marketplace)
   interface CartItem { id: number; name: string; price: number; image: string; quantity: number; stock?: number }
@@ -47,15 +58,10 @@ const ProductDetailPage: React.FC = () => {
     (async () => {
       if (!id) return;
       setIsLoading(true);
+      setLoadError(null);
       try {
         const data = await productsAPI.getById(Number(id));
         // Resolve image URLs if backend returns relative paths
-        const API_ORIGIN = (api.defaults.baseURL || '').replace(/\/api\/?$/, '');
-        const resolveUrl = (u?: string | null) => {
-          if (!u) return '';
-          if (u.startsWith('http://') || u.startsWith('https://')) return u;
-          return `${API_ORIGIN}/${u.replace(/^\/?/, '')}`;
-        };
         const gallery = Array.isArray((data as any).images) ? (data as any).images.map(resolveUrl).filter(Boolean) : [];
         const careStr = (data as any).care_instructions as string | undefined;
         const careInstructions = careStr
@@ -78,13 +84,64 @@ const ProductDetailPage: React.FC = () => {
         if (mounted) setProduct(mapped);
       } catch (e) {
         console.error('[ProductDetail] Fetch failed', e);
-        if (mounted) setProduct(null);
+        if (mounted) {
+          setProduct(null);
+          setLoadError('not_found');
+        }
       } finally {
         if (mounted) setIsLoading(false);
       }
     })();
     return () => { mounted = false; };
   }, [id]);
+
+  // Initialize favorite state when authenticated and product is loaded
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (!isAuthenticated || !product?.id) { setIsFavorited(false); return; }
+      try {
+        const favs = await favoritesAPI.list();
+        if (!active) return;
+        setIsFavorited(Array.isArray(favs) && favs.some((f) => f.product_id === product.id));
+      } catch (e) {
+        // ignore
+      }
+    })();
+    return () => { active = false; };
+  }, [isAuthenticated, product?.id]);
+
+  // Resume pending favorite after login
+  useEffect(() => {
+    (async () => {
+      if (!isAuthenticated || !product?.id) return;
+      try {
+        const pending = sessionStorage.getItem('pending_favorite_product_id');
+        if (pending && Number(pending) === product.id) {
+          const res = await favoritesAPI.toggle(product.id);
+          setIsFavorited(Boolean(res?.favorited));
+          sessionStorage.removeItem('pending_favorite_product_id');
+        }
+      } catch {}
+    })();
+  }, [isAuthenticated, product?.id]);
+
+  const toggleFavorite = async () => {
+    if (!product) return;
+    if (!isAuthenticated) {
+      try { sessionStorage.setItem('pending_favorite_product_id', String(product.id)); } catch {}
+      requireAuth('/login');
+      return;
+    }
+    const prev = isFavorited;
+    setIsFavorited(!prev); // optimistic
+    try {
+      const res = await favoritesAPI.toggle(product.id);
+      setIsFavorited(Boolean(res?.favorited));
+    } catch (e) {
+      setIsFavorited(prev);
+    }
+  };
 
   // Determine single image to display: prefer first of gallery, else main image
   const displayImage: string | '' = React.useMemo(() => {
@@ -215,10 +272,45 @@ const ProductDetailPage: React.FC = () => {
     navigate('/marketplace');
   };
 
-  if (isLoading || !product) {
+  // Fetch related products from same category when product loads
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!product?.category) { setRelated([]); return; }
+      try {
+        const res = await productsAPI.getAll({ category: product.category, per_page: 6 });
+        const items: any[] = Array.isArray((res as any).data) ? (res as any).data : (Array.isArray(res) ? (res as any) : []);
+        const mapped = items
+          .filter((p: any) => p && p.id !== product.id)
+          .slice(0, 3)
+          .map((p: any) => {
+            const rawImg: string | undefined = p.image || p.image_url || p.thumbnail || (Array.isArray(p.images) ? p.images[0] : undefined);
+            const img = resolveUrl(rawImg);
+            return { id: p.id, name: p.name, price: Number(p.price ?? 0), image: img };
+          });
+        if (mounted) setRelated(mapped);
+      } catch (err) {
+        if (mounted) setRelated([]);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [product?.id, product?.category]);
+
+  if (isLoading) {
     return <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
       <div className="text-cordillera-cream">Loading...</div>
     </div>;
+  }
+
+  if (loadError === 'not_found' || !product) {
+    return (
+      <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-serif text-cordillera-cream mb-4">Product Not Found</h1>
+          <button onClick={() => navigate('/marketplace')} className="text-cordillera-gold hover:text-cordillera-gold/80 transition-colors">Back to Marketplace</button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -297,9 +389,29 @@ const ProductDetailPage: React.FC = () => {
                 <span className="text-3xl font-light text-cordillera-gold">
                   ₱{product.price.toLocaleString()}
                 </span>
-                <span className="text-sm uppercase tracking-wider text-cordillera-olive/50 bg-cordillera-sage px-3 py-1">
-                  {product.category}
-                </span>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={toggleFavorite}
+                    className="group inline-flex items-center justify-center w-10 h-10 rounded-full border border-cordillera-olive/30 hover:border-cordillera-gold transition-colors bg-white"
+                    aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                    title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill={isFavorited ? 'currentColor' : 'none'}
+                      className={`w-5 h-5 ${isFavorited ? 'text-red-500' : 'text-cordillera-olive'} group-hover:text-red-500`}
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
+                    </svg>
+                  </button>
+                  <span className="text-sm uppercase tracking-wider text-cordillera-olive/50 bg-cordillera-sage px-3 py-1">
+                    {product.category}
+                  </span>
+                </div>
               </div>
               {typeof product.stockQuantity === 'number' && (
                 <div className="mb-6 text-sm">
@@ -389,33 +501,27 @@ const ProductDetailPage: React.FC = () => {
 
         {/* Related Products */}
         <section className="mt-20">
-          <h2 className="text-3xl font-serif text-cordillera-olive mb-8">
-            More from this Collection
-          </h2>
+          <h2 className="text-3xl font-serif text-cordillera-olive mb-8">More from this Collection</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((item) => (
-              <Link
-                key={item}
-                to={`/product/${item + 10}`}
-                className="group block bg-white shadow-sm hover:shadow-lg transition-all duration-300"
-              >
+            {(related.length > 0 ? related : []).map((rp) => (
+              <Link key={rp.id} to={`/product/${rp.id}`} className="group block bg-white shadow-sm hover:shadow-lg transition-all duration-300">
                 <div className="aspect-square overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400"
-                    alt="Related Product"
+                    src={rp.image || `https://source.unsplash.com/600x600/?${encodeURIComponent(product.category)}`}
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://source.unsplash.com/600x600/?${encodeURIComponent(product.category)}`; }}
+                    alt={rp.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="text-lg font-serif text-cordillera-olive mb-2">
-                    Related Weaving Item {item}
-                  </h3>
-                  <span className="text-xl font-light text-cordillera-gold">
-                    ₱{(1000 + item * 500).toLocaleString()}
-                  </span>
+                  <h3 className="text-lg font-serif text-cordillera-olive mb-2">{rp.name}</h3>
+                  <span className="text-xl font-light text-cordillera-gold">₱{rp.price.toLocaleString()}</span>
                 </div>
               </Link>
             ))}
+            {related.length === 0 && (
+              <div className="text-cordillera-olive/60">No related items found.</div>
+            )}
           </div>
         </section>
       </div>

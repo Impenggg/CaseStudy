@@ -92,6 +92,30 @@ export const authAPI = {
   },
 };
 
+// Favorites API
+export const favoritesAPI = {
+  list: async (): Promise<Array<{ id: number; product_id: number }>> => {
+    const res = await api.get('/favorites');
+    return res?.data?.data || [];
+  },
+  toggle: async (productId: number): Promise<{ status: string; favorited: boolean }> => {
+    const res = await api.post(`/products/${productId}/favorite`);
+    return res.data;
+  },
+};
+
+// Story Likes API
+export const storyLikesAPI = {
+  list: async (): Promise<Array<{ id: number; story_id: number }>> => {
+    const res = await api.get('/story-likes');
+    return res?.data?.data || [];
+  },
+  toggle: async (storyId: number): Promise<{ status: string; liked: boolean }> => {
+    const res = await api.post(`/stories/${storyId}/like`);
+    return res.data;
+  },
+};
+
 export type MediaPost = {
   id: number;
   user_id: number;

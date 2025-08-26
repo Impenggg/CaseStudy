@@ -3,7 +3,7 @@ import { triggerAction } from '../lib/uiActions';
 import { Link } from 'react-router-dom';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
-import api, { productsAPI, ordersAPI } from '@/services/api';
+import api, { productsAPI, ordersAPI, favoritesAPI } from '@/services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -92,6 +92,43 @@ const MarketplacePage: React.FC = () => {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
   const quickViewRef = useRef<HTMLDivElement | null>(null);
   const productsGridRef = useRef<HTMLDivElement | null>(null);
+
+  // Favorites state (set of product IDs)
+  const [favoriteIds, setFavoriteIds] = useState<Set<number>>(new Set());
+
+  // Load favorites when authenticated
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!isAuthenticated) { setFavoriteIds(new Set()); return; }
+      try {
+        const list = await favoritesAPI.list();
+        if (!mounted) return;
+        setFavoriteIds(new Set(list.map(i => i.product_id)));
+      } catch (e) {
+        // ignore
+      }
+    })();
+    return () => { mounted = false; };
+  }, [isAuthenticated]);
+
+  const toggleFavorite = async (productId: number) => {
+    if (!isAuthenticated) {
+      sessionStorage.setItem('pending_favorite_product_id', String(productId));
+      requireAuth('/login');
+      return;
+    }
+    try {
+      const res = await favoritesAPI.toggle(productId);
+      setFavoriteIds(prev => {
+        const next = new Set(prev);
+        if (res.favorited) next.add(productId); else next.delete(productId);
+        return next;
+      });
+    } catch (e) {
+      // ignore
+    }
+  };
 
   // Inline Edit modal state (for owners)
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -506,6 +543,14 @@ const MarketplacePage: React.FC = () => {
           setCheckoutStep('shipping');
         }
       }
+      // Resume favorite toggle
+      const favId = sessionStorage.getItem('pending_favorite_product_id');
+      if (favId) {
+        sessionStorage.removeItem('pending_favorite_product_id');
+        try { favoritesAPI.toggle(Number(favId)).then(res => {
+          setFavoriteIds(prev => { const next = new Set(prev); if (res.favorited) next.add(Number(favId)); else next.delete(Number(favId)); return next; });
+        }); } catch {}
+      }
     }
   }, [isAuthenticated, products, user]);
 
@@ -588,6 +633,17 @@ const MarketplacePage: React.FC = () => {
         <div className="absolute top-3 left-3 bg-cordillera-gold text-cordillera-olive text-xs font-semibold px-2 py-1 rounded">
           {product.category}
         </div>
+        {/* Favorite toggle */}
+        <button
+          type="button"
+          aria-label={favoriteIds.has(product.id) ? 'Remove from favorites' : 'Add to favorites'}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(product.id); }}
+          className={`absolute top-3 right-3 rounded-full p-2 transition-colors ${favoriteIds.has(product.id) ? 'bg-red-600 text-white' : 'bg-white/90 text-cordillera-olive hover:bg-white'}`}
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill={favoriteIds.has(product.id) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
+        </button>
       </div>
     );
   };

@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\MediaPostController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\FavoritesController;
+use App\Http\Controllers\Api\StoryLikesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -100,4 +102,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard route (authenticated)
     Route::get('/dashboard/{role}', [DashboardController::class, 'show']);
+
+    // Favorites routes (authenticated)
+    Route::get('/favorites', [FavoritesController::class, 'index']);
+    Route::post('/products/{product}/favorite', [FavoritesController::class, 'toggle']);
+
+    // Story likes routes (authenticated)
+    Route::get('/story-likes', [StoryLikesController::class, 'index']);
+    Route::post('/stories/{story}/like', [StoryLikesController::class, 'toggle']);
 });
