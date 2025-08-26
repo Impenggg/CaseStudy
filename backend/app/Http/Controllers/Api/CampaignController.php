@@ -79,10 +79,19 @@ class CampaignController extends Controller
      */
     public function store(CampaignStoreRequest $request): JsonResponse
     {
+        // Only allow weavers (artisans) and admins to create
+        $user = Auth::user();
+        if (!$user || !in_array($user->role, ['weaver', 'artisan', 'admin'])) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
         $validated = $request->validated();
 
         $campaign = Campaign::create(array_merge($validated, [
-            'organizer_id' => Auth::id(),
+            'organizer_id' => $user->id,
             'current_amount' => 0,
             'backers_count' => 0,
         ]));

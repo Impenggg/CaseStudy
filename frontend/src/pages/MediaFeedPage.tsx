@@ -171,7 +171,10 @@ const MediaFeedPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-cordillera-cream">
       <div className="max-w-6xl mx-auto py-6 px-4">
-        <h1 className="text-2xl font-serif text-cordillera-olive mb-4">Media</h1>
+        <div className="sticky top-0 z-10 -mx-4 px-4 py-3 bg-cordillera-cream/90 backdrop-blur supports-[backdrop-filter]:bg-cordillera-cream/70 border-b border-cordillera-sage/30">
+          <h1 className="text-2xl font-serif text-cordillera-olive">Media Creation</h1>
+        </div>
+        <div className="h-4" />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left: 1/3 column */}

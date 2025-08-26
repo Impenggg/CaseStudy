@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -16,7 +17,7 @@ class AuthController extends Controller
     /**
      * Register a new user.
      */
-    public function register(Request $request): JsonResponse
+    public function register(RegisterRequest $request): JsonResponse
     {
         try {
             // Debug: log incoming email and payload (without password)
@@ -40,15 +41,7 @@ class AuthController extends Controller
                 $request->merge(['name' => $nameNormalized]);
             }
 
-            $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email:filter|max:255|unique:users,email',
-                'password' => 'required|string|min:8',
-                // Accept legacy/frontend role labels and normalize below
-                'role' => 'sometimes|in:weaver,buyer,artisan,customer',
-                'bio' => 'nullable|string|max:1000',
-                'location' => 'nullable|string|max:255',
-            ]);
+            $validated = $request->validated();
 
             // Normalize role inputs: artisan -> weaver, customer -> buyer
             $incomingRole = strtolower((string) $request->input('role', ''));
@@ -59,12 +52,12 @@ class AuthController extends Controller
             }
 
             $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'name' => $validated['name'] ?? $request->name,
+                'email' => $validated['email'] ?? $request->email,
+                'password' => Hash::make($validated['password'] ?? $request->password),
                 'role' => $incomingRole ?: 'buyer',
-                'bio' => $request->bio,
-                'location' => $request->location,
+                'bio' => $validated['bio'] ?? $request->bio,
+                'location' => $validated['location'] ?? $request->location,
             ]);
 
             $token = $user->createToken('auth_token')->plainTextToken;

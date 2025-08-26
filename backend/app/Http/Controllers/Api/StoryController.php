@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Story\StoryStoreRequest;
+use App\Http\Requests\Story\StoryUpdateRequest;
 use App\Models\Story;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -74,24 +76,22 @@ class StoryController extends Controller
     /**
      * Store a newly created story.
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoryStoreRequest $request): JsonResponse
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'excerpt' => 'required|string|max:500',
-            'media_url' => 'nullable|string',
-            'media_type' => 'nullable|in:image,video',
-            'category' => 'required|in:tradition,technique,artisan,community',
-            'tags' => 'nullable|array',
-            'tags.*' => 'string',
-            'featured' => 'boolean',
-            'published' => 'boolean',
-        ]);
+        // Only allow weavers (artisans) and admins to create
+        $user = Auth::user();
+        if (!$user || !in_array($user->role, ['weaver', 'artisan', 'admin'])) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unauthorized',
+            ], 403);
+        }
+
+        $validated = $request->validated();
 
         $story = Story::create([
-            ...$request->all(),
-            'author_id' => Auth::id(),
+            ...$validated,
+            'author_id' => $user->id,
         ]);
 
         return response()->json([
@@ -115,7 +115,7 @@ class StoryController extends Controller
     /**
      * Update the specified story.
      */
-    public function update(Request $request, Story $story): JsonResponse
+    public function update(StoryUpdateRequest $request, Story $story): JsonResponse
     {
         // Check if user owns the story
         if ($story->author_id !== Auth::id()) {
@@ -125,20 +125,9 @@ class StoryController extends Controller
             ], 403);
         }
 
-        $request->validate([
-            'title' => 'sometimes|string|max:255',
-            'content' => 'sometimes|string',
-            'excerpt' => 'sometimes|string|max:500',
-            'media_url' => 'nullable|string',
-            'media_type' => 'nullable|in:image,video',
-            'category' => 'sometimes|in:tradition,technique,artisan,community',
-            'tags' => 'nullable|array',
-            'tags.*' => 'string',
-            'featured' => 'boolean',
-            'published' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
-        $story->update($request->all());
+        $story->update($validated);
 
         return response()->json([
             'status' => 'success',

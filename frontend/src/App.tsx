@@ -113,9 +113,9 @@ const App: React.FC = () => {
             path="/submit-story"
             element={
               <Layout>
-                <ProtectedRoute>
+                <RoleProtectedRoute allowed={['artisan', 'admin']}>
                   <StorySubmissionPage />
-                </ProtectedRoute>
+                </RoleProtectedRoute>
               </Layout>
             }
           />
@@ -123,9 +123,9 @@ const App: React.FC = () => {
             path="/create-campaign"
             element={
               <Layout>
-                <ProtectedRoute>
+                <RoleProtectedRoute allowed={['artisan', 'admin']}>
                   <CampaignCreationPage />
-                </ProtectedRoute>
+                </RoleProtectedRoute>
               </Layout>
             }
           />

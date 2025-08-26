@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Product\ProductStoreRequest;
+use App\Http\Requests\Product\ProductUpdateRequest;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -74,7 +76,7 @@ class ProductController extends Controller
     /**
      * Store a newly created product.
      */
-    public function store(Request $request): JsonResponse
+    public function store(ProductStoreRequest $request): JsonResponse
     {
         // Only allow weavers (and admins if applicable) to create
         $user = Auth::user();
@@ -85,22 +87,7 @@ class ProductController extends Controller
             ], 403);
         }
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'category' => 'required|string|max:255',
-            'description' => 'required|string',
-            'cultural_background' => 'nullable|string',
-            'materials' => 'required|array',
-            'materials.*' => 'string',
-            'care_instructions' => 'required|string',
-            'image' => 'nullable|file|image|mimes:jpg,jpeg,png,webp,jfif|max:4096',
-            'stock_quantity' => 'required|integer|min:0',
-            'dimensions' => 'nullable|array',
-            'tags' => 'nullable|array',
-            'tags.*' => 'string',
-            'featured' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
         // Handle image upload if present
         $imagePath = null;
@@ -148,7 +135,7 @@ class ProductController extends Controller
     /**
      * Update the specified product.
      */
-    public function update(Request $request, Product $product): JsonResponse
+    public function update(ProductUpdateRequest $request, Product $product): JsonResponse
     {
         // Check if user owns the product or is admin
         $user = Auth::user();
@@ -159,22 +146,7 @@ class ProductController extends Controller
             ], 403);
         }
 
-        $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'price' => 'sometimes|numeric|min:0',
-            'category' => 'sometimes|string|max:255',
-            'description' => 'sometimes|string',
-            'cultural_background' => 'nullable|string',
-            'materials' => 'sometimes|array',
-            'materials.*' => 'string',
-            'care_instructions' => 'sometimes|string',
-            'image' => 'nullable|file|image|mimes:jpg,jpeg,png,webp,jfif|max:4096',
-            'stock_quantity' => 'sometimes|integer|min:0',
-            'dimensions' => 'nullable|array',
-            'tags' => 'nullable|array',
-            'tags.*' => 'string',
-            'featured' => 'boolean',
-        ]);
+        $validated = $request->validated();
 
         $payload = $validated;
         if (isset($payload['dimensions']) && is_string($payload['dimensions'])) {
