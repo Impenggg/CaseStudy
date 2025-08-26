@@ -135,7 +135,8 @@ export const mediaAPI = {
     form.append('image', file);
     if (caption) form.append('caption', caption);
     const res = await api.post('/media', form, { headers: { 'Content-Type': 'multipart/form-data' } });
-    return res.data;
+    // backend returns { status, message, data: MediaPost }
+    return res.data.data as MediaPost;
   },
   react: async (id: number) => {
     const res = await api.post(`/media/${id}/react`);
@@ -143,7 +144,8 @@ export const mediaAPI = {
   },
   comment: async (id: number, body: string) => {
     const res = await api.post(`/media/${id}/comments`, { body });
-    return res.data;
+    // backend returns { status, message, data: Comment }
+    return res.data.data as { id: number; body: string; created_at: string; user?: { id: number; name: string } };
   },
 };
 

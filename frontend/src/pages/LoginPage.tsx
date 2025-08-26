@@ -9,12 +9,17 @@ export const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [capsOn, setCapsOn] = useState(false);
+  const [touched, setTouched] = useState<{ email?: boolean; password?: boolean }>({});
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const fromState = (location.state as any)?.from?.pathname as string | undefined;
   const intendedPath = (typeof window !== 'undefined') ? sessionStorage.getItem('intended_path') || undefined : undefined;
   const redirectTo = fromState || intendedPath || undefined;
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const passwordValid = password.length >= 6;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,17 +83,17 @@ export const LoginPage = () => {
                   Discover stories and handcrafted pieces from the highlands. Sign in to support artisans, save favorites, and continue your journey.
                 </p>
               </div>
-              <ul className="mt-10 space-y-3 text-cordillera-cream/80 text-sm">
-                <li className="flex items-center"><span className="mr-2 text-cordillera-gold">•</span> Seamless checkout and campaign support</li>
-                <li className="flex items-center"><span className="mr-2 text-cordillera-gold">•</span> Save artworks and stories you love</li>
-                <li className="flex items-center"><span className="mr-2 text-cordillera-gold">•</span> Personalized recommendations</li>
+              <ul className="mt-10 space-y-3 text-cordillera-cream/80 text-sm text-right self-end ml-auto max-w-md pr-2">
+                <li className="flex items-center justify-end flex-row-reverse"><span className="ml-2 text-cordillera-gold">•</span> Seamless checkout and campaign support</li>
+                <li className="flex items-center justify-end flex-row-reverse"><span className="ml-2 text-cordillera-gold">•</span> Save artworks and stories you love</li>
+                <li className="flex items-center justify-end flex-row-reverse"><span className="ml-2 text-cordillera-gold">•</span> Personalized recommendations</li>
               </ul>
             </div>
           </div>
 
           {/* Form card */}
           <div className="relative">
-            <Card className="mx-auto max-w-md w-full">
+            <Card className="mx-auto max-w-md w-full bg-cordillera-cream/5 border border-cordillera-gold/20 backdrop-blur-sm">
               <CardContent className="space-y-8">
               {/* Header */}
               <div className="text-center">
@@ -124,7 +129,7 @@ export const LoginPage = () => {
               </div>
 
               {/* Login Form */}
-              <form className="mt-2 space-y-6" onSubmit={handleSubmit}>
+              <form className="mt-2 space-y-6" onSubmit={handleSubmit} noValidate>
                 <div className="space-y-4">
                   <div>
                     <label htmlFor="email" className="block text-sm font-light text-cordillera-cream mb-2">
@@ -143,10 +148,16 @@ export const LoginPage = () => {
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        onBlur={() => setTouched((t) => ({ ...t, email: true }))}
+                        aria-invalid={touched.email && !emailValid}
+                        aria-describedby="email-help email-error"
                         className="w-full pl-10 pr-4 py-3 bg-cordillera-cream/10 border border-cordillera-gold/30 text-cordillera-cream placeholder-cordillera-cream/60 focus:outline-none focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
                         placeholder="Enter your email"
                       />
                     </div>
+                    {touched.email && !emailValid && (
+                      <p id="email-error" className="mt-1 text-xs text-red-300">Please enter a valid email address.</p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor="password" className="block text-sm font-light text-cordillera-cream mb-2">
@@ -165,6 +176,10 @@ export const LoginPage = () => {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
+                        onBlur={() => setTouched((t) => ({ ...t, password: true }))}
+                        onKeyUp={(e) => setCapsOn(e.getModifierState && e.getModifierState('CapsLock'))}
+                        aria-invalid={touched.password && !passwordValid}
+                        aria-describedby="password-error"
                         className="w-full pl-10 pr-10 py-3 bg-cordillera-cream/10 border border-cordillera-gold/30 text-cordillera-cream placeholder-cordillera-cream/60 focus:outline-none focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
                         placeholder="Enter your password"
                       />
@@ -181,6 +196,12 @@ export const LoginPage = () => {
                         )}
                       </button>
                     </div>
+                    {capsOn && (
+                      <p className="mt-1 text-xs text-amber-200">Caps Lock is on.</p>
+                    )}
+                    {touched.password && !passwordValid && (
+                      <p id="password-error" className="mt-1 text-xs text-red-300">Password must be at least 6 characters.</p>
+                    )}
                   </div>
                 </div>
 
@@ -202,7 +223,7 @@ export const LoginPage = () => {
                 <div>
                   <button
                     type="submit"
-                    disabled={isLoading}
+                    disabled={isLoading || !emailValid || !passwordValid}
                     className="w-full bg-cordillera-gold text-cordillera-olive py-3 px-4 font-medium tracking-wide hover:bg-cordillera-gold/90 focus:outline-none focus:ring-2 focus:ring-cordillera-gold focus:ring-offset-2 focus:ring-offset-cordillera-olive transition-colors disabled:opacity-50"
                   >
                     {isLoading ? 'Signing In...' : 'Sign In'}
@@ -219,14 +240,7 @@ export const LoginPage = () => {
                 </div>
               </form>
 
-              {/* Social proof */}
-              <div className="mt-8 pt-6 border-t border-cordillera-gold/20">
-                <div className="flex flex-wrap items-center justify-center gap-3">
-                  <span className="px-3 py-1 text-xs bg-cordillera-cream/5 border border-cordillera-gold/20 text-cordillera-cream/80">Trusted by local artisans</span>
-                  <span className="px-3 py-1 text-xs bg-cordillera-cream/5 border border-cordillera-gold/20 text-cordillera-cream/80">Secure checkout</span>
-                  <span className="px-3 py-1 text-xs bg-cordillera-cream/5 border border-cordillera-gold/20 text-cordillera-cream/80">Community-driven</span>
-                </div>
-              </div>
+              {/* Social proof removed by request */}
               </CardContent>
             </Card>
           </div>

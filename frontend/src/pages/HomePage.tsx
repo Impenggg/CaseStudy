@@ -201,7 +201,7 @@ const HomePage: React.FC = () => {
                   >
                     {featuredProducts.map((product) => (
                       <div key={product.id} className="w-full flex-shrink-0 px-2">
-                        <div className="bg-white rounded-lg border border-cordillera-sage/30 shadow-sm overflow-hidden h-[360px]">
+                        <div className="card-surface rounded-lg overflow-hidden h-[360px]">
                           <div className="h-[220px] relative overflow-hidden">
                             <img
                               src={product.image || PLACEHOLDER_IMG}
@@ -283,7 +283,7 @@ const HomePage: React.FC = () => {
                 Want to Support
               </h3>
               <div className="px-2">
-                <div className="bg-white border border-cordillera-sage/30 rounded-lg shadow-sm p-6 sm:p-7 h-[360px] flex flex-col overflow-hidden">
+                <div className="card-surface rounded-lg p-6 sm:p-7 h-[360px] flex flex-col overflow-hidden">
                   {/* Top badge */}
                   <div className="flex items-center gap-3 mb-3">
                     <span className="inline-block text-xs font-semibold tracking-wide uppercase px-3 py-1 rounded-md bg-cordillera-sage text-cordillera-olive">

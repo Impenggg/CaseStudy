@@ -115,8 +115,8 @@ const MediaFeedPage: React.FC = () => {
       setPosting(true);
       setPostError(null);
       const res = await mediaAPI.create({ file, caption: caption.trim() || undefined });
-      // Prepend new post into feed for responsiveness
-      const newPost: MediaPost | undefined = res?.data;
+      // API returns the created MediaPost directly
+      const newPost: MediaPost | undefined = res;
       if (newPost) setFeed((prev) => [newPost, ...prev]);
       // Reset composer
       setFile(null);
@@ -157,7 +157,7 @@ const MediaFeedPage: React.FC = () => {
       setFeed((prev) => {
         const next = [...prev];
         const p = { ...next[index] };
-        const comment = res?.data;
+        const comment = res; // API returns the comment object directly
         p.comments = [comment, ...(p.comments || [])];
         p.comments_count = (p.comments_count || 0) + 1;
         next[index] = p;
@@ -183,13 +183,13 @@ const MediaFeedPage: React.FC = () => {
             <button
               type="button"
               onClick={() => setIsComposerOpen(true)}
-              className="w-full text-left bg-white rounded-md shadow-sm hover:shadow-md transition-shadow border border-cordillera-sage/30 p-4 hover:bg-cordillera-gold/5"
+              className="w-full text-left card-surface rounded-md p-4"
             >
               <div className="text-cordillera-olive/70">Share something…</div>
             </button>
 
-            {/* User's images grid */}
-            <div>
+            {/* User's images grid (sticky) */}
+            <div className="sticky top-20 self-start">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-lg font-medium text-cordillera-olive">Your images</h2>
                 {loadingMyPosts && <span className="text-sm text-cordillera-olive/60">Loading…</span>}
@@ -197,13 +197,13 @@ const MediaFeedPage: React.FC = () => {
               {myError && <div className="text-sm text-red-700 mb-2">{myError}</div>}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {myPosts.map((p) => (
-                  <div key={p.id} className="group relative bg-white rounded-md overflow-hidden border border-cordillera-sage/30 shadow-sm hover:shadow-md transition-all">
+                  <div key={p.id} className="group relative card-surface rounded-md overflow-hidden">
                     <img src={p.image_url} alt={p.caption || `my-${p.id}`} className="w-full h-32 object-cover transform transition-transform duration-300 group-hover:scale-[1.03]" />
                     <div className="pointer-events-none absolute inset-0 bg-cordillera-olive/0 group-hover:bg-cordillera-olive/5 transition-colors" />
                   </div>
                 ))}
                 {!loadingMyPosts && myPosts.length === 0 && !myError && (
-                  <div className="col-span-2 sm:col-span-3 text-center text-cordillera-olive/70 text-sm bg-white rounded-md border border-cordillera-sage/30 p-6">
+                  <div className="col-span-2 sm:col-span-3 text-center text-cordillera-olive/70 text-sm card-surface rounded-md p-6">
                     No images yet. Share your first one using the composer above.
                   </div>
                 )}
@@ -226,7 +226,7 @@ const MediaFeedPage: React.FC = () => {
 
             {/* Empty state */}
             {!loadingFeed && feed.length === 0 && !feedError && (
-              <div className="bg-white rounded-md border border-cordillera-sage/30 p-8 text-center text-cordillera-olive/70">
+              <div className="card-surface rounded-md p-8 text-center text-cordillera-olive/70">
                 <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-cordillera-gold/15 flex items-center justify-center">
                   <svg className="w-6 h-6 text-cordillera-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -237,9 +237,10 @@ const MediaFeedPage: React.FC = () => {
               </div>
             )}
 
+            {/* Feed posts */}
             <div className="space-y-5">
               {feed.map((post, i) => (
-                <div key={post.id} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-cordillera-sage/30">
+                <div key={post.id} className="card-surface rounded-lg">
                   <div className="p-3 border-b border-cordillera-sage/20 flex items-center justify-between">
                     <div>
                       <div className="text-sm font-medium text-cordillera-olive">{post.user?.name || 'User'}</div>
@@ -309,7 +310,7 @@ const MediaFeedPage: React.FC = () => {
           />
           {/* Dialog */}
           <div
-            className="relative bg-white w-full max-w-lg mx-4 rounded-lg shadow-xl border border-cordillera-sage/30"
+            className="relative w-full max-w-lg mx-4 rounded-lg shadow-xl border border-cordillera-olive/15 bg-cordillera-cream text-cordillera-olive dark:bg-cordillera-olive/90 dark:text-cordillera-cream"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-5 py-4 border-b border-cordillera-sage/20 flex items-center justify-between">
