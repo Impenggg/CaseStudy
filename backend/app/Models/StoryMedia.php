@@ -23,10 +23,36 @@ class StoryMedia extends Model
     ];
 
     /**
+     * Auto-append computed full URL for media assets.
+     */
+    protected $appends = [
+        'media_url',
+    ];
+
+    /**
      * Get the story for this media.
      */
     public function story()
     {
         return $this->belongsTo(Story::class);
+    }
+
+    /**
+     * Accessor: normalize stored media_url into an absolute, web-accessible URL.
+     */
+    public function getMediaUrlAttribute(): string
+    {
+        $raw = (string) ($this->attributes['media_url'] ?? '');
+        if ($raw === '') {
+            return '';
+        }
+        if (str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://')) {
+            return $raw;
+        }
+        $path = ltrim($raw, "/\\");
+        if (str_starts_with($path, 'storage/')) {
+            return asset($path);
+        }
+        return asset('storage/' . $path);
     }
 }

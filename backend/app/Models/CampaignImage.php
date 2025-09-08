@@ -32,10 +32,36 @@ class CampaignImage extends Model
     ];
 
     /**
+     * Auto-append normalized image_url for API responses.
+     */
+    protected $appends = [
+        'image_url',
+    ];
+
+    /**
      * Get the campaign for this image.
      */
     public function campaign()
     {
         return $this->belongsTo(Campaign::class);
+    }
+
+    /**
+     * Accessor: normalize stored image_url into an absolute, web-accessible URL.
+     */
+    public function getImageUrlAttribute(): string
+    {
+        $raw = (string) ($this->attributes['image_url'] ?? '');
+        if ($raw === '') {
+            return '';
+        }
+        if (str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://')) {
+            return $raw;
+        }
+        $path = ltrim($raw, "/\\");
+        if (str_starts_with($path, 'storage/')) {
+            return asset($path);
+        }
+        return asset('storage/' . $path);
     }
 }

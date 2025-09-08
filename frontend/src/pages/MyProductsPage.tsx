@@ -17,7 +17,11 @@ const MyProductsPage: React.FC = () => {
     if (image.startsWith('http://') || image.startsWith('https://')) return image;
     return `${API_ORIGIN}/${image.replace(/^\/?/, '')}`;
   };
-  const PLACEHOLDER_IMG = 'https://via.placeholder.com/48?text=%20';
+  const PLACEHOLDER_IMG =
+    'data:image/svg+xml;utf8,' +
+    encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48"><rect width="100%" height="100%" fill="#e5e7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="9" fill="#6b7280">No Image</text></svg>`
+    );
 
   const load = async () => {
     try {
@@ -91,11 +95,18 @@ const MyProductsPage: React.FC = () => {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <img
-                          src={
-                            resolveImageUrl(
-                              (p as any).image || (p as any).image_url || (p as any).image_path || (p as any).imagePath || (p as any).thumbnail || ''
-                            ) || PLACEHOLDER_IMG
-                          }
+                          src={(() => {
+                            const arr = (p as any).images_array as string[] | undefined
+                            const firstFromArray = Array.isArray(arr) && arr.length > 0 ? arr[0] : undefined
+                            const chosen = firstFromArray
+                              || (p as any).image_url
+                              || (p as any).image
+                              || (p as any).image_path
+                              || (p as any).imagePath
+                              || (p as any).thumbnail
+                              || ''
+                            return resolveImageUrl(chosen) || PLACEHOLDER_IMG
+                          })()}
                           alt={p.name}
                           className="w-12 h-12 object-cover rounded"
                           loading="lazy"

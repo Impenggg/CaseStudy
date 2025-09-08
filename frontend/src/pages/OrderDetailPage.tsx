@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { ordersAPI } from '../services/api';
+import api, { ordersAPI } from '../services/api';
 
 type Product = {
   id: number;
@@ -34,6 +34,17 @@ const OrderDetailPage: React.FC = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Resolve API origin (http://localhost:8000) from axios baseURL (http://localhost:8000/api)
+  const API_ORIGIN = useMemo(() => (api.defaults.baseURL || '').replace(/\/api\/?$/, ''), []);
+  const resolveUrl = (u?: string | null) => {
+    if (!u) return '';
+    if (u.startsWith('http://') || u.startsWith('https://')) return u;
+    return `${API_ORIGIN}/${u.replace(/^\/?/, '')}`;
+  };
+  const PLACEHOLDER_IMG = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"><rect width="100%" height="100%" fill="#e5e7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="12" fill="#6b7280">No Image</text></svg>`
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -114,12 +125,23 @@ const OrderDetailPage: React.FC = () => {
               {/* Product summary */}
               <div className="flex gap-4 items-start">
                 <div className="w-24 h-24 bg-cordillera-sage/20 rounded overflow-hidden flex items-center justify-center">
-                  {order.product?.image ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={order.product.image} alt={order.product.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-cordillera-olive/60 text-xs">No Image</span>
-                  )}
+                  {(() => {
+                    const raw = (order.product as any)?.image_url || (order.product as any)?.image || null;
+                    const src = resolveUrl(raw);
+                    const finalSrc = src || PLACEHOLDER_IMG;
+                    return (
+                      <img
+                        src={finalSrc}
+                        alt={order.product?.name || `Product #${order.product_id}`}
+                        className="w-full h-full object-cover"
+                        title={finalSrc}
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement;
+                          if (target.src !== PLACEHOLDER_IMG) target.src = PLACEHOLDER_IMG;
+                        }}
+                      />
+                    );
+                  })()}
                 </div>
                 <div className="flex-1">
                   <Link to={`/product/${order.product?.id ?? order.product_id}`} className="font-medium text-cordillera-olive hover:underline">

@@ -40,8 +40,6 @@ const CampaignDetailPage: React.FC = () => {
       if (!id) return;
       setIsLoading(true);
       try {
-        console.debug('[CampaignDetail] BaseURL:', api.defaults.baseURL);
-        console.debug('[CampaignDetail] Fetching campaign by id:', id);
         const data = await campaignsAPI.getById(Number(id));
         // Resolve image URL if backend returns a relative path
         const API_ORIGIN = (api.defaults.baseURL || '').replace(/\/api\/?$/, '');

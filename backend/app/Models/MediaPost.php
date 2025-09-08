@@ -1,3 +1,4 @@
+
 <?php
 
 namespace App\Models;
@@ -38,6 +39,19 @@ class MediaPost extends Model
 
     public function getImageUrlAttribute(): string
     {
-        return url(\Illuminate\Support\Facades\Storage::url($this->image_path));
+        if (empty($this->image_path)) {
+            return '';
+        }
+        
+        // If it's already a full URL, return as is
+        if (str_starts_with($this->image_path, 'http')) {
+            return $this->image_path;
+        }
+        
+        // Remove any leading slashes to prevent double slashes in URL
+        $path = ltrim($this->image_path, '/\\');
+        
+        // Return the full URL
+        return asset('storage/' . $path);
     }
 }

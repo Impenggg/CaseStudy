@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { ordersAPI } from '../services/api'
+import api, { ordersAPI } from '../services/api'
 
 type OrderListItem = {
   id: number
@@ -19,6 +19,15 @@ const OrdersPage: React.FC = () => {
   const [orders, setOrders] = useState<OrderListItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Derive API origin (e.g., http://localhost:8000) from axios baseURL (e.g., http://localhost:8000/api)
+  const API_ORIGIN = useMemo(() => (api.defaults.baseURL || '').replace(/\/api\/?$/, ''), [])
+  const resolveUrl = (u?: string | null) => {
+    if (!u) return ''
+    if (u.startsWith('http://') || u.startsWith('https://')) return u
+    return `${API_ORIGIN}/${u.replace(/^\/?/, '')}`
+  }
+  const PLACEHOLDER_IMG = 'https://via.placeholder.com/64?text=%20'
 
   useEffect(() => {
     requireAuth()
@@ -90,11 +99,23 @@ const OrdersPage: React.FC = () => {
               >
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-cordillera-sage/20 rounded overflow-hidden flex items-center justify-center">
-                    {o.product?.image ? (
-                      <img src={o.product.image} alt={o.product?.name || `Product #${o.product_id}`} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-cordillera-cream/60 text-xs">No Image</span>
-                    )}
+                    {(() => {
+                      const raw = (o.product as any)?.image_url || (o.product as any)?.image || null
+                      const src = resolveUrl(raw)
+                      const finalSrc = src || PLACEHOLDER_IMG
+                      return (
+                        <img
+                          src={finalSrc}
+                          alt={o.product?.name || `Product #${o.product_id}`}
+                          className="w-full h-full object-cover"
+                          title={finalSrc}
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLImageElement
+                            if (target.src !== PLACEHOLDER_IMG) target.src = PLACEHOLDER_IMG
+                          }}
+                        />
+                      )
+                    })()}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">

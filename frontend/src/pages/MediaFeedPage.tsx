@@ -198,7 +198,17 @@ const MediaFeedPage: React.FC = () => {
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {myPosts.map((p) => (
                   <div key={p.id} className="group relative card-surface rounded-md overflow-hidden">
-                    <img src={p.image_url} alt={p.caption || `my-${p.id}`} className="w-full h-32 object-cover transform transition-transform duration-300 group-hover:scale-[1.03]" />
+                    <img
+                      src={p.image_url}
+                      alt={p.caption || `my-${p.id}`}
+                      className="w-full h-32 object-cover transform transition-transform duration-300 group-hover:scale-[1.03]"
+                      onError={(e) => {
+                        const target = e.currentTarget as HTMLImageElement;
+                        const q = encodeURIComponent('handicraft');
+                        const fallback = `https://source.unsplash.com/400x300/?${q}`;
+                        if (target.src !== fallback) target.src = fallback;
+                      }}
+                    />
                     <div className="pointer-events-none absolute inset-0 bg-cordillera-olive/0 group-hover:bg-cordillera-olive/5 transition-colors" />
                   </div>
                 ))}
@@ -250,7 +260,17 @@ const MediaFeedPage: React.FC = () => {
                   <div className="p-3">
                     {post.caption && <p className="mb-2 text-cordillera-olive">{post.caption}</p>}
                     <div className="relative overflow-hidden rounded-md group">
-                      <img src={post.image_url} alt={post.caption || `post-${post.id}`} className="w-full object-cover transform transition-transform duration-500 group-hover:scale-[1.02]" />
+                      <img
+                        src={post.image_url}
+                        alt={post.caption || `post-${post.id}`}
+                        className="w-full object-cover transform transition-transform duration-500 group-hover:scale-[1.02]"
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement;
+                          const q = encodeURIComponent('handicraft');
+                          const fallback = `https://source.unsplash.com/800x600/?${q}`;
+                          if (target.src !== fallback) target.src = fallback;
+                        }}
+                      />
                       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   </div>

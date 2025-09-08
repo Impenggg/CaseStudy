@@ -219,8 +219,7 @@ const MarketplacePage: React.FC = () => {
     let mounted = true;
     (async () => {
       try {
-        console.debug('[Marketplace] BaseURL:', api.defaults.baseURL);
-        console.debug('[Marketplace] Fetching products...');
+        // fetching products
         // Compute storage bases using backend API base (including path), supporting subpath deployments (e.g., /CaseStudy/backend/public)
         // Example: if baseURL = http://localhost/CaseStudy/backend/public/api,
         // backendRoot becomes http://localhost/CaseStudy/backend/public
@@ -241,13 +240,17 @@ const MarketplacePage: React.FC = () => {
             ];
           }
         })();
+
         const res = await productsAPI.getAll({ per_page: 100 });
-        console.debug('[Marketplace] Products response:', res);
+        // products fetched
         // Support both paginated {data: [...]} and raw arrays
         const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : res?.data?.data || []);
+
         const mapped: Product[] = list.map((item: any) => {
-          const normalized = resolveImageUrl(item.image);
+          // Prefer backend-computed image_url (normalized), fallback to image
+          const normalized = resolveImageUrl(item.image_url || item.image);
           const name = (item?.name || '').trim();
+
           // Build candidates across possible storage directories
           const nameNoParens = name.replace(/\s*\(.*?\)\s*/g, '').trim();
           const firstToken = (nameNoParens.split(/[^A-Za-z0-9]+/)[0] || nameNoParens).trim();
@@ -259,19 +262,21 @@ const MarketplacePage: React.FC = () => {
           const noPunctLower = noPunct.toLowerCase();
           const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
           const uniq = (arr: string[]) => Array.from(new Set(arr.filter(Boolean)));
+
           // Prioritize most likely filename patterns first
           const prioritizedVariants = uniq([
-            name,                     // Exact name
-            nameNoParens,             // Remove parentheses
-            spaceNorm,                // Collapsed spaces
-            spaceToUnderscore,        // Underscore instead of spaces
-            lower,                    // lowercase
+            name,
+            nameNoParens,
+            spaceNorm,
+            spaceToUnderscore,
+            lower,
             lowerNoParens,
-            noPunct,                  // remove punctuation
+            noPunct,
             noPunctLower,
-            firstToken,               // first word
-            slug,                     // slug
+            firstToken,
+            slug,
           ]);
+
           // Try common extensions with jpg first
           const exts = ['jpg', 'jpeg', 'png', 'webp', 'jfif'];
           const storageCandidates = uniq(
@@ -279,16 +284,21 @@ const MarketplacePage: React.FC = () => {
               prioritizedVariants.flatMap(v => {
                 const enc = encodeURIComponent(v);
                 return [
-                  // Plain (as-is) and encoded variants
                   ...exts.map(ext => `${baseDir}${v}.${ext}`),
                   ...exts.map(ext => `${baseDir}${enc}.${ext}`),
                 ];
               })
             )
           );
-          // Build a gallery: prefer backend URL if present, then our candidates
-          const gallery = uniq([normalized, ...storageCandidates]);
-          // Prefer backend URL if present; otherwise start with the first storage candidate
+
+          // Include backend images array if present (images_array from backend appends, or images relation values)
+          const backendImagesRaw: string[] = Array.isArray((item as any).images_array)
+            ? (item as any).images_array
+            : (Array.isArray((item as any).images) ? (item as any).images : []);
+          const backendImages = backendImagesRaw.map((u: string) => resolveImageUrl(u)).filter(Boolean);
+
+          const gallery = uniq([normalized, ...backendImages, ...storageCandidates]);
+
           return {
             id: item.id,
             name: item.name,
@@ -302,6 +312,7 @@ const MarketplacePage: React.FC = () => {
             ownerId: item.user_id ?? item.user?.id ?? item.seller?.id,
           };
         });
+
         if (mounted) {
           setProducts(mapped);
           setFilteredProducts(mapped);

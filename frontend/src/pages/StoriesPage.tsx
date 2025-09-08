@@ -60,9 +60,7 @@ const StoriesPage: React.FC = () => {
 
     (async () => {
       try {
-        console.debug('[StoriesPage] Fetching stories...');
         const res = await storiesAPI.getAll({ per_page: 'all' });
-        console.debug('[StoriesPage] Stories response:', res);
         const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : res?.data?.data || []);
         const mappedStories: Story[] = list.map((s: any) => {
           // Prefer excerpt in card; full content can be shown in detail page
@@ -86,9 +84,7 @@ const StoriesPage: React.FC = () => {
         // Removed static external stories to ensure UI reflects live DB only
 
         // Fetch campaigns (all)
-        console.debug('[StoriesPage] Fetching campaigns...');
         const cres = await campaignsAPI.getAll({ per_page: 'all' });
-        console.debug('[StoriesPage] Campaigns response:', cres);
         const clist = Array.isArray(cres?.data) ? cres.data : (Array.isArray(cres) ? cres : cres?.data?.data || []);
         const mappedCampaigns: Campaign[] = clist.map((c: any) => {
           const img = c.image && isImageUrl(c.image) ? c.image : fallbackImage;

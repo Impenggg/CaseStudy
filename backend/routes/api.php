@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\StoryController;
@@ -44,6 +45,9 @@ Route::get('/campaigns/{campaign}', [CampaignController::class, 'show']);
 
 // Public uploads listing (for gallery display)
 Route::get('/uploads', [UploadController::class, 'index']);
+
+
+// (Removed test-storage dev route)
 
 // Protected routes (authentication required)
 Route::middleware('auth:sanctum')->group(function () {
