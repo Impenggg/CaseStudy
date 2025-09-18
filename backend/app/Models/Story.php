@@ -26,6 +26,11 @@ class Story extends Model
         'featured',
         'published',
         'reading_time',
+        // Moderation
+        'moderation_status',
+        'reviewed_by',
+        'reviewed_at',
+        'rejection_reason',
     ];
 
     /**
@@ -61,6 +66,30 @@ class Story extends Model
     public function scopePublished($query)
     {
         return $query->where('published', true);
+    }
+
+    /**
+     * Scope a query to only include approved stories.
+     */
+    public function scopeApproved($query)
+    {
+        return $query->where('moderation_status', 'approved');
+    }
+
+    /**
+     * Scope a query to only include pending stories.
+     */
+    public function scopePending($query)
+    {
+        return $query->where('moderation_status', 'pending');
+    }
+
+    /**
+     * Scope a query to only include rejected stories.
+     */
+    public function scopeRejected($query)
+    {
+        return $query->where('moderation_status', 'rejected');
     }
 
     /**

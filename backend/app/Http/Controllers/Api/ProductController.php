@@ -17,7 +17,7 @@ class ProductController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Product::with(['seller', 'images']);
+        $query = Product::with(['seller', 'images'])->approved();
 
         // Search
         if ($request->has('search')) {
@@ -111,6 +111,7 @@ class ProductController extends Controller
             [
                 'image' => $imagePath ?? ($request->string('image')->isNotEmpty() ? $request->string('image')->toString() : null),
                 'user_id' => $user->id,
+                'moderation_status' => ($user->role === 'admin') ? 'approved' : 'pending',
             ]
         ));
 
@@ -126,6 +127,13 @@ class ProductController extends Controller
      */
     public function show(Product $product): JsonResponse
     {
+        $user = Auth::user();
+        $canView = $product->moderation_status === 'approved'
+            || ($user && ($user->id === $product->user_id || ($user->role === 'admin')));
+        if (!$canView) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+
         return response()->json([
             'status' => 'success',
             'data' => $product->load(['seller', 'images']),

@@ -1,4 +1,3 @@
-
 <?php
 
 namespace App\Models;
@@ -16,6 +15,11 @@ class MediaPost extends Model
         'user_id',
         'caption',
         'image_path',
+        // Moderation
+        'moderation_status',
+        'reviewed_by',
+        'reviewed_at',
+        'rejection_reason',
     ];
 
     protected $appends = [
@@ -35,6 +39,30 @@ class MediaPost extends Model
     public function reactions(): HasMany
     {
         return $this->hasMany(MediaReaction::class);
+    }
+
+    /**
+     * Scope a query to only include approved posts.
+     */
+    public function scopeApproved($query)
+    {
+        return $query->where('moderation_status', 'approved');
+    }
+
+    /**
+     * Scope a query to only include pending posts.
+     */
+    public function scopePending($query)
+    {
+        return $query->where('moderation_status', 'pending');
+    }
+
+    /**
+     * Scope a query to only include rejected posts.
+     */
+    public function scopeRejected($query)
+    {
+        return $query->where('moderation_status', 'rejected');
     }
 
     public function getImageUrlAttribute(): string

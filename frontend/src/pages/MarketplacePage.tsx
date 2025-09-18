@@ -341,9 +341,9 @@ const MarketplacePage: React.FC = () => {
 
   // Cart helpers
   const addToCart = (product: Product) => {
-    // Block artisans from adding to cart
-    if (user && (user as any).role === 'artisan') {
-      setErrorMsg('Artisan accounts cannot add items to the cart.');
+    // Block artisans and admins from adding to cart
+    if (user && (((user as any).role === 'artisan') || ((user as any).role === 'admin'))) {
+      setErrorMsg('This account type cannot add items to the cart.');
       return;
     }
     // Respect stock limits if provided
@@ -392,9 +392,9 @@ const MarketplacePage: React.FC = () => {
   const cartTotal = cartItems.reduce((sum, i) => sum + i.quantity * i.price, 0);
 
   const handleCheckout = () => {
-    // Block artisans from ordering
-    if (user && (user as any).role === 'artisan') {
-      setErrorMsg('Artisan accounts cannot place marketplace orders.');
+    // Block artisans and admins from ordering
+    if (user && (((user as any).role === 'artisan') || ((user as any).role === 'admin'))) {
+      setErrorMsg('This account type cannot place marketplace orders.');
       return;
     }
     // Require auth to proceed to checkout
@@ -519,12 +519,13 @@ const MarketplacePage: React.FC = () => {
     if (isAuthenticated) {
       const pendingId = sessionStorage.getItem('pending_add_product_id');
       if (pendingId) {
-        // If artisan, do not add pending item
-        if (user && (user as any).role === 'artisan') {
-          setErrorMsg('Artisan accounts cannot add items to the cart.');
+        // If artisan or admin, do not add pending item
+        if (user && (((user as any).role === 'artisan') || ((user as any).role === 'admin'))) {
+          setErrorMsg('This account type cannot add items to the cart.');
           sessionStorage.removeItem('pending_add_product_id');
           return;
         }
+
         const product = products.find(p => p.id === Number(pendingId));
         if (product) {
           setCartItems((prev) => {
@@ -543,9 +544,9 @@ const MarketplacePage: React.FC = () => {
       // Resume checkout
       if (sessionStorage.getItem('resume_checkout') === '1') {
         sessionStorage.removeItem('resume_checkout');
-        // If artisan, do not open checkout and show message
-        if (user && (user as any).role === 'artisan') {
-          setErrorMsg('Artisan accounts cannot place marketplace orders.');
+        // If artisan or admin, do not open checkout and show message
+        if (user && (((user as any).role === 'artisan') || ((user as any).role === 'admin'))) {
+          setErrorMsg('This account type cannot place marketplace orders.');
           return;
         }
         if (cartItems.length > 0) {
@@ -664,36 +665,38 @@ const MarketplacePage: React.FC = () => {
       {errorMsg && (
         <div className="bg-red-50 text-red-700 border border-red-200 px-4 py-3 text-sm">{errorMsg}</div>
       )}
-             {/* Premium Cart Button */}
-       <div className="fixed right-6 bottom-6 z-50">
-         <button
-           onClick={() => setIsCartOpen(true)}
-           className="group relative bg-gradient-to-r from-cordillera-gold to-cordillera-gold/90 text-cordillera-olive px-6 py-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-500 flex items-center gap-3 border-2 border-cordillera-olive/20 hover:border-cordillera-olive transform hover:scale-110 backdrop-blur-sm"
-           aria-label="Open cart"
-         >
-                     <div className="relative">
-             <svg className="w-6 h-6 transition-all duration-300 group-hover:rotate-12 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
-             </svg>
-             {cartCount > 0 && (
-               <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse shadow-lg border border-white">
-                 {cartCount}
-               </span>
-             )}
-           </div>
-           <div className="flex flex-col items-start">
-             <span className="text-sm font-bold tracking-wide">Cart</span>
-             <span className="text-xs opacity-90 font-medium">
-               {cartCount === 0 ? 'Empty' : `${cartCount} item${cartCount !== 1 ? 's' : ''}`}
-             </span>
-           </div>
-           {cartTotal > 0 && (
-             <div className="ml-2 pl-3 border-l border-cordillera-olive/30">
-               <span className="text-sm font-bold text-cordillera-olive">₱{cartTotal.toLocaleString()}</span>
-             </div>
-           )}
-        </button>
-      </div>
+      {/* Premium Cart Button (hidden for admin) */}
+      {!(user && (user as any).role === 'admin') && (
+        <div className="fixed right-6 bottom-6 z-50">
+          <button
+            onClick={() => setIsCartOpen(true)}
+            className="group relative bg-gradient-to-r from-cordillera-gold to-cordillera-gold/90 text-cordillera-olive px-6 py-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-500 flex items-center gap-3 border-2 border-cordillera-olive/20 hover:border-cordillera-olive transform hover:scale-110 backdrop-blur-sm"
+            aria-label="Open cart"
+          >
+            <div className="relative">
+              <svg className="w-6 h-6 transition-all duration-300 group-hover:rotate-12 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
+              </svg>
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse shadow-lg border border-white">
+                  {cartCount}
+                </span>
+              )}
+            </div>
+            <div className="flex flex-col items-start">
+              <span className="text-sm font-bold tracking-wide">Cart</span>
+              <span className="text-xs opacity-90 font-medium">
+                {cartCount === 0 ? 'Empty' : `${cartCount} item${cartCount !== 1 ? 's' : ''}`}
+              </span>
+            </div>
+            {cartTotal > 0 && (
+              <div className="ml-2 pl-3 border-l border-cordillera-olive/30">
+                <span className="text-sm font-bold text-cordillera-olive">₱{cartTotal.toLocaleString()}</span>
+              </div>
+            )}
+          </button>
+        </div>
+      )}
       {/* Enhanced Hero Section */}
       <section className="relative py-24 bg-cordillera-olive overflow-hidden">
         {/* Subtle Background Pattern */}
@@ -736,7 +739,7 @@ const MarketplacePage: React.FC = () => {
               <span className="text-sm font-medium">Heritage Quality</span>
             </div>
           </div>
-          {user && (((user as any).role === 'artisan') || ((user as any).role === 'admin')) && (
+          {user && ((user as any).role === 'artisan') && (
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 to="/create-product"
@@ -928,8 +931,9 @@ const MarketplacePage: React.FC = () => {
                   </button>
                 </div>
               ) : (
-                filteredProducts.map((product) => (
-                  <Card key={product.id} className="group overflow-hidden flex flex-col h-full">
+                <>
+                  {filteredProducts.map((product) => (
+                    <Card key={product.id} className="group overflow-hidden flex flex-col h-full">
                     <Link to={`/product/${product.id}`} className="block">
                       <ProductCardImage product={product} />
                     </Link>
@@ -956,233 +960,30 @@ const MarketplacePage: React.FC = () => {
                         <div className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex gap-2 justify-center">
                           <button
                             onClick={() => addToCart(product)}
-                            disabled={(typeof product.stockQuantity === 'number' && product.stockQuantity === 0) || Boolean(user && (user as any).role === 'artisan')}
-                            title={(typeof product.stockQuantity === 'number' && product.stockQuantity === 0) ? 'Out of stock' : (user && (user as any).role === 'artisan') ? 'Artisan accounts cannot add items to the cart.' : undefined}
-                            className={`bg-cordillera-olive text-cordillera-cream px-4 py-2 text-sm font-medium rounded hover:bg-cordillera-olive/90 ${((typeof product.stockQuantity === 'number' && product.stockQuantity === 0) || Boolean(user && (user as any).role === 'artisan')) ? 'opacity-50 cursor-not-allowed hover:bg-cordillera-olive' : ''}`}
+                            disabled={(typeof product.stockQuantity === 'number' && product.stockQuantity === 0) || Boolean(user && ((((user as any).role) === 'artisan') || ((user as any).role === 'admin')))}
+                            title={(typeof product.stockQuantity === 'number' && product.stockQuantity === 0) ? 'Out of stock' : (user && ((((user as any).role) === 'artisan') || ((user as any).role === 'admin'))) ? 'This account type cannot add items to the cart.' : undefined}
+                            className={`bg-cordillera-olive text-cordillera-cream px-4 py-2 text-sm font-medium rounded hover:bg-cordillera-olive/90 ${((typeof product.stockQuantity === 'number' && product.stockQuantity === 0) || Boolean(user && ((((user as any).role) === 'artisan') || ((user as any).role === 'admin')))) ? 'opacity-50 cursor-not-allowed hover:bg-cordillera-olive' : ''}`}
                           >
                             Add to Cart
                           </button>
+
                           <button
                             onClick={() => openQuickView(product)}
                             className="bg-cordillera-gold text-cordillera-olive px-4 py-2 text-sm font-medium rounded hover:bg-cordillera-gold/90"
                           >
                             Quick View
                           </button>
-                          {(user && (((user as any).role === 'admin') || (product.ownerId && (user as any).id === product.ownerId))) && (
-                            <>
-                              <button
-                                onClick={() => {
-                                  setEditProduct(product);
-                                  setEditForm({
-                                    name: product.name,
-                                    price: product.price,
-                                    stock_quantity: product.stockQuantity ?? '',
-                                    category: product.category,
-                                    description: product.description,
-                                    materials: '',
-                                    care_instructions: '',
-                                    featured: false,
-                                  });
-                                  setEditError(null);
-                                  setIsEditOpen(true);
-                                }}
-                                className="border border-cordillera-olive/30 text-cordillera-olive px-3 py-2 text-sm rounded hover:bg-cordillera-olive/5"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={async () => {
-                                  if (!confirm('Delete this product? This cannot be undone.')) return;
-                                  try {
-                                    await productsAPI.delete(product.id);
-                                    setProducts(prev => prev.filter(p => p.id !== product.id));
-                                    setFilteredProducts(prev => prev.filter(p => p.id !== product.id));
-                                  } catch (err: any) {
-                                    setErrorMsg(err?.response?.data?.message || 'Failed to delete product');
-                                  }
-                                }}
-                                className="border border-red-300 text-red-600 px-3 py-2 text-sm rounded hover:bg-red-50"
-                              >
-                                Delete
-                              </button>
-                            </>
-                          )}
                         </div>
                       </div>
                     </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
+                    </Card>
+                  ))}
+                </>
+            )}
+              </div>
           </div>
         </div>
       </div>
-      {/* Edit Product Modal */}
-      {isEditOpen && editProduct && (
-        <div className="fixed inset-0 z-[60]">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setIsEditOpen(false)}></div>
-          <div className="absolute inset-0 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-              <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-cordillera-olive">Edit Product</h3>
-                <button onClick={() => setIsEditOpen(false)} className="text-cordillera-olive/70 hover:text-cordillera-olive">✕</button>
-              </div>
-              {editError && (
-                <div className="m-4 p-3 rounded border border-red-200 text-red-700 bg-red-50">{editError}</div>
-              )}
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  if (!editProduct) return;
-                  try {
-                    setSavingEdit(true);
-                    setEditError(null);
-                    const payload: any = {
-                      name: editForm.name,
-                      price: typeof editForm.price === 'string' ? Number(editForm.price) : editForm.price,
-                      category: editForm.category,
-                      description: editForm.description,
-                      featured: !!editForm.featured,
-                      care_instructions: editForm.care_instructions,
-                    };
-                    if (editForm.materials.trim()) {
-                      payload.materials = editForm.materials.split(',').map(m => m.trim()).filter(Boolean);
-                    }
-                    if (editForm.stock_quantity !== '') payload.stock_quantity = editForm.stock_quantity;
-                    const updated = await productsAPI.update(editProduct.id, payload);
-                    setProducts(prev => prev.map(p => p.id === editProduct.id ? { ...p, name: updated.name ?? editForm.name, price: Number(updated.price ?? editForm.price), category: updated.category ?? editForm.category, description: updated.description ?? editForm.description, stockQuantity: (updated as any).stock_quantity ?? p.stockQuantity } : p));
-                    setFilteredProducts(prev => prev.map(p => p.id === editProduct.id ? { ...p, name: updated.name ?? editForm.name, price: Number(updated.price ?? editForm.price), category: updated.category ?? editForm.category, description: updated.description ?? editForm.description, stockQuantity: (updated as any).stock_quantity ?? p.stockQuantity } : p));
-                    setIsEditOpen(false);
-                  } catch (err: any) {
-                    setEditError(err?.response?.data?.message || 'Failed to update product');
-                  } finally {
-                    setSavingEdit(false);
-                  }
-                }}
-                className="p-6 space-y-4"
-              >
-                <div>
-                  <label className="block text-sm text-cordillera-olive/70 mb-1">Name</label>
-                  <input value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} className="w-full border px-3 py-2 rounded" required />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-cordillera-olive/70 mb-1">Price</label>
-                    <input type="number" step="0.01" value={editForm.price} onChange={e => setEditForm(f => ({ ...f, price: e.target.value === '' ? '' : Number(e.target.value) }))} className="w-full border px-3 py-2 rounded" required />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-cordillera-olive/70 mb-1">Stock Quantity</label>
-                    <input type="number" value={editForm.stock_quantity} onChange={e => setEditForm(f => ({ ...f, stock_quantity: e.target.value === '' ? '' : Number(e.target.value) }))} className="w-full border px-3 py-2 rounded" />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm text-cordillera-olive/70 mb-1">Category</label>
-                  <input value={editForm.category} onChange={e => setEditForm(f => ({ ...f, category: e.target.value }))} className="w-full border px-3 py-2 rounded" />
-                </div>
-                <div>
-                  <label className="block text-sm text-cordillera-olive/70 mb-1">Description</label>
-                  <textarea value={editForm.description} onChange={e => setEditForm(f => ({ ...f, description: e.target.value }))} className="w-full border px-3 py-2 rounded min-h-[100px]" />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-cordillera-olive/70 mb-1">Materials (comma-separated)</label>
-                    <input value={editForm.materials} onChange={e => setEditForm(f => ({ ...f, materials: e.target.value }))} className="w-full border px-3 py-2 rounded" />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-cordillera-olive/70 mb-1">Care Instructions</label>
-                    <input value={editForm.care_instructions} onChange={e => setEditForm(f => ({ ...f, care_instructions: e.target.value }))} className="w-full border px-3 py-2 rounded" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <input id="edit_featured" type="checkbox" checked={editForm.featured} onChange={e => setEditForm(f => ({ ...f, featured: e.target.checked }))} />
-                  <label htmlFor="edit_featured" className="text-cordillera-olive/80">Featured</label>
-                </div>
-                <div className="flex items-center gap-3 justify-end pt-2">
-                  <button type="button" onClick={() => setIsEditOpen(false)} className="px-4 py-2 rounded border border-cordillera-olive/30 text-cordillera-olive hover:bg-cordillera-olive/5">Cancel</button>
-                  <button type="submit" disabled={savingEdit} className="px-4 py-2 rounded bg-cordillera-olive text-white hover:bg-cordillera-olive/90 disabled:opacity-50">{savingEdit ? 'Saving…' : 'Save Changes'}</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Cart Modal */}
-      {/* Quick View Modal */}
-      {isQuickViewOpen && quickViewProduct && (
-        <div className="fixed inset-0 z-50">
-          <div className="absolute inset-0 bg-black/50" onClick={closeQuickView}></div>
-          <div className="absolute inset-0 flex items-center justify-center p-4">
-            <div className="bg-white rounded-lg shadow-2xl w-full max-w-3xl overflow-hidden">
-              {/* Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b">
-                <h2 className="text-xl font-serif text-cordillera-olive">Quick View</h2>
-                <button onClick={closeQuickView} className="text-cordillera-olive/60 hover:text-cordillera-olive" aria-label="Close quick view">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              {/* Content */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-                <div className="h-72 md:h-full overflow-hidden">
-                  <img
-                    src={quickViewProduct.image}
-                    alt={quickViewProduct.name}
-                    loading="lazy"
-                    decoding="async"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-                <div className="p-6 flex flex-col" ref={quickViewRef} role="dialog" aria-modal="true" aria-label="Quick View">
-                  <div className="text-sm text-cordillera-olive/60 mb-1">{quickViewProduct.category}</div>
-                  <h3 className="text-2xl font-serif text-cordillera-olive mb-2">{quickViewProduct.name}</h3>
-                  <div className="text-cordillera-gold text-2xl font-light mb-4">₱{quickViewProduct.price.toLocaleString()}</div>
-                  <div className="flex items-center text-xs text-cordillera-olive/60 mb-4">
-                    <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                    <span className="uppercase tracking-wider">{quickViewProduct.artisan}</span>
-                  </div>
-                  {typeof quickViewProduct.stockQuantity === 'number' && (
-                    <div className="text-xs text-cordillera-olive/70 mb-4">
-                      In stock: <span className="font-medium text-cordillera-olive">{quickViewProduct.stockQuantity}</span>
-                    </div>
-                  )}
-                  <p className="text-cordillera-olive/70 text-sm leading-relaxed mb-6 line-clamp-6">{quickViewProduct.description}</p>
-                  <div className="mt-auto flex gap-3">
-                    <button
-                      onClick={() => { addToCart(quickViewProduct); closeQuickView(); }}
-                      disabled={(typeof quickViewProduct.stockQuantity === 'number' && quickViewProduct.stockQuantity === 0) || Boolean(user && (user as any).role === 'artisan')}
-                      title={
-                        (typeof quickViewProduct.stockQuantity === 'number' && quickViewProduct.stockQuantity === 0)
-                          ? 'Out of stock'
-                          : (user && (user as any).role === 'artisan')
-                            ? 'Artisan accounts cannot add items to the cart.'
-                            : undefined
-                      }
-                      className={`bg-cordillera-olive text-cordillera-cream px-5 py-2 rounded-lg font-medium hover:bg-cordillera-olive/90 ${
-                        (typeof quickViewProduct.stockQuantity === 'number' && quickViewProduct.stockQuantity === 0) || Boolean(user && (user as any).role === 'artisan')
-                          ? 'opacity-50 cursor-not-allowed hover:bg-cordillera-olive'
-                          : ''
-                      }`}
-                    >
-                      Add to Cart
-                    </button>
-                    <Link
-                      to={`/product/${quickViewProduct.id}`}
-                      className="border border-cordillera-olive/30 text-cordillera-olive px-5 py-2 rounded-lg font-medium hover:bg-cordillera-olive/5"
-                      onClick={closeQuickView}
-                    >
-                      View Details
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
       
       {/* Cart Modal */}
       <CartModal
@@ -1193,10 +994,10 @@ const MarketplacePage: React.FC = () => {
         onDecrement={decrementItem}
         onRemove={removeItem}
         onCheckout={handleCheckout}
-        disableCheckout={Boolean(user && (user as any).role === 'artisan')}
-        disabledReason="Artisan accounts cannot place marketplace orders."
-        disableIncrease={Boolean(user && (user as any).role === 'artisan')}
-        disableIncreaseReason="Artisan accounts cannot add more items to the cart."
+        disableCheckout={Boolean(user && (((user as any).role === 'artisan') || ((user as any).role === 'admin')))}
+        disabledReason="This account type cannot place marketplace orders."
+        disableIncrease={Boolean(user && (((user as any).role === 'artisan') || ((user as any).role === 'admin')))}
+        disableIncreaseReason="This account type cannot add more items to the cart."
       />
 
       {/* Checkout Modal */}

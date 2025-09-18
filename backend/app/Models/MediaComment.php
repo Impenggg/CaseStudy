@@ -14,6 +14,11 @@ class MediaComment extends Model
         'media_post_id',
         'user_id',
         'body',
+        // Moderation
+        'moderation_status',
+        'reviewed_by',
+        'reviewed_at',
+        'rejection_reason',
     ];
 
     public function post(): BelongsTo
@@ -24,5 +29,29 @@ class MediaComment extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Scope a query to only include approved comments.
+     */
+    public function scopeApproved($query)
+    {
+        return $query->where('moderation_status', 'approved');
+    }
+
+    /**
+     * Scope a query to only include pending comments.
+     */
+    public function scopePending($query)
+    {
+        return $query->where('moderation_status', 'pending');
+    }
+
+    /**
+     * Scope a query to only include rejected comments.
+     */
+    public function scopeRejected($query)
+    {
+        return $query->where('moderation_status', 'rejected');
     }
 }

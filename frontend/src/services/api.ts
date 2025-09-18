@@ -353,6 +353,10 @@ export const ordersAPI = {
     payment_method: string;
   }) => {
     const response = await api.post('/orders', orderData);
+    try {
+      localStorage.setItem('account_refresh', String(Date.now()));
+      window.dispatchEvent(new Event('account_refresh'));
+    } catch {}
     return response.data.data;
   },
 
@@ -369,6 +373,7 @@ export const ordersAPI = {
     payment_method: string;
   }) => {
     const response = await api.post('/orders/batch', payload);
+    try { localStorage.setItem('account_refresh', String(Date.now())); } catch {}
     return response.data;
   },
 
@@ -413,12 +418,44 @@ export const donationsAPI = {
     payment_method: string;
   }) => {
     const response = await api.post('/donations', donationData);
+    // Trigger realtime refresh for Account page counters
+    try {
+      localStorage.setItem('account_refresh', String(Date.now()));
+      window.dispatchEvent(new Event('account_refresh'));
+    } catch {}
     return response.data.data;
   },
 
   getMyDonations: async () => {
     const response = await api.get('/my-donations');
     return response.data;
+  },
+};
+
+// Admin Moderation API
+export const adminModerationAPI = {
+  list: async (
+    type: 'products' | 'stories' | 'campaigns' | 'media-posts' | 'media-comments',
+    params?: { status?: 'pending' | 'approved' | 'rejected'; page?: number; per_page?: number }
+  ) => {
+    const res = await api.get(`/admin/moderation/${type}`, { params });
+    return res.data as {
+      status: string;
+      data: any[];
+      pagination: { current_page: number; total_pages: number; per_page: number; total_count: number } | null;
+    };
+  },
+  approve: async (type: 'products' | 'stories' | 'campaigns' | 'media-posts' | 'media-comments', id: number) => {
+    const res = await api.post(`/admin/moderation/${type}/${id}/approve`);
+    return res.data as { status: string; message: string; data: any };
+  },
+  reject: async (
+    type: 'products' | 'stories' | 'campaigns' | 'media-posts' | 'media-comments',
+    id: number,
+    reason?: string
+  ) => {
+    const res = await api.post(`/admin/moderation/${type}/${id}/reject`, { reason });
+    return res.data as { status: string; message: string; data: any };
   },
 };
 

@@ -25,6 +25,7 @@ const MyProductsPage = lazy(() => import('./pages/MyProductsPage'));
 const ProductEditPage = lazy(() => import('./pages/ProductEditPage'));
 const MyStoriesPage = lazy(() => import('./pages/MyStoriesPage'));
 const MyCampaignsPage = lazy(() => import('./pages/MyCampaignsPage'));
+const AdminModerationPage = lazy(() => import('./pages/AdminModerationPage'));
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleProtectedRoute from './components/RoleProtectedRoute';
 
@@ -256,6 +257,17 @@ const App: React.FC = () => {
             }
           />
 
+          <Route
+            path="/admin/moderation"
+            element={
+              <Layout>
+                <RoleProtectedRoute allowed={['admin']}>
+                  <AdminModerationPage />
+                </RoleProtectedRoute>
+              </Layout>
+            }
+          />
+          
           <Route
             path="/supports"
             element={

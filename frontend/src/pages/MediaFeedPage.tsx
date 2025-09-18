@@ -11,6 +11,7 @@ const MediaFeedPage: React.FC = () => {
   const [isComposerOpen, setIsComposerOpen] = useState(false);
 
   const { user } = useAuth();
+  const isAdmin = Boolean(user && (user as any).role === 'admin');
 
   // Right column: global feed
   const [feed, setFeed] = useState<MediaPost[]>([]);
@@ -180,13 +181,15 @@ const MediaFeedPage: React.FC = () => {
           {/* Left: 1/3 column */}
           <div className="space-y-6">
             {/* Composer trigger */}
-            <button
-              type="button"
-              onClick={() => setIsComposerOpen(true)}
-              className="w-full text-left card-surface rounded-md p-4"
-            >
-              <div className="text-cordillera-olive/70">Share something…</div>
-            </button>
+            {!isAdmin && (
+              <button
+                type="button"
+                onClick={() => setIsComposerOpen(true)}
+                className="w-full text-left card-surface rounded-md p-4"
+              >
+                <div className="text-cordillera-olive/70">Share something…</div>
+              </button>
+            )}
 
             {/* User's images grid (sticky) */}
             <div className="sticky top-20 self-start">
@@ -317,7 +320,7 @@ const MediaFeedPage: React.FC = () => {
       </div>
 
       {/* Modal Uploader */}
-      {isComposerOpen && (
+      {isComposerOpen && !isAdmin && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
           role="dialog"
@@ -443,6 +446,8 @@ const MediaFeedPage: React.FC = () => {
 
 const CommentBox: React.FC<{ onSubmit: (body: string) => void }> = ({ onSubmit }) => {
   const [body, setBody] = useState('');
+  const { user } = useAuth();
+  const isAdmin = Boolean(user && (user as any).role === 'admin');
   return (
     <div className="flex items-center gap-2">
       <input
@@ -458,7 +463,9 @@ const CommentBox: React.FC<{ onSubmit: (body: string) => void }> = ({ onSubmit }
           onSubmit(v);
           setBody('');
         }}
-        className="text-sm bg-cordillera-gold text-cordillera-olive px-3 py-1 rounded-md hover:bg-cordillera-gold/90"
+        disabled={isAdmin}
+        title={isAdmin ? 'Admin accounts cannot post comments.' : undefined}
+        className={`text-sm px-3 py-1 rounded-md ${isAdmin ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-cordillera-gold text-cordillera-olive hover:bg-cordillera-gold/90'}`}
       >
         Send
       </button>

@@ -18,7 +18,7 @@ class CampaignController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Campaign::with(['organizer', 'images']);
+        $query = Campaign::with(['organizer', 'images'])->approved();
 
         // Search
         if ($request->has('search')) {
@@ -94,6 +94,7 @@ class CampaignController extends Controller
             'organizer_id' => $user->id,
             'current_amount' => 0,
             'backers_count' => 0,
+            'moderation_status' => ($user->role === 'admin') ? 'approved' : 'pending',
         ]));
 
         return response()->json([
@@ -108,6 +109,12 @@ class CampaignController extends Controller
      */
     public function show(Campaign $campaign): JsonResponse
     {
+        $user = Auth::user();
+        $canView = $campaign->moderation_status === 'approved'
+            || ($user && ($user->id === $campaign->organizer_id || ($user->role === 'admin')));
+        if (!$canView) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
         return response()->json([
             'status' => 'success',
             'data' => new CampaignResource($campaign->load(['organizer', 'images', 'donations'])),

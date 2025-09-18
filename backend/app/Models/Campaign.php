@@ -25,6 +25,11 @@ class Campaign extends Model
         'category',
         'status',
         'backers_count',
+        // Moderation
+        'moderation_status',
+        'reviewed_by',
+        'reviewed_at',
+        'rejection_reason',
     ];
 
     /**
@@ -76,6 +81,30 @@ class Campaign extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
+    }
+
+    /**
+     * Scope a query to only include approved campaigns.
+     */
+    public function scopeApproved($query)
+    {
+        return $query->where('moderation_status', 'approved');
+    }
+
+    /**
+     * Scope a query to only include pending campaigns.
+     */
+    public function scopePending($query)
+    {
+        return $query->where('moderation_status', 'pending');
+    }
+
+    /**
+     * Scope a query to only include rejected campaigns.
+     */
+    public function scopeRejected($query)
+    {
+        return $query->where('moderation_status', 'rejected');
     }
 
     /**

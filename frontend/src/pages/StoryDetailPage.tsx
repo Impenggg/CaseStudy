@@ -43,6 +43,22 @@ const StoryDetailPage: React.FC = () => {
     }
   };
 
+  // Realtime: increment stories_viewed_count once per story view and notify Account page
+  useEffect(() => {
+    const sid = Number(id)
+    if (!sid || !story?.id) return
+    const viewedKey = `viewed_story_${sid}`
+    try {
+      if (sessionStorage.getItem(viewedKey) === '1') return
+      const current = Number(localStorage.getItem('stories_viewed_count') || '0')
+      const next = Number.isFinite(current) ? current + 1 : 1
+      localStorage.setItem('stories_viewed_count', String(next))
+      sessionStorage.setItem(viewedKey, '1')
+      // Force Account page to refetch immediately
+      localStorage.setItem('account_refresh', String(Date.now()))
+    } catch {}
+  }, [id, story?.id])
+
   // Normalize story fields to avoid undefined access; do this before any returns
   const safeStory = {
     id: story?.id ?? 0,

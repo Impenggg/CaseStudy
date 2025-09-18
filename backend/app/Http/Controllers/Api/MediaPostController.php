@@ -20,8 +20,12 @@ class MediaPostController extends Controller
     {
         $perPage = (int) ($request->query('per_page', 10));
         $posts = MediaPost::query()
-            ->with(['user:id,name', 'comments.user:id,name'])
-            ->withCount(['reactions as reactions_count', 'comments as comments_count'])
+            ->approved()
+            ->with(['user:id,name', 'comments' => function ($q) { $q->approved()->with('user:id,name'); }])
+            ->withCount([
+                'reactions as reactions_count',
+                'comments as comments_count' => function ($q) { $q->approved(); }
+            ])
             ->orderByDesc('created_at')
             ->paginate($perPage);
 
@@ -33,8 +37,32 @@ class MediaPostController extends Controller
      */
     public function show(MediaPost $media): JsonResponse
     {
-        $media->load(['user:id,name', 'comments.user:id,name'])
-            ->loadCount(['reactions as reactions_count', 'comments as comments_count']);
+        $user = request()->user();
+        $canView = $media->moderation_status === 'approved'
+            || ($user && ($user->id === $media->user_id || (method_exists($user, 'isAdmin') && $user->isAdmin())));
+        if (!$canView) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
+
+        $commentsRelation = ['comments' => function ($q) use ($user, $media) {
+            // Only approved comments unless owner/admin
+            $isPrivileged = $user && ($user->id === $media->user_id || (method_exists($user, 'isAdmin') && $user->isAdmin()));
+            if (!$isPrivileged) {
+                $q->approved();
+            }
+            $q->with('user:id,name');
+        }];
+
+        $media->load(array_merge(['user:id,name'], $commentsRelation))
+            ->loadCount([
+                'reactions as reactions_count',
+                'comments as comments_count' => function ($q) use ($user, $media) {
+                    $isPrivileged = $user && ($user->id === $media->user_id || (method_exists($user, 'isAdmin') && $user->isAdmin()));
+                    if (!$isPrivileged) {
+                        $q->approved();
+                    }
+                }
+            ]);
         return response()->json($media);
     }
 
@@ -44,10 +72,18 @@ class MediaPostController extends Controller
     public function userPosts(User $user, Request $request): JsonResponse
     {
         $perPage = (int) ($request->query('per_page', 10));
+        $viewer = $request->user();
+        $isOwnerOrAdmin = $viewer && ($viewer->id === $user->id || (method_exists($viewer, 'isAdmin') && $viewer->isAdmin()));
         $posts = MediaPost::query()
             ->where('user_id', $user->id)
+            ->when(!$isOwnerOrAdmin, function ($q) { $q->approved(); })
             ->with(['user:id,name'])
-            ->withCount(['reactions as reactions_count', 'comments as comments_count'])
+            ->withCount([
+                'reactions as reactions_count',
+                'comments as comments_count' => function ($q) use ($isOwnerOrAdmin) {
+                    if (!$isOwnerOrAdmin) $q->approved();
+                }
+            ])
             ->orderByDesc('created_at')
             ->paginate($perPage);
         return response()->json($posts);
@@ -66,10 +102,12 @@ class MediaPostController extends Controller
         $file = $request->file('image');
         $path = $file->store('uploads/media', 'public');
 
+        $creator = $request->user();
         $post = MediaPost::create([
-            'user_id' => $request->user()->id,
+            'user_id' => $creator->id,
             'caption' => $request->input('caption'),
             'image_path' => $path,
+            'moderation_status' => (method_exists($creator, 'isAdmin') && $creator->isAdmin()) ? 'approved' : 'pending',
         ]);
 
         $post->load('user:id,name')->loadCount(['reactions as reactions_count', 'comments as comments_count']);
@@ -125,10 +163,12 @@ class MediaPostController extends Controller
             'body' => 'required|string|max:2000',
         ]);
 
+        $actor = $request->user();
         $comment = MediaComment::create([
             'media_post_id' => $media->id,
-            'user_id' => $request->user()->id,
+            'user_id' => $actor->id,
             'body' => $request->input('body'),
+            'moderation_status' => (method_exists($actor, 'isAdmin') && $actor->isAdmin()) ? 'approved' : 'pending',
         ]);
 
         $comment->load('user:id,name');

@@ -113,7 +113,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                       </div>
                       <div className="py-1">
                         {/* Role-specific menus */}
-                        {user?.role === 'artisan' ? (
+                        {user?.role === 'admin' ? (
+                          // Admin menu
+                          <>
+                            <Link to="/admin/moderation" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Moderation</Link>
+                            <Link to="/account" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Account Information</Link>
+                          </>
+                        ) : user?.role === 'artisan' ? (
                           // Artisan menu
                           <>
                             <Link to="/dashboard/artisan" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Account Information</Link>
@@ -209,7 +215,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               {isAuthenticated ? (
                 <>
                   <div className="px-3 pt-3 text-cordillera-cream/70 text-xs">Account</div>
-                  {user?.role === 'artisan' ? (
+                  {user?.role === 'admin' ? (
+                    <>
+                      <Link to="/admin/moderation" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Moderation</Link>
+                      <Link to="/account" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Account Information</Link>
+                    </>
+                  ) : user?.role === 'artisan' ? (
                     <>
                       <Link to="/dashboard/artisan" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">Account Information</Link>
                       <Link to="/my-products" onClick={() => setIsMobileMenuOpen(false)} className="block px-3 py-2 text-cordillera-cream hover:text-cordillera-gold transition-colors">My Products</Link>

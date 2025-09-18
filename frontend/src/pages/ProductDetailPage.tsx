@@ -315,7 +315,8 @@ const ProductDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-cordillera-cream">
-      {/* Floating Cart Button */}
+      {/* Floating Cart Button (hidden for admin) */}
+      {!(user && (user as any).role === 'admin') && (
       <div className="fixed right-6 bottom-6 z-50">
         <button
           onClick={() => setIsCartOpen(true)}
@@ -345,6 +346,7 @@ const ProductDetailPage: React.FC = () => {
           )}
         </button>
       </div>
+      )}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Breadcrumb */}
         <nav className="mb-8">
@@ -534,6 +536,8 @@ const ProductDetailPage: React.FC = () => {
         onDecrement={decrementItem}
         onRemove={removeItem}
         onCheckout={handleCheckout}
+        disableCheckout={Boolean(user && (((user as any).role === 'artisan') || ((user as any).role === 'admin')))}
+        disabledReason="This account type cannot place marketplace orders."
       />
     </div>
   );

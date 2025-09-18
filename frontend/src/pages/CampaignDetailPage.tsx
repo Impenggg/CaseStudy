@@ -113,9 +113,9 @@ const CampaignDetailPage: React.FC = () => {
   };
 
   const handleSupport = () => {
-    // Block artisans from supporting campaigns
-    if (user && (user as any).role === 'artisan') {
-      triggerAction('Artisan accounts cannot support campaigns');
+    // Block artisans and admins from supporting campaigns
+    if (user && (((user as any).role === 'artisan') || ((user as any).role === 'admin'))) {
+      triggerAction('This account type cannot support campaigns');
       return;
     }
     // Require auth before supporting a campaign
@@ -130,9 +130,9 @@ const CampaignDetailPage: React.FC = () => {
 
   const handleSupportSubmit = async () => {
     if (!id || !campaign) return;
-    // Safety: block artisans at submit time as well
-    if (user && (user as any).role === 'artisan') {
-      triggerAction('Artisan accounts cannot support campaigns');
+    // Safety: block artisans/admins at submit time as well
+    if (user && (((user as any).role === 'artisan') || ((user as any).role === 'admin'))) {
+      triggerAction('This account type cannot support campaigns');
       return;
     }
     if (supportAmount <= 0) return;
@@ -307,12 +307,14 @@ const CampaignDetailPage: React.FC = () => {
               </div>
 
               {/* Support Button */}
-              <button
-                onClick={handleSupport}
-                className="w-full bg-cordillera-gold text-cordillera-olive py-4 px-6 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
-              >
-                Support This Campaign
-              </button>
+              {!(user && ((user as any).role === 'admin')) && (
+                <button
+                  onClick={handleSupport}
+                  className="w-full bg-cordillera-gold text-cordillera-olive py-4 px-6 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
+                >
+                  Support This Campaign
+                </button>
+              )}
             </div>
           </div>
         </div>

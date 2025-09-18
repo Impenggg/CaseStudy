@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\DonationController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\MediaPostController;
+use App\Http\Controllers\Api\AdminModerationController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\FavoritesController;
 use App\Http\Controllers\Api\StoryLikesController;
@@ -114,4 +115,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // Story likes routes (authenticated)
     Route::get('/story-likes', [StoryLikesController::class, 'index']);
     Route::post('/stories/{story}/like', [StoryLikesController::class, 'toggle']);
+
+    // Admin moderation routes (admins only)
+    Route::middleware('admin')->group(function () {
+        Route::get('/admin/moderation/{type}', [AdminModerationController::class, 'list']);
+        Route::post('/admin/moderation/{type}/{id}/approve', [AdminModerationController::class, 'approve']);
+        Route::post('/admin/moderation/{type}/{id}/reject', [AdminModerationController::class, 'reject']);
+    });
 });

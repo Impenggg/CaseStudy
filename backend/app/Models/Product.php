@@ -29,6 +29,11 @@ class Product extends Model
         'dimensions',
         'tags',
         'featured',
+        // Moderation
+        'moderation_status',
+        'reviewed_by',
+        'reviewed_at',
+        'rejection_reason',
     ];
 
     /**
@@ -98,6 +103,30 @@ class Product extends Model
     public function scopeInStock($query)
     {
         return $query->where('stock_quantity', '>', 0);
+    }
+
+    /**
+     * Scope a query to only include approved products.
+     */
+    public function scopeApproved($query)
+    {
+        return $query->where('moderation_status', 'approved');
+    }
+
+    /**
+     * Scope a query to only include pending products.
+     */
+    public function scopePending($query)
+    {
+        return $query->where('moderation_status', 'pending');
+    }
+
+    /**
+     * Scope a query to only include rejected products.
+     */
+    public function scopeRejected($query)
+    {
+        return $query->where('moderation_status', 'rejected');
     }
 
     /**

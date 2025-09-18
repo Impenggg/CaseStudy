@@ -17,7 +17,7 @@ class StoryController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $query = Story::with(['author', 'media'])->published();
+        $query = Story::with(['author', 'media'])->published()->approved();
 
         // Search
         if ($request->has('search')) {
@@ -89,10 +89,10 @@ class StoryController extends Controller
 
         $validated = $request->validated();
 
-        $story = Story::create([
-            ...$validated,
+        $story = Story::create(array_merge($validated, [
             'author_id' => $user->id,
-        ]);
+            'moderation_status' => ($user->role === 'admin') ? 'approved' : 'pending',
+        ]));
 
         return response()->json([
             'status' => 'success',
@@ -106,6 +106,12 @@ class StoryController extends Controller
      */
     public function show(Story $story): JsonResponse
     {
+        $user = Auth::user();
+        $canView = ($story->moderation_status ?? 'approved') === 'approved'
+            || ($user && ($user->id === $story->author_id || ($user->role === 'admin')));
+        if (!$canView) {
+            return response()->json(['message' => 'Not found'], 404);
+        }
         return response()->json([
             'status' => 'success',
             'data' => $story->load(['author', 'media']),
