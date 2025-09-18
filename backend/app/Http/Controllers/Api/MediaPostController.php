@@ -39,14 +39,14 @@ class MediaPostController extends Controller
     {
         $user = request()->user();
         $canView = $media->moderation_status === 'approved'
-            || ($user && ($user->id === $media->user_id || (method_exists($user, 'isAdmin') && $user->isAdmin())));
+            || ($user && ($user->id === $media->user_id || $user->role === 'admin'));
         if (!$canView) {
             return response()->json(['message' => 'Not found'], 404);
         }
 
         $commentsRelation = ['comments' => function ($q) use ($user, $media) {
             // Only approved comments unless owner/admin
-            $isPrivileged = $user && ($user->id === $media->user_id || (method_exists($user, 'isAdmin') && $user->isAdmin()));
+            $isPrivileged = $user && ($user->id === $media->user_id || $user->role === 'admin');
             if (!$isPrivileged) {
                 $q->approved();
             }
@@ -57,7 +57,7 @@ class MediaPostController extends Controller
             ->loadCount([
                 'reactions as reactions_count',
                 'comments as comments_count' => function ($q) use ($user, $media) {
-                    $isPrivileged = $user && ($user->id === $media->user_id || (method_exists($user, 'isAdmin') && $user->isAdmin()));
+                    $isPrivileged = $user && ($user->id === $media->user_id || $user->role === 'admin');
                     if (!$isPrivileged) {
                         $q->approved();
                     }
@@ -73,7 +73,7 @@ class MediaPostController extends Controller
     {
         $perPage = (int) ($request->query('per_page', 10));
         $viewer = $request->user();
-        $isOwnerOrAdmin = $viewer && ($viewer->id === $user->id || (method_exists($viewer, 'isAdmin') && $viewer->isAdmin()));
+        $isOwnerOrAdmin = $viewer && ($viewer->id === $user->id || $viewer->role === 'admin');
         $posts = MediaPost::query()
             ->where('user_id', $user->id)
             ->when(!$isOwnerOrAdmin, function ($q) { $q->approved(); })
@@ -107,7 +107,7 @@ class MediaPostController extends Controller
             'user_id' => $creator->id,
             'caption' => $request->input('caption'),
             'image_path' => $path,
-            'moderation_status' => (method_exists($creator, 'isAdmin') && $creator->isAdmin()) ? 'approved' : 'pending',
+            'moderation_status' => ($creator->role === 'admin') ? 'approved' : 'pending',
         ]);
 
         $post->load('user:id,name')->loadCount(['reactions as reactions_count', 'comments as comments_count']);
@@ -168,7 +168,7 @@ class MediaPostController extends Controller
             'media_post_id' => $media->id,
             'user_id' => $actor->id,
             'body' => $request->input('body'),
-            'moderation_status' => (method_exists($actor, 'isAdmin') && $actor->isAdmin()) ? 'approved' : 'pending',
+            'moderation_status' => ($actor->role === 'admin') ? 'approved' : 'pending',
         ]);
 
         $comment->load('user:id,name');

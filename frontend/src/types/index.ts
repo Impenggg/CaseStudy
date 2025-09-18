@@ -33,6 +33,10 @@ export interface Product {
   };
   tags: string[];
   featured: boolean;
+  moderation_status?: 'pending' | 'approved' | 'rejected';
+  reviewed_by?: number;
+  reviewed_at?: string;
+  rejection_reason?: string;
   created_at: string;
   updated_at: string;
 }
@@ -52,6 +56,10 @@ export interface Story {
   featured: boolean;
   published: boolean;
   reading_time: number;
+  moderation_status?: 'pending' | 'approved' | 'rejected';
+  reviewed_by?: number;
+  reviewed_at?: string;
+  rejection_reason?: string;
   created_at: string;
   updated_at: string;
 }
@@ -70,6 +78,10 @@ export interface Campaign {
   category: 'preservation' | 'education' | 'equipment' | 'community';
   status: 'active' | 'completed' | 'cancelled';
   backers_count: number;
+  moderation_status?: 'pending' | 'approved' | 'rejected';
+  reviewed_by?: number;
+  reviewed_at?: string;
+  rejection_reason?: string;
   created_at: string;
   updated_at: string;
 }
@@ -183,6 +195,39 @@ export interface ContactForm {
   email: string;
   subject: string;
   message: string;
+}
+
+// Media Types
+export interface MediaPost {
+  id: number;
+  user_id: number;
+  caption?: string;
+  image_path: string;
+  image_url: string;
+  moderation_status?: 'pending' | 'approved' | 'rejected';
+  reviewed_by?: number;
+  reviewed_at?: string;
+  rejection_reason?: string;
+  created_at: string;
+  updated_at: string;
+  user?: { id: number; name: string };
+  reactions_count?: number;
+  comments_count?: number;
+  comments?: MediaComment[];
+}
+
+export interface MediaComment {
+  id: number;
+  media_post_id: number;
+  user_id: number;
+  body: string;
+  moderation_status?: 'pending' | 'approved' | 'rejected';
+  reviewed_by?: number;
+  reviewed_at?: string;
+  rejection_reason?: string;
+  created_at: string;
+  updated_at: string;
+  user?: { id: number; name: string };
 }
 
 // Analytics Types

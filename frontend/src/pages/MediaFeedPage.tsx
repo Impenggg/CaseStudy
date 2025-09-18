@@ -199,22 +199,48 @@ const MediaFeedPage: React.FC = () => {
               </div>
               {myError && <div className="text-sm text-red-700 mb-2">{myError}</div>}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {myPosts.map((p) => (
-                  <div key={p.id} className="group relative card-surface rounded-md overflow-hidden">
-                    <img
-                      src={p.image_url}
-                      alt={p.caption || `my-${p.id}`}
-                      className="w-full h-32 object-cover transform transition-transform duration-300 group-hover:scale-[1.03]"
-                      onError={(e) => {
-                        const target = e.currentTarget as HTMLImageElement;
-                        const q = encodeURIComponent('handicraft');
-                        const fallback = `https://source.unsplash.com/400x300/?${q}`;
-                        if (target.src !== fallback) target.src = fallback;
-                      }}
-                    />
-                    <div className="pointer-events-none absolute inset-0 bg-cordillera-olive/0 group-hover:bg-cordillera-olive/5 transition-colors" />
-                  </div>
-                ))}
+                {myPosts.map((p) => {
+                  const isApproved = (p as any).moderation_status === 'approved' || !(p as any).moderation_status;
+                  const isPending = (p as any).moderation_status === 'pending';
+                  const isRejected = (p as any).moderation_status === 'rejected';
+                  
+                  return (
+                    <div key={p.id} className={`group relative card-surface rounded-md overflow-hidden ${!isApproved ? 'opacity-70' : ''}`}>
+                      <img
+                        src={p.image_url}
+                        alt={p.caption || `my-${p.id}`}
+                        className="w-full h-32 object-cover transform transition-transform duration-300 group-hover:scale-[1.03]"
+                        onError={(e) => {
+                          const target = e.currentTarget as HTMLImageElement;
+                          const q = encodeURIComponent('handicraft');
+                          const fallback = `https://source.unsplash.com/400x300/?${q}`;
+                          if (target.src !== fallback) target.src = fallback;
+                        }}
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-cordillera-olive/0 group-hover:bg-cordillera-olive/5 transition-colors" />
+                      
+                      {/* Moderation Status Badge */}
+                      {!isApproved && (
+                        <div className="absolute top-2 right-2 z-10">
+                          <div className={`px-2 py-1 text-xs rounded-full font-medium ${
+                            isPending ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white'
+                          }`}>
+                            {isPending ? 'Pending' : 'Rejected'}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Lock Overlay for Non-Approved Posts */}
+                      {!isApproved && (
+                        <div className="absolute inset-0 bg-black/30 backdrop-blur-[1px] flex items-center justify-center">
+                          <svg className="w-6 h-6 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H10m9-9a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
                 {!loadingMyPosts && myPosts.length === 0 && !myError && (
                   <div className="col-span-2 sm:col-span-3 text-center text-cordillera-olive/70 text-sm card-surface rounded-md p-6">
                     No images yet. Share your first one using the composer above.
@@ -252,53 +278,119 @@ const MediaFeedPage: React.FC = () => {
 
             {/* Feed posts */}
             <div className="space-y-5">
-              {feed.map((post, i) => (
-                <div key={post.id} className="card-surface rounded-lg">
-                  <div className="p-3 border-b border-cordillera-sage/20 flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-medium text-cordillera-olive">{post.user?.name || 'User'}</div>
-                      <div className="text-xs text-cordillera-olive/60">{new Date(post.created_at).toLocaleString()}</div>
+              {feed.map((post, i) => {
+                const isApproved = (post as any).moderation_status === 'approved' || !(post as any).moderation_status;
+                const isPending = (post as any).moderation_status === 'pending';
+                const isRejected = (post as any).moderation_status === 'rejected';
+                const isOwner = user && post.user_id === user.id;
+                
+                return (
+                  <div key={post.id} className={`card-surface rounded-lg relative ${!isApproved ? 'opacity-50' : ''}`}>
+                    {/* Moderation Status Overlay */}
+                    {!isApproved && (
+                      <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] rounded-lg z-10 flex items-center justify-center">
+                        <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg">
+                          <div className="flex items-center gap-2">
+                            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H10m9-9a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-sm font-medium text-gray-700">
+                              {isPending ? 'Pending Review' : isRejected ? 'Rejected' : 'Under Review'}
+                            </span>
+                          </div>
+                          {isOwner && (
+                            <p className="text-xs text-gray-600 mt-1">
+                              {isPending ? 'Your post is awaiting admin approval' : 'Your post was rejected by admin'}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="p-3 border-b border-cordillera-sage/20 flex items-center justify-between">
+                      <div>
+                        <div className="text-sm font-medium text-cordillera-olive">{post.user?.name || 'User'}</div>
+                        <div className="text-xs text-cordillera-olive/60">{new Date(post.created_at).toLocaleString()}</div>
+                      </div>
+                      {/* Status Badge for Owner */}
+                      {isOwner && !isApproved && (
+                        <div className={`px-2 py-1 text-xs rounded-full ${
+                          isPending ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {isPending ? 'Pending' : 'Rejected'}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  <div className="p-3">
-                    {post.caption && <p className="mb-2 text-cordillera-olive">{post.caption}</p>}
-                    <div className="relative overflow-hidden rounded-md group">
-                      <img
-                        src={post.image_url}
-                        alt={post.caption || `post-${post.id}`}
-                        className="w-full object-cover transform transition-transform duration-500 group-hover:scale-[1.02]"
-                        onError={(e) => {
-                          const target = e.currentTarget as HTMLImageElement;
-                          const q = encodeURIComponent('handicraft');
-                          const fallback = `https://source.unsplash.com/800x600/?${q}`;
-                          if (target.src !== fallback) target.src = fallback;
-                        }}
-                      />
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="p-3">
+                      {post.caption && <p className="mb-2 text-cordillera-olive">{post.caption}</p>}
+                      <div className="relative overflow-hidden rounded-md group">
+                        <img
+                          src={post.image_url}
+                          alt={post.caption || `post-${post.id}`}
+                          className="w-full object-cover transform transition-transform duration-500 group-hover:scale-[1.02]"
+                          onError={(e) => {
+                            const target = e.currentTarget as HTMLImageElement;
+                            const q = encodeURIComponent('handicraft');
+                            const fallback = `https://source.unsplash.com/800x600/?${q}`;
+                            if (target.src !== fallback) target.src = fallback;
+                          }}
+                        />
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="px-3 pb-3 flex items-center gap-4 text-sm text-cordillera-olive/80">
-                    <button
-                      className="hover:text-cordillera-olive transition-colors"
-                      onClick={() => toggleLike(post.id, i)}
-                    >
-                      👍 Like {post.reactions_count ? `(${post.reactions_count})` : ''}
-                    </button>
-                    <div>💬 {post.comments_count || 0}</div>
-                  </div>
+                    <div className="px-3 pb-3 flex items-center gap-4 text-sm text-cordillera-olive/80">
+                      <button
+                        className="hover:text-cordillera-olive transition-colors"
+                        onClick={() => toggleLike(post.id, i)}
+                      >
+                        👍 Like {post.reactions_count ? `(${post.reactions_count})` : ''}
+                      </button>
+                      <div>💬 {post.comments_count || 0}</div>
+                    </div>
 
                   {/* Comments */}
                   <div className="px-3 pb-3">
                     <CommentBox onSubmit={(body) => addComment(post.id, i, body)} />
-                    {(post.comments || []).slice(0, 3).map((c) => (
-                      <div key={c.id} className="mt-2 text-sm">
-                        <span className="font-medium text-cordillera-olive">{c.user?.name || 'User'}</span>{' '}
-                        <span className="text-cordillera-olive/80">{c.body}</span>
-                      </div>
-                    ))}
+                    {(post.comments || []).slice(0, 3).map((c) => {
+                      const commentApproved = (c as any).moderation_status === 'approved' || !(c as any).moderation_status;
+                      const commentPending = (c as any).moderation_status === 'pending';
+                      const commentRejected = (c as any).moderation_status === 'rejected';
+                      const isCommentOwner = user && (c as any).user_id === user.id;
+                      
+                      return (
+                        <div key={c.id} className={`mt-2 text-sm relative ${!commentApproved ? 'opacity-60' : ''}`}>
+                          {/* Comment Moderation Overlay */}
+                          {!commentApproved && (
+                            <div className="absolute inset-0 bg-black/10 backdrop-blur-[1px] rounded flex items-center justify-center z-10">
+                              <div className="bg-white/90 px-2 py-1 rounded text-xs">
+                                <span className="text-gray-600">
+                                  {commentPending ? 'Pending' : commentRejected ? 'Rejected' : 'Under Review'}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                          
+                          <div className="flex items-start gap-2">
+                            <div className="flex-1">
+                              <span className="font-medium text-cordillera-olive">{c.user?.name || 'User'}</span>{' '}
+                              <span className="text-cordillera-olive/80">{c.body}</span>
+                            </div>
+                            {/* Status Badge for Comment Owner */}
+                            {isCommentOwner && !commentApproved && (
+                              <div className={`px-1 py-0.5 text-xs rounded ${
+                                commentPending ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                              }`}>
+                                {commentPending ? 'P' : 'R'}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
 
             {/* Infinite scroll sentinel + fallback button */}

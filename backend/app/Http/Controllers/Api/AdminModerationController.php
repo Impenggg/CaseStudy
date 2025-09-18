@@ -41,7 +41,7 @@ class AdminModerationController extends Controller
         
         // Include relationships for better display
         if ($type === 'products') {
-            $query->with('user:id,name');
+            $query->with('seller:id,name');
         } elseif ($type === 'stories') {
             $query->with('author:id,name');
         } elseif ($type === 'campaigns') {

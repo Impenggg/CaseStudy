@@ -111,6 +111,17 @@ const MyCampaignsPage: React.FC = () => {
                   <div className="mt-3 text-sm text-cordillera-olive/70">
                     Goal: {c.goal_amount ? `₱${Number(c.goal_amount).toLocaleString()}` : '—'}
                   </div>
+                  {(c as any).moderation_status && (
+                    <div className={`inline-block px-2 py-1 text-xs rounded-full mt-2 ${
+                      (c as any).moderation_status === 'approved' ? 'bg-green-100 text-green-800' :
+                      (c as any).moderation_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {(c as any).moderation_status === 'approved' ? 'Approved' :
+                       (c as any).moderation_status === 'pending' ? 'Pending Review' :
+                       'Rejected'}
+                    </div>
+                  )}
                   <div className="mt-4 flex gap-2">
                     {canManage && (
                       <>

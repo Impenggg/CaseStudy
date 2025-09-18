@@ -1,6 +1,25 @@
 import axios from 'axios';
 import type { Product, Story, Campaign, User, Order, Donation } from '@/types';
 
+// MediaPost type definition (with moderation fields)
+export type MediaPost = {
+  id: number;
+  user_id: number;
+  caption?: string;
+  image_path: string;
+  image_url: string;
+  moderation_status?: 'pending' | 'approved' | 'rejected';
+  reviewed_by?: number;
+  reviewed_at?: string;
+  rejection_reason?: string;
+  created_at: string;
+  updated_at: string;
+  user?: { id: number; name: string };
+  reactions_count?: number;
+  comments_count?: number;
+  comments?: Array<{ id: number; body: string; created_at: string; user?: { id: number; name: string }; moderation_status?: 'pending' | 'approved' | 'rejected' }>;
+};
+
 // Configure axios instance
 const DEFAULT_API = 'http://localhost:8000/api';
 let RESOLVED_BASE_URL = (import.meta as any)?.env?.VITE_API_BASE_URL || DEFAULT_API;
@@ -114,19 +133,6 @@ export const storyLikesAPI = {
     const res = await api.post(`/stories/${storyId}/like`);
     return res.data;
   },
-};
-
-export type MediaPost = {
-  id: number;
-  user_id: number;
-  caption?: string;
-  image_path: string;
-  image_url: string;
-  created_at: string;
-  user?: { id: number; name: string };
-  reactions_count?: number;
-  comments_count?: number;
-  comments?: Array<{ id: number; body: string; created_at: string; user?: { id: number; name: string } }>;
 };
 
 export const mediaAPI = {

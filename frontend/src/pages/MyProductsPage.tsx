@@ -117,7 +117,18 @@ const MyProductsPage: React.FC = () => {
                         />
                         <div>
                           <Link to={`/product/${p.id}`} className="text-cordillera-olive font-medium hover:underline">{p.name}</Link>
-                          <div className="text-xs text-cordillera-olive/60 line-clamp-1">{p.description}</div>
+                          <p className="text-cordillera-olive/60 mb-2">${p.price}</p>
+                          {p.moderation_status && (
+                            <div className={`inline-block px-2 py-1 text-xs rounded-full mb-2 ${
+                              p.moderation_status === 'approved' ? 'bg-green-100 text-green-800' :
+                              p.moderation_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {p.moderation_status === 'approved' ? 'Approved' :
+                               p.moderation_status === 'pending' ? 'Pending Review' :
+                               'Rejected'}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </td>
