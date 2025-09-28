@@ -169,6 +169,22 @@ const MediaFeedPage: React.FC = () => {
     }
   };
 
+  // Delete one of my posts (from the "Your images" section)
+  const deleteMyPost = async (postId: number) => {
+    if (isAdmin) return; // admins don't post/delete here
+    const ok = window.confirm('Delete this post? This cannot be undone.');
+    if (!ok) return;
+    try {
+      await mediaAPI.delete(postId);
+      setMyPosts((prev) => prev.filter((p) => p.id !== postId));
+      setFeed((prev) => prev.filter((p) => p.id !== postId));
+    } catch (err: any) {
+      const status = err?.response?.status;
+      const msg = err?.response?.data?.message || err?.message || 'Failed to delete';
+      alert(`${status ? status + ' - ' : ''}${msg}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-cordillera-cream">
       <div className="max-w-6xl mx-auto py-6 px-4">
@@ -218,6 +234,19 @@ const MediaFeedPage: React.FC = () => {
                         }}
                       />
                       <div className="pointer-events-none absolute inset-0 bg-cordillera-olive/0 group-hover:bg-cordillera-olive/5 transition-colors" />
+                      {/* Delete button (visible for customers/artisans) */}
+                      {!isAdmin && (
+                        <button
+                          type="button"
+                          onClick={() => deleteMyPost(p.id)}
+                          className="absolute top-2 left-2 z-10 inline-flex items-center justify-center w-8 h-8 rounded-md bg-white/90 text-red-600 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30"
+                          title="Delete post"
+                        >
+                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0h8a1 1 0 001-1V5a1 1 0 00-1-1h-3.5l-.724-.724A1 1 0 0011.586 3h-.172a1 1 0 00-.707.293L10 4H6a1 1 0 00-1 1v1z" />
+                          </svg>
+                        </button>
+                      )}
                       
                       {/* Moderation Status Badge */}
                       {!isApproved && (

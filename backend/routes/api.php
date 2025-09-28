@@ -102,6 +102,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/media/{media}', [MediaPostController::class, 'show']);
     Route::get('/users/{user}/media', [MediaPostController::class, 'userPosts']);
     Route::post('/media', [MediaPostController::class, 'store']);
+    Route::delete('/media/{media}', [MediaPostController::class, 'destroy']);
     Route::post('/media/{media}/react', [MediaPostController::class, 'react']);
     Route::post('/media/{media}/comments', [MediaPostController::class, 'comment']);
 

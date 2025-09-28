@@ -177,6 +177,9 @@ export const mediaAPI = {
     // backend returns { status, message, data: Comment }
     return res.data.data as { id: number; body: string; created_at: string; user?: { id: number; name: string } };
   },
+  delete: async (id: number): Promise<void> => {
+    await api.delete(`/media/${id}`);
+  },
 };
 
 // Products API

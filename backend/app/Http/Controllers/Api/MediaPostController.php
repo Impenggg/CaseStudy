@@ -179,4 +179,33 @@ class MediaPostController extends Controller
             'data' => $comment,
         ], 201);
     }
+
+    /**
+     * Delete a media post (owner or admin)
+     */
+    public function destroy(MediaPost $media, Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if (!$user || ($user->id !== $media->user_id && $user->role !== 'admin')) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        // Delete image file if exists
+        if (!empty($media->image_path)) {
+            try {
+                if (Storage::disk('public')->exists($media->image_path)) {
+                    Storage::disk('public')->delete($media->image_path);
+                }
+            } catch (\Throwable $e) {
+                // Continue even if file delete fails, but log if needed
+            }
+        }
+
+        $media->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Post deleted',
+        ]);
+    }
 }
