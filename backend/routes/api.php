@@ -30,6 +30,10 @@ use App\Http\Controllers\Api\StoryLikesController;
 
 // Public routes (no authentication required)
 Route::post('/register', [AuthController::class, 'register']);
+
+// Email verification routes
+Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verify'])->name('verification.verify');
+Route::post('email/resend', [AuthController::class, 'resend'])->name('verification.resend');
 Route::post('/login', [AuthController::class, 'login']);
 
 // Public product routes

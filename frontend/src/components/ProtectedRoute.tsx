@@ -29,3 +29,29 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 };
 
 export default ProtectedRoute;
+
+export const RoleProtectedRoute = ({ children, allowed }: { children: JSX.Element, allowed: string[] }) => {
+  const { isAuthenticated, user, isLoading } = useAuth();
+  const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cordillera-gold mx-auto mb-4"></div>
+          <p className="text-cordillera-cream">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (user && user.role && !allowed.includes(user.role)) {
+    return <Navigate to="/" state={{ from: location }} replace />;
+  }
+
+  return children;
+};

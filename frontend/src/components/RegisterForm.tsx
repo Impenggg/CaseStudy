@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const RegisterForm = () => {
@@ -7,7 +7,8 @@ const RegisterForm = () => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    terms_accepted: false
   });
   const [role, setRole] = React.useState<'customer' | 'artisan'>('customer');
   const [error, setError] = React.useState('');
@@ -42,6 +43,11 @@ const RegisterForm = () => {
       return false;
     }
 
+    if (!formData.terms_accepted) {
+      setError('You must accept the terms and conditions');
+      return false;
+    }
+
     return true;
   };
 
@@ -62,13 +68,9 @@ const RegisterForm = () => {
         return;
       }
 
-      const success = await register(email, formData.password, formData.name.trim(), role);
+      const success = await register(email, formData.password, formData.name.trim(), role, formData.terms_accepted);
       if (success) {
-        const fromState = (location.state as any)?.from?.pathname
-        const intended = sessionStorage.getItem('intended_path') || undefined
-        const to = fromState || intended || '/'
-        sessionStorage.removeItem('intended_path')
-        navigate(to, { replace: true });
+        navigate('/verify-email', { state: { email } });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
@@ -200,6 +202,26 @@ const RegisterForm = () => {
               />
             </div>
 
+            {/* Terms and Agreements */}
+            <div className="flex items-start">
+              <input
+                id="terms_accepted"
+                name="terms_accepted"
+                type="checkbox"
+                checked={formData.terms_accepted}
+                onChange={(e) => setFormData(prev => ({ ...prev, terms_accepted: e.target.checked }))}
+                className="mt-1 h-4 w-4 border-cordillera-gold/30 text-cordillera-gold focus:ring-cordillera-gold bg-cordillera-cream/20"
+                disabled={isLoading}
+                required
+              />
+              <label htmlFor="terms_accepted" className="ml-3 text-sm text-cordillera-cream/80">
+                I agree to the{' '}
+                <Link to="/terms" className="text-cordillera-gold hover:text-cordillera-gold/90">Terms of Service</Link>
+                {' '}and{' '}
+                <Link to="/privacy" className="text-cordillera-gold hover:text-cordillera-gold/90">Privacy Policy</Link>.
+              </label>
+            </div>
+
             <button
               type="submit"
               disabled={isLoading}
@@ -211,26 +233,24 @@ const RegisterForm = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Creating Account...
                 </div>
               ) : (
-                'Create Account'
-              )}
+                <span className="font-medium">Create Account</span>
+              )
             </button>
-          </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-cordillera-cream/70 text-sm">
-              Already have an account?{' '}
-              <button
-                onClick={() => navigate('/login')}
-                className="text-cordillera-gold hover:text-cordillera-gold/80 font-medium transition-colors"
-                disabled={isLoading}
-              >
-                Sign in here
-              </button>
-            </p>
-          </div>
+            <div className="text-sm text-center mt-4">
+              <p className="text-cordillera-cream/80">
+                Already have an account?{' '}
+                <button
+                  onClick={() => navigate('/login')}
+                  className="font-medium text-cordillera-gold hover:text-cordillera-gold/90"
+                >
+                  Sign in here
+                </button>
+              </p>
+            </div>
+          </form>
         </div>
       </div>
     </div>

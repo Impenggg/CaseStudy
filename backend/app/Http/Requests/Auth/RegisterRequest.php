@@ -24,6 +24,7 @@ class RegisterRequest extends FormRequest
             'role' => 'sometimes|in:weaver,buyer,artisan,customer',
             'bio' => 'nullable|string|max:1000',
             'location' => 'nullable|string|max:255',
+            'terms_accepted' => 'required|accepted',
         ];
     }
 }

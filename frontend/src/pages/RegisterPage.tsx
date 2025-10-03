@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 export const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,9 @@ export const RegisterPage = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [capsOn, setCapsOn] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
 
@@ -40,25 +44,25 @@ export const RegisterPage = () => {
       setError('Passwords do not match');
       return;
     }
-
     if (formData.password.length < 8) {
       setError('Password must be at least 8 characters');
       return;
     }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       setError('Please enter a valid email address');
       return;
     }
+    if (!termsAccepted) {
+      setError('You must accept the terms and conditions');
+      return;
+    }
 
     setIsLoading(true);
-
     try {
-      // Correct parameter order: (email, password, name, role)
-      const success = await register(email, formData.password, name, role);
+      // Correct parameter order: (email, password, name, role, terms_accepted)
+      const success = await register(email, formData.password, name, role, termsAccepted);
       if (success) {
-        // Redirect to role dashboard by normalized role in localStorage
         const stored = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
         let normalizedRole: string | undefined;
         try {
@@ -388,14 +392,37 @@ export const RegisterPage = () => {
                     {touched.confirmPassword && !confirmValid && (
                       <p id="confirm-error" className="mt-1 text-xs text-red-300">Passwords do not match.</p>
                     )}
-                  </div>
-                </div>
+                                  </div>
+              </div>
 
-                {error && (
-                  <div className="bg-red-500/10 border border-red-500/30 text-red-200 px-4 py-3 text-sm">
-                    {error}
-                  </div>
-                )}
+              {/* Terms & Agreements */}
+              <div className="flex items-start">
+                <input
+                  id="terms"
+                  name="terms"
+                  type="checkbox"
+                  checked={termsAccepted}
+                  onChange={(e) => setTermsAccepted(e.target.checked)}
+                  className="mt-1 h-4 w-4 border-cordillera-gold/30 text-cordillera-gold focus:ring-cordillera-gold bg-cordillera-cream/20"
+                  required
+                />
+                <label htmlFor="terms" className="ml-3 text-sm text-cordillera-cream/80">
+                  I agree to the{' '}
+                  <button type="button" onClick={() => setShowTerms(true)} className="text-cordillera-gold hover:text-cordillera-gold/90 underline underline-offset-2">
+                    Terms of Service
+                  </button>
+                  {' '}and{' '}
+                  <button type="button" onClick={() => setShowPrivacy(true)} className="text-cordillera-gold hover:text-cordillera-gold/90 underline underline-offset-2">
+                    Privacy Policy
+                  </button>.
+                </label>
+              </div>
+
+              {error && (
+                <div className="bg-red-500/10 border border-red-500/30 text-red-200 px-4 py-3 text-sm">
+                  {error}
+                </div>
+              )}
 
                 <div>
                   <button
@@ -415,6 +442,119 @@ export const RegisterPage = () => {
                     </Link>
                   </p>
                 </div>
+              {/* Terms Modal */}
+              <Dialog open={showTerms} onOpenChange={setShowTerms}>
+                <DialogContent className="bg-cordillera-olive/95 text-cordillera-cream border border-cordillera-gold/30 w-[95vw] max-w-3xl p-0 overflow-hidden">
+                  <div className="px-6 pt-5 pb-3 border-b border-cordillera-gold/20 text-center">
+                    <DialogHeader className="items-center">
+                      <DialogTitle className="text-xl font-serif text-cordillera-cream">Terms of Service</DialogTitle>
+                    </DialogHeader>
+                    <p className="mt-1 text-sm text-cordillera-cream/80">Please review the terms below before creating your account.</p>
+                  </div>
+                  <div className="px-6 py-5 max-h-[65vh] overflow-auto">
+                    <div className="prose prose-invert prose-sm sm:prose-base">
+                      <p>
+                        These Terms of Service ("Terms") govern your access to and use of the Cordillera Weaving
+                        platform. By creating an account or using our services, you agree to be bound by these Terms.
+                      </p>
+                      <h3>1. Your Account</h3>
+                      <ul>
+                        <li>You are responsible for keeping your account credentials secure.</li>
+                        <li>You are responsible for all activities that occur under your account.</li>
+                        <li>Notify us immediately of any unauthorized access or use.</li>
+                      </ul>
+                      <h3>2. Acceptable Use</h3>
+                      <ul>
+                        <li>Do not use the platform for unlawful, harmful, or abusive activities.</li>
+                        <li>Do not upload content that is illegal, infringing, or violates others' rights.</li>
+                        <li>Do not attempt to disrupt or compromise the platform’s security or integrity.</li>
+                      </ul>
+                      <h3>3. Buying and Selling</h3>
+                      <ul>
+                        <li>Transactions are subject to marketplace policies, including shipping and refunds.</li>
+                        <li>Sellers are responsible for listing accuracy and order fulfillment.</li>
+                        <li>Buyers must review listings and provide accurate delivery information.</li>
+                      </ul>
+                      <h3>4. Intellectual Property</h3>
+                      <ul>
+                        <li>You retain rights to content you create and upload.</li>
+                        <li>By posting content, you grant us a limited license to host and display it on the platform.</li>
+                      </ul>
+                      <h3>5. Termination</h3>
+                      <p>We may suspend or terminate access if you breach these Terms or engage in harmful activities.</p>
+                      <h3>6. Changes</h3>
+                      <p>We may modify these Terms. Continued use after changes constitutes acceptance of the updated Terms.</p>
+                      <p className="mt-4 text-xs opacity-70">Last updated: {new Date().getFullYear()}</p>
+                    </div>
+                  </div>
+                  <div className="px-6 py-3 border-t border-cordillera-gold/20 flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowTerms(false)}
+                      className="px-4 py-2 text-sm text-cordillera-cream/90 hover:text-cordillera-cream border border-cordillera-cream/30 hover:border-cordillera-cream/50 transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+
+              {/* Privacy Modal */}
+              <Dialog open={showPrivacy} onOpenChange={setShowPrivacy}>
+                <DialogContent className="bg-cordillera-olive/95 text-cordillera-cream border border-cordillera-gold/30 w-[95vw] max-w-3xl p-0 overflow-hidden">
+                  <div className="px-6 pt-5 pb-3 border-b border-cordillera-gold/20 text-center">
+                    <DialogHeader className="items-center">
+                      <DialogTitle className="text-xl font-serif text-cordillera-cream">Privacy Policy</DialogTitle>
+                    </DialogHeader>
+                    <p className="mt-1 text-sm text-cordillera-cream/80">Learn how we collect, use, and protect your information.</p>
+                  </div>
+                  <div className="px-6 py-5 max-h-[65vh] overflow-auto">
+                    <div className="prose prose-invert prose-sm sm:prose-base">
+                      <p>
+                        This Privacy Policy explains what information we collect, how we use it, and the choices you have.
+                        By using the platform, you agree to the collection and use of information in accordance with this policy.
+                      </p>
+                      <h3>1. Information We Collect</h3>
+                      <ul>
+                        <li>Account information you provide (e.g., name, email, password).</li>
+                        <li>Usage data such as pages visited, actions taken, and device information.</li>
+                        <li>Content you upload, including text and media.</li>
+                      </ul>
+                      <h3>2. How We Use Information</h3>
+                      <ul>
+                        <li>To provide, maintain, and improve the platform and its features.</li>
+                        <li>To communicate with you about your account, activity, and updates.</li>
+                        <li>To protect against fraud, abuse, and security threats.</li>
+                      </ul>
+                      <h3>3. Sharing</h3>
+                      <ul>
+                        <li>We do not sell your personal data.</li>
+                        <li>We may share information with trusted service providers to operate the platform.</li>
+                        <li>We may disclose information if required by law or to protect rights and safety.</li>
+                      </ul>
+                      <h3>4. Your Choices</h3>
+                      <ul>
+                        <li>Access and update your account information in settings.</li>
+                        <li>Request deletion or additional privacy inquiries via support.</li>
+                      </ul>
+                      <h3>5. Data Security</h3>
+                      <p>We use reasonable safeguards to protect data. No method is 100% secure.</p>
+                      <h3>6. Changes</h3>
+                      <p>We may update this policy. Continued use after changes indicates acceptance.</p>
+                      <p className="mt-4 text-xs opacity-70">Last updated: {new Date().getFullYear()}</p>
+                    </div>
+                  </div>
+                  <div className="px-6 py-3 border-t border-cordillera-gold/20 flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowPrivacy(false)}
+                      className="px-4 py-2 text-sm text-cordillera-cream/90 hover:text-cordillera-cream border border-cordillera-cream/30 hover:border-cordillera-cream/50 transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </DialogContent>
+              </Dialog>
               </form>
             </CardContent>
           </Card>

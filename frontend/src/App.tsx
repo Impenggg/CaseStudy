@@ -2,6 +2,9 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import { useScrollToTop } from './hooks/useScrollToTop';
+import ErrorBoundary from './components/ErrorBoundary';
+import ProtectedRoute from './components/ProtectedRoute';
+import RoleProtectedRoute from './components/RoleProtectedRoute';
 
 // Lazy-loaded pages for better structure and to avoid stale modules
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -13,7 +16,6 @@ const CampaignDetailPage = lazy(() => import('./pages/CampaignDetailPage'));
 const StorySubmissionPage = lazy(() => import('./pages/StorySubmissionPage'));
 const CampaignCreationPage = lazy(() => import('./pages/CampaignCreationPage'));
 const MediaFeedPage = lazy(() => import('./pages/MediaFeedPage'));
-const AccountPage = lazy(() => import('./pages/AccountPage'));
 const UserDashboard = lazy(() => import('./pages/UserDashboard').then(m => ({ default: m.UserDashboard })));
 const OrdersPage = lazy(() => import('./pages/OrdersPage'));
 const OrderDetailPage = lazy(() => import('./pages/OrderDetailPage.tsx').then(m => ({ default: m.default })));
@@ -25,294 +27,243 @@ const MyProductsPage = lazy(() => import('./pages/MyProductsPage'));
 const ProductEditPage = lazy(() => import('./pages/ProductEditPage'));
 const MyStoriesPage = lazy(() => import('./pages/MyStoriesPage'));
 const MyCampaignsPage = lazy(() => import('./pages/MyCampaignsPage'));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
+const AccountPage = lazy(() => import('./pages/AccountPage'));
 const AdminModerationPage = lazy(() => import('./pages/AdminModerationPage'));
-import ProtectedRoute from './components/ProtectedRoute';
-import RoleProtectedRoute from './components/RoleProtectedRoute';
 
-// Error Boundary Component
-class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean; error?: Error }
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props)
-    this.state = { hasError: false }
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error }
-  }
-
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('App Error:', error, errorInfo)
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
-          <div className="text-center text-cordillera-cream p-8">
-            <h1 className="text-4xl font-serif mb-4">Something went wrong</h1>
-            <p className="mb-4 text-cordillera-cream/80">The app encountered an error, but we're handling it gracefully.</p>
-            <button 
-              onClick={() => {
-                this.setState({ hasError: false })
-                window.location.reload()
-              }}
-              className="bg-cordillera-gold text-cordillera-olive px-6 py-2 font-medium hover:bg-cordillera-gold/90 transition-colors"
-            >
-              Reload App
-            </button>
-          </div>
-        </div>
-      )
-    }
-
-    return this.props.children
-  }
-}
-
+// Main App component
 const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <Router>
         <ScrollToTop />
-        <Suspense
-          fallback={
-            <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
-              <div className="text-center text-cordillera-cream">Loading…</div>
-            </div>
-          }
-        >
-        <Routes>
-          {/* Public browsing routes */}
-          <Route path="/" element={<Layout><HomePage /></Layout>} />
-          <Route path="/marketplace" element={<Layout><MarketplacePage /></Layout>} />
-          <Route path="/product/:id" element={<Layout><ProductDetailPage /></Layout>} />
-          <Route path="/stories" element={<Layout><StoriesPage /></Layout>} />
-          <Route path="/story/:id" element={<Layout><StoryDetailPage /></Layout>} />
-          <Route path="/campaign/:id" element={<Layout><CampaignDetailPage /></Layout>} />
-          {/* Media-related routes */}
-          <Route
-            path="/media"
-            element={
-              <Layout>
-                <ProtectedRoute>
-                  <MediaFeedPage />
-                </ProtectedRoute>
-              </Layout>
-            }
-          />
+        <Suspense fallback={<div className="min-h-screen bg-cordillera-olive" />}>
+          <Routes>
+            {/* Public pages */}
+            <Route path="/" element={<Layout><HomePage /></Layout>} />
+            <Route path="/marketplace" element={<Layout><MarketplacePage /></Layout>} />
+            <Route path="/products/:id" element={<Layout><ProductDetailPage /></Layout>} />
+            <Route path="/stories" element={<Layout><StoriesPage /></Layout>} />
+            <Route path="/stories/:id" element={<Layout><StoryDetailPage /></Layout>} />
+            <Route path="/campaigns/:id" element={<Layout><CampaignDetailPage /></Layout>} />
 
-          {/* Auth pages */}
-          <Route path="/login" element={<Layout><LoginPage /></Layout>} />
-          <Route path="/register" element={<Layout><RegisterPage /></Layout>} />
+            {/* Auth pages */}
+            <Route path="/login" element={<Layout><LoginPage /></Layout>} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
 
-          {/* Account-only routes */}
-          <Route
-            path="/submit-story"
-            element={
-              <Layout>
-                <RoleProtectedRoute allowed={['artisan', 'admin']}>
-                  <StorySubmissionPage />
-                </RoleProtectedRoute>
-              </Layout>
-            }
-          />
-          <Route
-            path="/create-campaign"
-            element={
-              <Layout>
-                <RoleProtectedRoute allowed={['artisan', 'admin']}>
-                  <CampaignCreationPage />
-                </RoleProtectedRoute>
-              </Layout>
-            }
-          />
-          <Route
-            path="/media-creation"
-            element={
-              <Layout>
-                <ProtectedRoute>
-                  <Navigate to="/media" replace />
-                </ProtectedRoute>
-              </Layout>
-            }
-          />
-          <Route
-            path="/account"
-            element={
-              <Layout>
-                <ProtectedRoute>
-                  <AccountPage />
-                </ProtectedRoute>
-              </Layout>
-            }
-          />
-          <Route
-            path="/orders"
-            element={
-              <Layout>
-                <ProtectedRoute>
-                  <OrdersPage />
-                </ProtectedRoute>
-              </Layout>
-            }
-          />
-          {/* Customer alias to OrdersPage */}
-          <Route
-            path="/my-purchases"
-            element={
-              <Layout>
-                <RoleProtectedRoute allowed={['customer', 'admin']}>
-                  <OrdersPage />
-                </RoleProtectedRoute>
-              </Layout>
-            }
-          />
-          <Route
-            path="/orders/:id"
-            element={
-              <Layout>
-                <ProtectedRoute>
-                  <OrderDetailPage />
-                </ProtectedRoute>
-              </Layout>
-            }
-          />
-          <Route
-            path="/create-product"
-            element={
-              <Layout>
-                <RoleProtectedRoute allowed={['artisan', 'admin']}>
-                  <ProductCreatePage />
-                </RoleProtectedRoute>
-              </Layout>
-            }
-          />
+            {/* Media (protected) */}
+            <Route
+              path="/media"
+              element={
+                <Layout>
+                  <ProtectedRoute>
+                    <MediaFeedPage />
+                  </ProtectedRoute>
+                </Layout>
+              }
+            />
+            <Route
+              path="/media-creation"
+              element={
+                <Layout>
+                  <ProtectedRoute>
+                    <Navigate to="/media" replace />
+                  </ProtectedRoute>
+                </Layout>
+              }
+            />
 
-          <Route
-            path="/my-products"
-            element={
-              <Layout>
-                <RoleProtectedRoute allowed={['artisan', 'admin']}>
-                  <MyProductsPage />
-                </RoleProtectedRoute>
-              </Layout>
-            }
-          />
+            {/* Account-only routes */}
+            <Route
+              path="/submit-story"
+              element={
+                <Layout>
+                  <RoleProtectedRoute allowed={['artisan', 'admin']}>
+                    <StorySubmissionPage />
+                  </RoleProtectedRoute>
+                </Layout>
+              }
+            />
+            <Route
+              path="/create-campaign"
+              element={
+                <Layout>
+                  <RoleProtectedRoute allowed={['artisan', 'admin']}>
+                    <CampaignCreationPage />
+                  </RoleProtectedRoute>
+                </Layout>
+              }
+            />
+            <Route
+              path="/account"
+              element={
+                <Layout>
+                  <ProtectedRoute>
+                    <AccountPage />
+                  </ProtectedRoute>
+                </Layout>
+              }
+            />
+            <Route
+              path="/orders"
+              element={
+                <Layout>
+                  <ProtectedRoute>
+                    <OrdersPage />
+                  </ProtectedRoute>
+                </Layout>
+              }
+            />
+            {/* Customer alias to OrdersPage */}
+            <Route
+              path="/my-purchases"
+              element={
+                <Layout>
+                  <RoleProtectedRoute allowed={['customer', 'admin']}>
+                    <OrdersPage />
+                  </RoleProtectedRoute>
+                </Layout>
+              }
+            />
+            <Route
+              path="/orders/:id"
+              element={
+                <Layout>
+                  <ProtectedRoute>
+                    <OrderDetailPage />
+                  </ProtectedRoute>
+                </Layout>
+              }
+            />
+            <Route
+              path="/create-product"
+              element={
+                <Layout>
+                  <RoleProtectedRoute allowed={['artisan', 'admin']}>
+                    <ProductCreatePage />
+                  </RoleProtectedRoute>
+                </Layout>
+              }
+            />
+            <Route
+              path="/my-products"
+              element={
+                <Layout>
+                  <RoleProtectedRoute allowed={['artisan', 'admin']}>
+                    <MyProductsPage />
+                  </RoleProtectedRoute>
+                </Layout>
+              }
+            />
+            <Route
+              path="/products/:id/edit"
+              element={
+                <Layout>
+                  <RoleProtectedRoute allowed={['artisan', 'admin']}>
+                    <ProductEditPage />
+                  </RoleProtectedRoute>
+                </Layout>
+              }
+            />
+            <Route
+              path="/my-stories"
+              element={
+                <Layout>
+                  <RoleProtectedRoute allowed={['artisan', 'admin']}>
+                    <MyStoriesPage />
+                  </RoleProtectedRoute>
+                </Layout>
+              }
+            />
+            <Route
+              path="/my-campaigns"
+              element={
+                <Layout>
+                  <RoleProtectedRoute allowed={['artisan', 'admin']}>
+                    <MyCampaignsPage />
+                  </RoleProtectedRoute>
+                </Layout>
+              }
+            />
 
-          <Route
-            path="/products/:id/edit"
-            element={
-              <Layout>
-                <RoleProtectedRoute allowed={['artisan', 'admin']}>
-                  <ProductEditPage />
-                </RoleProtectedRoute>
-              </Layout>
-            }
-          />
+            {/* Role-specific dashboards */}
+            <Route
+              path="/dashboard/artisan"
+              element={
+                <Layout>
+                  <RoleProtectedRoute allowed={['artisan', 'admin']}>
+                    <UserDashboard />
+                  </RoleProtectedRoute>
+                </Layout>
+              }
+            />
+            <Route
+              path="/dashboard/customer"
+              element={
+                <Layout>
+                  <RoleProtectedRoute allowed={['customer', 'admin']}>
+                    <UserDashboard />
+                  </RoleProtectedRoute>
+                </Layout>
+              }
+            />
 
-          <Route
-            path="/my-stories"
-            element={
-              <Layout>
-                <RoleProtectedRoute allowed={['artisan', 'admin']}>
-                  <MyStoriesPage />
-                </RoleProtectedRoute>
-              </Layout>
-            }
-          />
+            <Route
+              path="/admin/moderation"
+              element={
+                <Layout>
+                  <RoleProtectedRoute allowed={['admin']}>
+                    <AdminModerationPage />
+                  </RoleProtectedRoute>
+                </Layout>
+              }
+            />
 
-          <Route
-            path="/my-campaigns"
-            element={
-              <Layout>
-                <RoleProtectedRoute allowed={['artisan', 'admin']}>
-                  <MyCampaignsPage />
-                </RoleProtectedRoute>
-              </Layout>
-            }
-          />
+            <Route
+              path="/supports"
+              element={
+                <Layout>
+                  <ProtectedRoute>
+                    <SupportsPage />
+                  </ProtectedRoute>
+                </Layout>
+              }
+            />
+            {/* Customer alias to SupportsPage */}
+            <Route
+              path="/campaigns-supported"
+              element={
+                <Layout>
+                  <RoleProtectedRoute allowed={['customer', 'admin']}>
+                    <SupportsPage />
+                  </RoleProtectedRoute>
+                </Layout>
+              }
+            />
 
-          {/* Role-specific dashboards */}
-          <Route
-            path="/dashboard/artisan"
-            element={
-              <Layout>
-                <RoleProtectedRoute allowed={['artisan', 'admin']}>
-                  <UserDashboard />
-                </RoleProtectedRoute>
-              </Layout>
-            }
-          />
-          <Route
-            path="/dashboard/customer"
-            element={
-              <Layout>
-                <RoleProtectedRoute allowed={['customer', 'admin']}>
-                  <UserDashboard />
-                </RoleProtectedRoute>
-              </Layout>
-            }
-          />
-
-          <Route
-            path="/admin/moderation"
-            element={
-              <Layout>
-                <RoleProtectedRoute allowed={['admin']}>
-                  <AdminModerationPage />
-                </RoleProtectedRoute>
-              </Layout>
-            }
-          />
-          
-          <Route
-            path="/supports"
-            element={
-              <Layout>
-                <ProtectedRoute>
-                  <SupportsPage />
-                </ProtectedRoute>
-              </Layout>
-            }
-          />
-          {/* Customer alias to SupportsPage */}
-          <Route
-            path="/campaigns-supported"
-            element={
-              <Layout>
-                <RoleProtectedRoute allowed={['customer', 'admin']}>
-                  <SupportsPage />
-                </RoleProtectedRoute>
-              </Layout>
-            }
-          />
-
-          {/* 404 Page */}
-          <Route
-            path="*"
-            element={
-              <Layout>
-                <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
-                  <div className="text-center">
-                    <h1 className="text-4xl font-serif text-cordillera-cream mb-4">Page Not Found</h1>
-                    <Link to="/" className="text-cordillera-gold hover:text-cordillera-gold/80 transition-colors">
-                      Return to Homepage
-                    </Link>
+            {/* 404 Page */}
+            <Route
+              path="*"
+              element={
+                <Layout>
+                  <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
+                    <div className="text-center">
+                      <h1 className="text-4xl font-serif text-cordillera-cream mb-4">Page Not Found</h1>
+                      <Link to="/" className="text-cordillera-gold hover:text-cordillera-gold/80 transition-colors">
+                        Return to Homepage
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              </Layout>
-            }
-          />
-        </Routes>
+                </Layout>
+              }
+            />
+          </Routes>
         </Suspense>
       </Router>
     </ErrorBoundary>
   );
 };
-
 // ScrollToTop component that uses the hook
 const ScrollToTop: React.FC = () => {
   useScrollToTop();

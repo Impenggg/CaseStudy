@@ -10,7 +10,7 @@ interface AuthContextType {
   loadingMessage?: string
   login: (email: string, password: string) => Promise<boolean>
   logout: () => Promise<void>
-  register: (email: string, password: string, name: string, role?: string) => Promise<boolean>
+  register: (email: string, password: string, name: string, role: string, terms_accepted: boolean) => Promise<boolean>
   checkAuth: () => Promise<void>
   requireAuth: (redirectPath?: string) => boolean
 }
@@ -89,7 +89,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
-  const register = async (email: string, password: string, name: string, role: string = 'customer'): Promise<boolean> => {
+  const register = async (email: string, password: string, name: string, role: string, terms_accepted: boolean): Promise<boolean> => {
     try {
       setIsLoading(true)
       setLoadingMessage('Creating your account...')
@@ -97,7 +97,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const backendRole = role?.toLowerCase() === 'artisan' ? 'weaver' : (role?.toLowerCase() || 'customer')
       const normalizedEmail = email.trim().toLowerCase().replace(/\s+/g, '').normalize('NFKC')
       const normalizedName = name.trim().normalize('NFKC')
-      const payload: any = { email: normalizedEmail, password, name: normalizedName }
+      const payload: any = { email: normalizedEmail, password, name: normalizedName, terms_accepted: terms_accepted ? 'on' : '' }
       // Only include role if artisan (weaver). Buyers can rely on backend default
       if (backendRole === 'weaver') payload.role = backendRole
       if (import.meta.env.DEV) {

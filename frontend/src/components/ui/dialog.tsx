@@ -1,4 +1,5 @@
 import * as React from "react"
+import ReactDOM from "react-dom"
 import { cn } from "@/lib/utils"
 
 interface DialogContextType {
@@ -57,26 +58,26 @@ const DialogContent = React.forwardRef<
   
   if (!context?.open) return null
   
-  return (
+  return ReactDOM.createPortal(
     <>
       {/* Backdrop */}
-      <div 
+      <div
         className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
         onClick={() => context.onOpenChange(false)}
       />
-      
-      {/* Dialog */}
-      <div className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2">
+
+      {/* Centered container */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
           ref={ref}
           className={cn(
-            "grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg",
+            "relative grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg",
             className
           )}
           {...props}
         >
           {children}
-          
+
           {/* Close button */}
           <button
             className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
@@ -87,7 +88,8 @@ const DialogContent = React.forwardRef<
           </button>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   )
 })
 DialogContent.displayName = "DialogContent"

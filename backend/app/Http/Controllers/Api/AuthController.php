@@ -52,6 +52,7 @@ class AuthController extends Controller
             }
 
             $user = User::create([
+                'terms_accepted_at' => now(),
                 'name' => $validated['name'] ?? $request->name,
                 'email' => $validated['email'] ?? $request->email,
                 'password' => Hash::make($validated['password'] ?? $request->password),
@@ -59,6 +60,8 @@ class AuthController extends Controller
                 'bio' => $validated['bio'] ?? $request->bio,
                 'location' => $validated['location'] ?? $request->location,
             ]);
+
+            $user->sendEmailVerificationNotification();
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -172,5 +175,41 @@ class AuthController extends Controller
             'message' => 'Profile updated successfully',
             'data' => $user,
         ]);
+    }
+
+    /**
+     * Mark the authenticated user's email address as verified.
+     */
+    public function verify(Request $request): JsonResponse
+    {
+        $user = User::find($request->route('id'));
+
+        if (! hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email already verified.'], 200);
+        }
+
+        if ($user->markEmailAsVerified()) {
+            event(new \Illuminate\Auth\Events\Verified($user));
+        }
+
+        return response()->json(['message' => 'Email successfully verified.'], 200);
+    }
+
+    /**
+     * Resend the email verification notification.
+     */
+    public function resend(Request $request): JsonResponse
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return response()->json(['message' => 'Email already verified.'], 200);
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return response()->json(['message' => 'Verification link sent.'], 200);
     }
 }
