@@ -60,6 +60,14 @@ class Campaign extends Model
     }
 
     /**
+     * Get the expenditures for this campaign.
+     */
+    public function expenditures()
+    {
+        return $this->hasMany(CampaignExpenditure::class);
+    }
+
+    /**
      * Get the images for this campaign.
      */
     public function images()

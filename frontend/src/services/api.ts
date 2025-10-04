@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Product, Story, Campaign, User, Order, Donation } from '@/types';
+import type { Product, Story, Campaign, User, Order, Donation, CampaignExpenditure } from '@/types';
 
 // MediaPost type definition (with moderation fields)
 export type MediaPost = {
@@ -333,6 +333,45 @@ export const campaignsAPI = {
   getMyCampaigns: async () => {
     const response = await api.get('/my-campaigns');
     return response.data;
+  },
+
+  // Donation history for a campaign (sanitized for anonymity)
+  getCampaignDonations: async (
+    campaignId: number,
+    params?: { page?: number; per_page?: number }
+  ): Promise<{
+    status: string;
+    data: Array<{ id: number; amount: number; message?: string; anonymous: boolean; donor?: { id: number; name: string } | null; created_at: string }>;
+    pagination: { current_page: number; total_pages: number; per_page: number; total_count: number } | null;
+  }> => {
+    const res = await api.get(`/campaigns/${campaignId}/donations`, { params });
+    return res.data;
+  },
+
+  // Expenditures (public list)
+  getExpenditures: async (campaignId: number): Promise<CampaignExpenditure[]> => {
+    const res = await api.get(`/campaigns/${campaignId}/expenditures`);
+    return (res?.data?.data ?? []) as CampaignExpenditure[];
+  },
+
+  // Expenditures CRUD (organizer/admin only)
+  createExpenditure: async (
+    campaignId: number,
+    payload: { title: string; description?: string; amount: number; used_at?: string; attachment_path?: string }
+  ): Promise<CampaignExpenditure> => {
+    const res = await api.post(`/campaigns/${campaignId}/expenditures`, payload);
+    return res.data.data as CampaignExpenditure;
+  },
+  updateExpenditure: async (
+    campaignId: number,
+    id: number,
+    payload: Partial<{ title: string; description?: string; amount: number; used_at?: string; attachment_path?: string }>
+  ): Promise<CampaignExpenditure> => {
+    const res = await api.put(`/campaigns/${campaignId}/expenditures/${id}`, payload);
+    return res.data.data as CampaignExpenditure;
+  },
+  deleteExpenditure: async (campaignId: number, id: number): Promise<void> => {
+    await api.delete(`/campaigns/${campaignId}/expenditures/${id}`);
   },
 };
 

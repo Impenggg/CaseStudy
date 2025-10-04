@@ -79,6 +79,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 Stories
               </Link>
               <Link
+                to="/campaigns"
+                className={`relative text-cordillera-cream/90 hover:text-cordillera-gold transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-cordillera-gold after:transition-all after:duration-200 after:w-0 hover:after:w-full ${
+                  isActive('/campaigns') ? 'text-cordillera-gold after:w-full' : ''
+                } focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40 rounded`}
+              >
+                Campaigns
+              </Link>
+              <Link
                 to="/media-creation"
                 className={`relative text-cordillera-cream/90 hover:text-cordillera-gold transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-cordillera-gold after:transition-all after:duration-200 after:w-0 hover:after:w-full ${
                   isActive('/media-creation') ? 'text-cordillera-gold after:w-full' : ''
@@ -203,6 +211,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 Stories
+              </Link>
+              <Link
+                to="/campaigns"
+                className={`block px-3 py-2 transition-colors ${isActive('/campaigns') ? 'text-cordillera-gold' : 'text-cordillera-cream/90 hover:text-cordillera-gold'}`}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Campaigns
               </Link>
               <Link
                 to="/media-creation"

@@ -6,23 +6,34 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+const LoadingScreen = () => (
+  <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
+    <div className="text-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cordillera-gold mx-auto mb-4"></div>
+      <p className="text-cordillera-cream">Loading...</p>
+    </div>
+  </div>
+);
+
+const isUnverified = (user: any | null | undefined) => {
+  if (!user) return false;
+  return user.email_verified_at == null; // null or undefined means not verified
+};
+
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cordillera-gold mx-auto mb-4"></div>
-          <p className="text-cordillera-cream">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (isUnverified(user)) {
+    return <Navigate to="/verify-email" state={{ from: location }} replace />;
   }
 
   return <>{children}</>;
@@ -30,23 +41,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
 export default ProtectedRoute;
 
-export const RoleProtectedRoute = ({ children, allowed }: { children: JSX.Element, allowed: string[] }) => {
+export const RoleProtectedRoute = ({ children, allowed }: { children: React.ReactElement, allowed: string[] }) => {
   const { isAuthenticated, user, isLoading } = useAuth();
   const location = useLocation();
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cordillera-gold mx-auto mb-4"></div>
-          <p className="text-cordillera-cream">Loading...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen />;
   }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (isUnverified(user)) {
+    return <Navigate to="/verify-email" state={{ from: location }} replace />;
   }
 
   if (user && user.role && !allowed.includes(user.role)) {

@@ -11,6 +11,7 @@ export interface User {
   bio?: string;
   location?: string;
   phone?: string;
+  email_verified_at?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -32,6 +33,7 @@ export interface Product {
   dimensions?: { length?: number; width?: number; height?: number; weight?: number };
   tags?: string[];
   featured?: boolean;
+  moderation_status?: 'approved' | 'pending' | 'rejected' | string;
   created_at?: string;
   updated_at?: string;
 }
@@ -94,6 +96,20 @@ export interface Donation {
   amount: number;
   message?: string;
   anonymous?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CampaignExpenditure {
+  id: ID;
+  campaign_id: ID;
+  title: string;
+  description?: string;
+  amount: number;
+  used_at?: string;
+  attachment_path?: string;
+  created_by?: ID;
+  creator?: { id: ID; name: string };
   created_at?: string;
   updated_at?: string;
 }

@@ -13,6 +13,7 @@ const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 const StoriesPage = lazy(() => import('./pages/StoriesPage'));
 const StoryDetailPage = lazy(() => import('./pages/StoryDetailPage'));
 const CampaignDetailPage = lazy(() => import('./pages/CampaignDetailPage'));
+const CampaignsPage = lazy(() => import('./pages/CampaignsPage'));
 const StorySubmissionPage = lazy(() => import('./pages/StorySubmissionPage'));
 const CampaignCreationPage = lazy(() => import('./pages/CampaignCreationPage'));
 const MediaFeedPage = lazy(() => import('./pages/MediaFeedPage'));
@@ -28,6 +29,7 @@ const ProductEditPage = lazy(() => import('./pages/ProductEditPage'));
 const MyStoriesPage = lazy(() => import('./pages/MyStoriesPage'));
 const MyCampaignsPage = lazy(() => import('./pages/MyCampaignsPage'));
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
+const VerifySuccessPage = lazy(() => import('./pages/VerifySuccessPage'));
 const AccountPage = lazy(() => import('./pages/AccountPage'));
 const AdminModerationPage = lazy(() => import('./pages/AdminModerationPage'));
 
@@ -45,12 +47,14 @@ const App: React.FC = () => {
             <Route path="/products/:id" element={<Layout><ProductDetailPage /></Layout>} />
             <Route path="/stories" element={<Layout><StoriesPage /></Layout>} />
             <Route path="/stories/:id" element={<Layout><StoryDetailPage /></Layout>} />
+            <Route path="/campaigns" element={<Layout><CampaignsPage /></Layout>} />
             <Route path="/campaigns/:id" element={<Layout><CampaignDetailPage /></Layout>} />
 
             {/* Auth pages */}
             <Route path="/login" element={<Layout><LoginPage /></Layout>} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/verify-success" element={<Layout><VerifySuccessPage /></Layout>} />
 
             {/* Media (protected) */}
             <Route

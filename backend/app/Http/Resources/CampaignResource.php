@@ -14,6 +14,10 @@ class CampaignResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $donationsTotal = $this->donations()->sum('amount');
+        $expendituresTotal = method_exists($this, 'expenditures') ? $this->expenditures()->sum('amount') : 0;
+        $utilization = $donationsTotal > 0 ? round(($expendituresTotal / $donationsTotal) * 100, 2) : 0;
+
         return [
             'id' => $this->id,
             'title' => $this->title,
@@ -32,6 +36,13 @@ class CampaignResource extends JsonResource
             }),
             'images' => $this->whenLoaded('images'),
             'donations' => $this->whenLoaded('donations'),
+            'transparency' => [
+                'donations_total' => (float) $donationsTotal,
+                'expenditures_total' => (float) $expendituresTotal,
+                'utilization_percentage' => (float) $utilization,
+                'donations_count' => (int) $this->donations()->count(),
+                'expenditures_count' => (int) (method_exists($this, 'expenditures') ? $this->expenditures()->count() : 0),
+            ],
             'created_at' => optional($this->created_at)->toIso8601String(),
             'updated_at' => optional($this->updated_at)->toIso8601String(),
         ];

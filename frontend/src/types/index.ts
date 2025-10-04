@@ -117,6 +117,21 @@ export interface Donation {
   created_at: string;
 }
 
+// Campaign Expenditure Types
+export interface CampaignExpenditure {
+  id: number;
+  campaign_id: number;
+  title: string;
+  description?: string;
+  amount: number;
+  used_at?: string;
+  attachment_path?: string;
+  created_by: number;
+  creator?: { id: number; name: string };
+  created_at: string;
+  updated_at: string;
+}
+
 // Address Types
 export interface Address {
   street: string;

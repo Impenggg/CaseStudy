@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import LoadingScreen from '../components/LoadingScreen';
 import { triggerAction } from '../lib/uiActions';
 import { Link } from 'react-router-dom';
-import api, { storiesAPI, campaignsAPI } from '@/services/api';
+import api, { storiesAPI } from '@/services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -19,28 +19,13 @@ interface Story {
   type: 'story';
 }
 
-interface Campaign {
-  id: number;
-  title: string;
-  description: string;
-  image: string;
-  goalAmount: number;
-  currentAmount: number;
-  endDate: string;
-  category: string;
-  organizer: string;
-  featured: boolean;
-  type: 'campaign';
-}
-
-type ContentItem = Story | Campaign;
+// Campaigns are now handled on a separate page.
 
 const StoriesPage: React.FC = () => {
   const { user } = useAuth();
-  const [allContent, setAllContent] = useState<ContentItem[]>([]);
-  const [filteredContent, setFilteredContent] = useState<ContentItem[]>([]);
+  const [stories, setStories] = useState<Story[]>([]);
+  const [filteredStories, setFilteredStories] = useState<Story[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [contentType, setContentType] = useState<'all' | 'stories' | 'campaigns'>('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -81,39 +66,15 @@ const StoriesPage: React.FC = () => {
           } as Story;
         });
 
-        // Removed static external stories to ensure UI reflects live DB only
-
-        // Fetch campaigns (all)
-        const cres = await campaignsAPI.getAll({ per_page: 'all' });
-        const clist = Array.isArray(cres?.data) ? cres.data : (Array.isArray(cres) ? cres : cres?.data?.data || []);
-        const mappedCampaigns: Campaign[] = clist.map((c: any) => {
-          const img = c.image && isImageUrl(c.image) ? c.image : fallbackImage;
-          return {
-            id: c.id,
-            title: c.title,
-            description: c.description,
-            image: img,
-            goalAmount: Number(c.goal_amount ?? 0),
-            currentAmount: Number(c.current_amount ?? 0),
-            endDate: c.end_date ? new Date(c.end_date).toLocaleDateString() : '',
-            category: c.category || 'community',
-            organizer: c.organizer?.name || 'Organizer',
-            featured: false,
-            type: 'campaign',
-          } as Campaign;
-        });
-
-        // Combine: API stories + campaigns (no static external stories)
-        const combined: ContentItem[] = [...mappedStories, ...mappedCampaigns];
         if (mounted) {
-          setAllContent(combined);
-          setFilteredContent(combined);
+          setStories(mappedStories);
+          setFilteredStories(mappedStories);
         }
       } catch (e: any) {
         console.error('[StoriesPage] Fetch error:', e?.response?.status, e?.response?.data || e);
         if (mounted) {
-          setAllContent([]);
-          setFilteredContent([]);
+          setStories([]);
+          setFilteredStories([]);
           const status = e?.response?.status;
           const msg = e?.response?.data?.message || e?.message || 'Failed to fetch content';
           setErrorMsg(`Stories/Campaigns fetch error${status ? ` (${status})` : ''}: ${msg}`);
@@ -128,14 +89,7 @@ const StoriesPage: React.FC = () => {
 
   // Enhanced filtering logic for combined content
   useEffect(() => {
-    let filtered = allContent;
-
-    // Filter by content type
-    if (contentType === 'stories') {
-      filtered = filtered.filter(item => item.type === 'story');
-    } else if (contentType === 'campaigns') {
-      filtered = filtered.filter(item => item.type === 'campaign');
-    }
+    let filtered = stories as Story[];
 
     // Filter by category
     if (selectedCategory !== 'all') {
@@ -147,25 +101,17 @@ const StoriesPage: React.FC = () => {
       filtered = filtered.filter(item => {
         const searchLower = searchTerm.toLowerCase();
         const titleMatch = item.title.toLowerCase().includes(searchLower);
-        
-        if (item.type === 'story') {
-          const story = item as Story;
-          return titleMatch || 
-                 story.content.toLowerCase().includes(searchLower) ||
-                 story.author.toLowerCase().includes(searchLower) ||
-                 story.category.toLowerCase().includes(searchLower);
-        } else {
-          const campaign = item as Campaign;
-          return titleMatch || 
-                 campaign.description.toLowerCase().includes(searchLower) ||
-                 campaign.organizer.toLowerCase().includes(searchLower) ||
-                 campaign.category.toLowerCase().includes(searchLower);
-        }
+        return (
+          titleMatch ||
+          item.content.toLowerCase().includes(searchLower) ||
+          item.author.toLowerCase().includes(searchLower) ||
+          item.category.toLowerCase().includes(searchLower)
+        );
       });
     }
 
-    setFilteredContent(filtered);
-  }, [selectedCategory, contentType, allContent, searchTerm]);
+    setFilteredStories(filtered);
+  }, [selectedCategory, stories, searchTerm]);
 
   // Helper function to get progress percentage for campaigns
   const getProgressPercentage = (current: number, goal: number) => {
@@ -173,18 +119,14 @@ const StoriesPage: React.FC = () => {
   };
 
   // Get featured content (currently not displayed separately)
-  const featuredStory = allContent.find(item => item.type === 'story' && item.featured) as Story;
-  const featuredCampaign = allContent.find(item => item.type === 'campaign' && item.featured) as Campaign;
-  
-  // Show all filtered content (including featured) in the grid
-  const regularContent = filteredContent;
+  // Show all filtered stories in the grid
+  const regularStories = filteredStories;
   
   // Get all categories from both stories and campaigns
-  const categories = ['all', ...Array.from(new Set(allContent.map(item => item.category)))];
+  const categories = ['all', ...Array.from(new Set(stories.map(item => item.category)))];
   
   // Content type counts (showing available counts, not filtered counts)
-  const totalStoryCount = allContent.filter(item => item.type === 'story').length;
-  const totalCampaignCount = allContent.filter(item => item.type === 'campaign').length;
+  const totalStoryCount = stories.length;
 
   // Fallback image for any broken/blocked images at render time
   const FALLBACK_IMG = 'https://images.unsplash.com/photo-1594736797933-d0051ba0ff29?w=800';
@@ -193,7 +135,6 @@ const StoriesPage: React.FC = () => {
   const clearAllFilters = () => {
     setSearchTerm('');
     setSelectedCategory('all');
-    setContentType('all');
   };
 
   // Loading component
@@ -219,7 +160,7 @@ const StoriesPage: React.FC = () => {
             </span>
           </div>
           <h1 className="text-6xl md:text-7xl font-serif font-light text-cordillera-cream mb-8 tracking-wide">
-            Stories & Campaigns
+            Stories
           </h1>
           <p className="text-xl md:text-2xl text-cordillera-cream/90 max-w-4xl mx-auto font-light leading-relaxed mb-8">
             Explore inspiring stories and support meaningful initiatives that preserve our cultural heritage.
@@ -256,15 +197,6 @@ const StoriesPage: React.FC = () => {
                 Submit Story
               </Link>
               <Link
-                to="/create-campaign"
-                className="inline-flex items-center px-6 py-3 rounded-lg bg-cordillera-gold text-cordillera-olive font-semibold hover:bg-cordillera-gold/90 shadow-md transition-colors"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Create Campaign
-              </Link>
-              <Link
                 to="/my-stories"
                 className="inline-flex items-center px-6 py-3 rounded-lg border border-cordillera-cream/40 text-cordillera-cream hover:bg-white/10 font-semibold transition-colors"
               >
@@ -272,15 +204,6 @@ const StoriesPage: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" />
                 </svg>
                 My Stories
-              </Link>
-              <Link
-                to="/my-campaigns"
-                className="inline-flex items-center px-6 py-3 rounded-lg border border-cordillera-cream/40 text-cordillera-cream hover:bg-white/10 font-semibold transition-colors"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-6a2 2 0 012-2h8" />
-                </svg>
-                My Campaigns
               </Link>
             </div>
           )}
@@ -291,11 +214,9 @@ const StoriesPage: React.FC = () => {
       <section className="py-20 bg-cordillera-cream">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
-            {regularContent.map((item) => (
-              <Card key={`${item.type}-${item.id}`} className="group block overflow-hidden h-full">
-                {item.type === 'story' ? (
-                  // Story Card (no image preview)
-                  <Link to={`/story/${item.id}`} className="block h-full">
+            {regularStories.map((item) => (
+              <Card key={`story-${item.id}`} className="group block overflow-hidden h-full">
+                  <Link to={`/stories/${item.id}`} className="block h-full">
                     <div className="px-6 pt-6">
                       <span className="inline-block bg-cordillera-olive/90 text-cordillera-cream px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded">
                         Story
@@ -309,75 +230,15 @@ const StoriesPage: React.FC = () => {
                         {item.title}
                       </h3>
                       <p className="text-cordillera-olive/70 text-[13px] leading-relaxed line-clamp-2 md:line-clamp-3">
-                        {(item as Story).content}
+                        {item.content}
                       </p>
-                      {/* Spacer to match campaign progress section height */}
-                      <div className="mt-3 mb-4 h-14 md:h-16" aria-hidden="true" />
+                      <div className="mt-3 mb-4 h-6" aria-hidden="true" />
                       <div className="mt-auto flex justify-between items-center text-[11px] text-cordillera-olive/60">
-                        <span>By {(item as Story).author}</span>
-                        <span>{(item as Story).readTime} min read</span>
+                        <span>By {item.author}</span>
+                        <span>{item.readTime} min read</span>
                       </div>
                     </CardContent>
                   </Link>
-                ) : (
-                  // Campaign Card (no image preview)
-                  <div className="flex flex-col h-full">
-                    <div className="px-6 pt-6">
-                      <span className="inline-block bg-cordillera-gold/90 text-cordillera-olive px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded">
-                        Campaign
-                      </span>
-                    </div>
-                    <CardContent className="pt-4 flex flex-col h-full">
-                      <span className="text-cordillera-gold text-[11px] font-medium uppercase tracking-wider">
-                        {item.category}
-                      </span>
-                      <h3 className="text-lg font-serif text-cordillera-olive mt-1 mb-2 leading-snug group-hover:text-cordillera-gold transition-colors duration-300">
-                        {item.title}
-                      </h3>
-                      <p className="text-cordillera-olive/70 text-[13px] leading-relaxed line-clamp-2 md:line-clamp-3">
-                        {(item as Campaign).description}
-                      </p>
-                      
-                      {/* Progress Bar - fixed height to align with story spacer */}
-                      <div className="mt-3 mb-4 h-14 md:h-16 flex flex-col justify-start">
-                        <div className="flex justify-between text-cordillera-olive/80 text-[13px] mb-1.5">
-                          <span>{getProgressPercentage((item as Campaign).currentAmount, (item as Campaign).goalAmount).toFixed(0)}% funded</span>
-                          <span>₱{(item as Campaign).currentAmount.toLocaleString()}</span>
-                        </div>
-                        <div className="h-1.5 bg-cordillera-sage/30 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-cordillera-gold rounded-full transition-all duration-500"
-                            style={{ width: `${getProgressPercentage((item as Campaign).currentAmount, (item as Campaign).goalAmount)}%` }}
-                          ></div>
-                        </div>
-                        <p className="text-[11px] text-cordillera-olive/60 mt-1">Goal: ₱{(item as Campaign).goalAmount.toLocaleString()}</p>
-                      </div>
-
-                      <div className="mt-auto flex flex-col md:flex-row md:justify-between items-stretch md:items-center gap-2.5">
-                        {user && (user as any).role === 'artisan' ? (
-                          <button
-                            disabled
-                            title="Artisan accounts cannot support campaigns"
-                            className="bg-gray-300 text-gray-600 px-5 py-2.5 text-sm font-medium rounded w-full md:w-auto text-center md:min-w-[128px] cursor-not-allowed"
-                          >
-                            Support Disabled
-                          </button>
-                        ) : (
-                          <Link 
-                            to={`/campaign/${item.id}`}
-                            className="bg-cordillera-gold text-cordillera-olive px-5 py-2.5 text-sm font-medium hover:bg-cordillera-gold/90 transition-colors rounded cursor-pointer w-full md:w-auto text-center md:min-w-[128px]"
-                          >
-                            Support Now
-                          </Link>
-                        )}
-                        <div className="text-center md:text-right text-[11px] text-cordillera-olive/60">
-                          <p>By {(item as Campaign).organizer}</p>
-                          <p>Ends {(item as Campaign).endDate}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </div>
-                )}
               </Card>
             ))}
           </div>

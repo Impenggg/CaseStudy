@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OtpVerificationMail;
+use App\Models\VerificationOtp;
 
 class AuthController extends Controller
 {
@@ -49,22 +52,69 @@ class AuthController extends Controller
                 $incomingRole = 'weaver';
             } elseif ($incomingRole === 'customer') {
                 $incomingRole = 'buyer';
+            } else {
+                // Default to buyer if no role specified or invalid role
+                $incomingRole = 'buyer';
+            }
+
+            // Test database connection before attempting user creation
+            try {
+                \DB::connection()->getPdo();
+                Log::info('Database connection successful');
+            } catch (\Exception $dbError) {
+                Log::error('Database connection failed', [
+                    'error' => $dbError->getMessage(),
+                    'trace' => $dbError->getTraceAsString(),
+                ]);
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Database connection failed. Please try again later.',
+                ], 503);
             }
 
             $user = User::create([
                 'terms_accepted_at' => now(),
-                'name' => $validated['name'] ?? $request->name,
-                'email' => $validated['email'] ?? $request->email,
-                'password' => Hash::make($validated['password'] ?? $request->password),
-                'role' => $incomingRole ?: 'buyer',
-                'bio' => $validated['bio'] ?? $request->bio,
-                'location' => $validated['location'] ?? $request->location,
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'role' => $incomingRole,
+                'bio' => $validated['bio'] ?? null,
+                'location' => $validated['location'] ?? null,
             ]);
 
-            $user->sendEmailVerificationNotification();
+            Log::info('User created successfully', ['user_id' => $user->id, 'email' => $user->email]);
+
+            // Generate and send OTP for email verification (expires in 5 minutes)
+            try {
+                // Remove any existing OTPs for safety
+                if (method_exists($user, 'verificationOtp')) {
+                    $user->verificationOtp()->delete();
+                } else {
+                    // In case relation missing, ensure table cleanup by user_id
+                    VerificationOtp::where('user_id', $user->id)->delete();
+                }
+
+                $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                VerificationOtp::create([
+                    'user_id' => $user->id,
+                    'otp' => $otp,
+                    'expires_at' => now()->addMinutes(5),
+                ]);
+
+                Mail::to($user->email)->send(new OtpVerificationMail($otp));
+                Log::info('OTP sent for verification', ['user_id' => $user->id]);
+            } catch (\Throwable $mailEx) {
+                Log::error('Failed to send OTP email', [
+                    'user_id' => $user->id,
+                    'error' => $mailEx->getMessage(),
+                ]);
+                // Continue registration even if email fails; frontend has resend capability
+            }
 
             $token = $user->createToken('auth_token')->plainTextToken;
-
+            
+            Log::info('Registration completed successfully', ['user_id' => $user->id]);
+            
             return response()->json([
                 'status' => 'success',
                 'message' => 'User registered successfully',
@@ -79,7 +129,24 @@ class AuthController extends Controller
                 'message' => 'Validation failed',
                 'errors' => $e->errors(),
             ], 422);
+        } catch (\Illuminate\Database\QueryException $e) {
+            Log::error('Database query failed during registration', [
+                'error' => $e->getMessage(),
+                'sql' => $e->getSql(),
+                'bindings' => $e->getBindings(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Database error occurred. Please try again.',
+            ], 500);
         } catch (\Exception $e) {
+            Log::error('Registration failed with unexpected error', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
             return response()->json([
                 'status' => 'error',
                 'message' => 'Registration failed. Please try again.',
@@ -175,41 +242,5 @@ class AuthController extends Controller
             'message' => 'Profile updated successfully',
             'data' => $user,
         ]);
-    }
-
-    /**
-     * Mark the authenticated user's email address as verified.
-     */
-    public function verify(Request $request): JsonResponse
-    {
-        $user = User::find($request->route('id'));
-
-        if (! hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        if ($user->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email already verified.'], 200);
-        }
-
-        if ($user->markEmailAsVerified()) {
-            event(new \Illuminate\Auth\Events\Verified($user));
-        }
-
-        return response()->json(['message' => 'Email successfully verified.'], 200);
-    }
-
-    /**
-     * Resend the email verification notification.
-     */
-    public function resend(Request $request): JsonResponse
-    {
-        if ($request->user()->hasVerifiedEmail()) {
-            return response()->json(['message' => 'Email already verified.'], 200);
-        }
-
-        $request->user()->sendEmailVerificationNotification();
-
-        return response()->json(['message' => 'Verification link sent.'], 200);
     }
 }

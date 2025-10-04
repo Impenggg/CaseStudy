@@ -26,6 +26,11 @@ const RoleProtectedRoute: React.FC<RoleProtectedRouteProps> = ({ children, allow
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Enforce email verification before allowing access
+  if (user && (user as any).email_verified_at == null) {
+    return <Navigate to="/verify-email" state={{ from: location }} replace />;
+  }
+
   if (!user || !allowed.includes((user as any).role)) {
     return <Navigate to="/" replace />;
   }

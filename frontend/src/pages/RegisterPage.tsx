@@ -63,13 +63,8 @@ export const RegisterPage = () => {
       // Correct parameter order: (email, password, name, role, terms_accepted)
       const success = await register(email, formData.password, name, role, termsAccepted);
       if (success) {
-        const stored = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
-        let normalizedRole: string | undefined;
-        try {
-          normalizedRole = stored ? (JSON.parse(stored)?.role as string | undefined) : undefined;
-        } catch {}
-        const dash = normalizedRole === 'artisan' ? '/dashboard/artisan' : '/dashboard/customer';
-        navigate(dash, { replace: true });
+        // Send the user to email verification screen
+        navigate('/verify-email', { state: { email } });
       } else {
         setError('Registration failed. Email may already be in use.');
       }

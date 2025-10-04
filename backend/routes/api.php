@@ -4,18 +4,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\ProductController;
-use App\Http\Controllers\Api\StoryController;
-use App\Http\Controllers\Api\CampaignController;
+use App\Http\Controllers\Api\FavoritesController;
+use App\Http\Controllers\Api\StoryLikesController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\DonationController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UploadController;
-use App\Http\Controllers\Api\MediaPostController;
 use App\Http\Controllers\Api\AdminModerationController;
 use App\Http\Controllers\Api\DashboardController;
-use App\Http\Controllers\Api\FavoritesController;
-use App\Http\Controllers\Api\StoryLikesController;
+use App\Http\Controllers\Api\VerificationController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\StoryController;
+use App\Http\Controllers\Api\CampaignController;
+use App\Http\Controllers\Api\MediaPostController;
+use App\Http\Controllers\Api\CampaignExpenditureController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,10 +33,11 @@ use App\Http\Controllers\Api\StoryLikesController;
 // Public routes (no authentication required)
 Route::post('/register', [AuthController::class, 'register']);
 
-// Email verification routes
-Route::get('email/verify/{id}/{hash}', [AuthController::class, 'verify'])->name('verification.verify');
-Route::post('email/resend', [AuthController::class, 'resend'])->name('verification.resend');
 Route::post('/login', [AuthController::class, 'login']);
+
+// OTP verification routes (no authentication required)
+Route::post('/email/verify/send-otp', [VerificationController::class, 'sendOtp']);
+Route::post('/email/verify', [VerificationController::class, 'verifyOtp']);
 
 // Public product routes
 Route::get('/products', [ProductController::class, 'index']);
@@ -47,6 +50,8 @@ Route::get('/stories/{story}', [StoryController::class, 'show']);
 // Public campaign routes
 Route::get('/campaigns', [CampaignController::class, 'index']);
 Route::get('/campaigns/{campaign}', [CampaignController::class, 'show']);
+Route::get('/campaigns/{campaign}/donations', [DonationController::class, 'campaignDonations']);
+Route::get('/campaigns/{campaign}/expenditures', [CampaignExpenditureController::class, 'index']);
 
 // Public uploads listing (for gallery display)
 Route::get('/uploads', [UploadController::class, 'index']);
@@ -97,6 +102,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/donations', [DonationController::class, 'store'])->middleware(\App\Http\Middleware\ArtisanRestrict::class);
     Route::get('/donations/{donation}', [DonationController::class, 'show']);
     Route::get('/my-donations', [DonationController::class, 'myDonations']);
+
+    // Campaign expenditures (organizer/admin write)
+    Route::post('/campaigns/{campaign}/expenditures', [CampaignExpenditureController::class, 'store']);
+    Route::put('/campaigns/{campaign}/expenditures/{expenditure}', [CampaignExpenditureController::class, 'update']);
+    Route::delete('/campaigns/{campaign}/expenditures/{expenditure}', [CampaignExpenditureController::class, 'destroy']);
 
     // Upload routes
     Route::post('/upload', [UploadController::class, 'upload']);

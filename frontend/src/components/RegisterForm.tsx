@@ -236,7 +236,7 @@ const RegisterForm = () => {
                 </div>
               ) : (
                 <span className="font-medium">Create Account</span>
-              )
+              )}
             </button>
 
             <div className="text-sm text-center mt-4">

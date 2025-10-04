@@ -39,6 +39,13 @@ class DonationController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        $user = Auth::user();
+        if (!$user || $user->role !== 'buyer') {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Only customers can support campaigns',
+            ], 403);
+        }
         $request->validate([
             'campaign_id' => 'required|exists:campaigns,id',
             'amount' => 'required|numeric|min:1',
@@ -57,11 +64,11 @@ class DonationController extends Controller
             ], 400);
         }
 
-        DB::transaction(function () use ($request, $campaign) {
+        DB::transaction(function () use ($request, $campaign, $user) {
             // Create donation
             $donation = Donation::create([
                 'campaign_id' => $request->campaign_id,
-                'donor_id' => Auth::id(),
+                'donor_id' => $user->id,
                 'amount' => $request->amount,
                 'message' => $request->message,
                 'anonymous' => $request->anonymous ?? false,
@@ -76,6 +83,7 @@ class DonationController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Donation processed successfully',
+            'data' => null,
         ], 201);
     }
 
@@ -103,6 +111,46 @@ class DonationController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => $donations->items(),
+            'pagination' => [
+                'current_page' => $donations->currentPage(),
+                'total_pages' => $donations->lastPage(),
+                'per_page' => $donations->perPage(),
+                'total_count' => $donations->total(),
+            ],
+        ]);
+    }
+
+    /**
+     * List donations for a specific campaign (public, sanitized for anonymity).
+     */
+    public function campaignDonations(Request $request, Campaign $campaign): JsonResponse
+    {
+        $perPage = (int) $request->get('per_page', 20);
+        $donations = Donation::where('campaign_id', $campaign->id)
+            ->with(['donor:id,name'])
+            ->orderByDesc('created_at')
+            ->paginate($perPage);
+
+        // Sanitize donor details for anonymous donations
+        $items = collect($donations->items())->map(function ($d) {
+            return [
+                'id' => $d->id,
+                'amount' => (float) $d->amount,
+                'message' => $d->message,
+                'anonymous' => (bool) $d->anonymous,
+                'donor' => $d->anonymous ? null : (
+                    $d->relationLoaded('donor') && $d->donor ? [
+                        'id' => $d->donor->id,
+                        'name' => $d->donor->name,
+                    ] : null
+                ),
+                'created_at' => optional($d->created_at)->toIso8601String(),
+            ];
+        })->all();
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $items,
             'pagination' => [
                 'current_page' => $donations->currentPage(),
                 'total_pages' => $donations->lastPage(),

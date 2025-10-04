@@ -13,6 +13,7 @@ interface AuthContextType {
   register: (email: string, password: string, name: string, role: string, terms_accepted: boolean) => Promise<boolean>
   checkAuth: () => Promise<void>
   requireAuth: (redirectPath?: string) => boolean
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -97,7 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const backendRole = role?.toLowerCase() === 'artisan' ? 'weaver' : (role?.toLowerCase() || 'customer')
       const normalizedEmail = email.trim().toLowerCase().replace(/\s+/g, '').normalize('NFKC')
       const normalizedName = name.trim().normalize('NFKC')
-      const payload: any = { email: normalizedEmail, password, name: normalizedName, terms_accepted: terms_accepted ? 'on' : '' }
+      const payload: any = { email: normalizedEmail, password, name: normalizedName, terms_accepted: terms_accepted }
       // Only include role if artisan (weaver). Buyers can rely on backend default
       if (backendRole === 'weaver') payload.role = backendRole
       if (import.meta.env.DEV) {
@@ -162,6 +163,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
+  const refreshUser = async (): Promise<void> => {
+    const token = localStorage.getItem('auth_token')
+    if (!token) return
+    try {
+      const { data } = await api.get('/user')
+      const u = normalizeUser(data.data)
+      setUser(u)
+      localStorage.setItem('user', JSON.stringify(u))
+    } catch (e) {
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('user')
+      setUser(null)
+      throw e
+    }
+  }
+
   const requireAuth = (redirectPath: string = '/login'): boolean => {
     if (!user) {
       const intended = window.location.pathname + window.location.search + window.location.hash
@@ -182,6 +199,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     register,
     checkAuth,
     requireAuth,
+    refreshUser,
   }
 
   return (
