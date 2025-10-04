@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { adminModerationAPI } from '@/services/api'
+import api, { adminModerationAPI } from '@/services/api'
 
-// Helper function to resolve image URLs
+// Helper: resolve image URLs using API base URL origin
+const API_ORIGIN = (api.defaults.baseURL || '').replace(/\/api\/?$/, '')
 const resolveImageUrl = (image?: string) => {
-  if (!image) return '';
-  if (image.startsWith('http://') || image.startsWith('https://')) return image;
-  if (image.startsWith('/')) return `http://localhost:8000${image}`;
-  return `http://localhost:8000/${image}`;
-};
+  if (!image) return ''
+  if (image.startsWith('http://') || image.startsWith('https://')) return image
+  if (image.startsWith('/')) return `${API_ORIGIN}${image}`
+  return `${API_ORIGIN}/${image}`
+}
 
 // Placeholder image for broken/missing images
 const PLACEHOLDER_IMG = 'data:image/svg+xml;utf8,' +

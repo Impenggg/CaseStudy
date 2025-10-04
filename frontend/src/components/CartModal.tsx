@@ -1,5 +1,13 @@
 import React from 'react';
 
+const PLACEHOLDER_IMG = 'data:image/svg+xml;utf8,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+      <rect width="100%" height="100%" fill="#e5e7eb"/>
+      <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="10" fill="#6b7280">No Image</text>
+    </svg>`
+  );
+
 interface CartItem {
   id: number;
   name: string;
@@ -109,9 +117,10 @@ const CartModal: React.FC<CartModalProps> = ({
                     <div className="flex items-center gap-4">
                       <div className="relative">
                         <img 
-                          src={item.image} 
-                          alt={item.name} 
-                          className="w-16 h-16 object-cover rounded-xl border border-cordillera-sage/30" 
+                          src={item.image || PLACEHOLDER_IMG}
+                          alt={item.name}
+                          className="w-16 h-16 object-cover rounded-xl border border-cordillera-sage/30"
+                          onError={(e) => { const t = e.currentTarget as HTMLImageElement; if (t.src !== PLACEHOLDER_IMG) t.src = PLACEHOLDER_IMG; }}
                         />
                         <div className="absolute -top-2 -right-2 bg-cordillera-gold text-cordillera-olive text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                           {item.quantity}

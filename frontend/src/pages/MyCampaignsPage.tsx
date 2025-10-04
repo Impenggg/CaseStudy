@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { campaignsAPI } from '@/services/api'
+import api, { campaignsAPI } from '@/services/api'
 import type { Campaign } from '@/types'
 import { useAuth } from '@/contexts/AuthContext'
 import BackLink from '@/components/BackLink'
@@ -15,11 +15,30 @@ const MyCampaignsPage: React.FC = () => {
   const [form, setForm] = useState<Partial<Campaign>>({})
   const [saving, setSaving] = useState(false)
 
+  // Resolve image URL helper and placeholder
+  const API_ORIGIN = useMemo(() => (api.defaults.baseURL || '').replace(/\/api\/?$/, ''), [])
+  const resolveImageUrl = (image?: string) => {
+    if (!image) return ''
+    if (image.startsWith('http://') || image.startsWith('https://')) return image
+    return `${API_ORIGIN}/${image.replace(/^\/?/, '')}`
+  }
+  const PLACEHOLDER_IMG = 'https://via.placeholder.com/640x240?text=No+Image'
+
   useEffect(() => {
     requireAuth()
   }, [])
 
   const canManage = useMemo(() => !!user && (user.role === 'artisan' || user.role === 'admin' || user.role === 'weaver'), [user])
+
+  // Build status options from existing campaigns plus common defaults
+  const statusOptions = useMemo(() => {
+    const set = new Set<string>(['active', 'completed'])
+    ;(items || []).forEach((c: any) => {
+      const v = (c.status || '').trim()
+      if (v) set.add(v)
+    })
+    return Array.from(set)
+  }, [items])
 
   const load = async () => {
     try {
@@ -39,7 +58,7 @@ const MyCampaignsPage: React.FC = () => {
 
   const onEdit = (c: Campaign) => {
     setEditing(c)
-    setForm({ title: c.title, description: c.description, goal_amount: c.goal_amount })
+    setForm({ title: c.title, description: c.description, goal_amount: c.goal_amount, status: c.status })
   }
 
   const onSave = async () => {
@@ -50,6 +69,7 @@ const MyCampaignsPage: React.FC = () => {
         title: form.title ?? editing.title,
         description: form.description ?? editing.description,
         goal_amount: form.goal_amount ?? editing.goal_amount,
+        status: form.status ?? editing.status,
       })
       setEditing(null)
       setForm({})
@@ -102,9 +122,18 @@ const MyCampaignsPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {items.map((c) => (
               <div key={c.id} className="bg-white rounded-lg shadow border border-cordillera-sage/30 overflow-hidden">
-                {c.image ? (
-                  <img src={c.image} alt={c.title} className="w-full h-40 object-cover" />
-                ) : null}
+                {(() => {
+                  const raw = (c as any).image_url || c.image
+                  const src = resolveImageUrl(raw) || ''
+                  return src ? (
+                    <img
+                      src={src}
+                      alt={c.title}
+                      className="w-full h-40 object-cover"
+                      onError={(e) => { const t=e.currentTarget as HTMLImageElement; if (t.src!==PLACEHOLDER_IMG) t.src = PLACEHOLDER_IMG }}
+                    />
+                  ) : null
+                })()}
                 <div className="p-4">
                   <h3 className="text-lg font-semibold text-cordillera-olive line-clamp-2">{c.title}</h3>
                   <div className="mt-2 text-sm text-cordillera-olive/70 line-clamp-3">{c.description}</div>
@@ -168,6 +197,19 @@ const MyCampaignsPage: React.FC = () => {
                   onChange={(e) => setForm((f) => ({ ...f, goal_amount: Number(e.target.value) }))}
                   className="w-full border rounded px-3 py-2"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Status</label>
+                <select
+                  value={form.status ?? ''}
+                  onChange={(e) => setForm((f) => ({ ...f, status: e.target.value || undefined }))}
+                  className="w-full border rounded px-3 py-2"
+                >
+                  <option value="">Select status</option>
+                  {statusOptions.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">

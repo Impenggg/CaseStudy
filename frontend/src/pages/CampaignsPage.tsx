@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import api, { campaignsAPI } from '@/services/api'
 import type { Campaign } from '@/types'
 import { Card, CardContent } from '@/components/ui/card'
+import { useAuth } from '@/contexts/AuthContext'
 
 const currency = (v: number | string | undefined) => {
   const n = Number(v || 0)
@@ -17,6 +18,7 @@ function pct(current?: number, goal?: number) {
 }
 
 const CampaignsPage: React.FC = () => {
+  const { user } = useAuth()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -26,6 +28,12 @@ const CampaignsPage: React.FC = () => {
     sort_by: 'newest',
     search: '',
   })
+
+  // Inline CRUD state (for organizer/admin)
+  const [editing, setEditing] = useState<Campaign | null>(null)
+  const [form, setForm] = useState<Partial<Campaign>>({})
+  const [saving, setSaving] = useState(false)
+  const [deletingId, setDeletingId] = useState<number | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -82,12 +90,72 @@ const CampaignsPage: React.FC = () => {
     return list
   }, [campaigns, filters])
 
+  const canManage = useMemo(() => {
+    return Boolean(user && (((user as any).role === 'artisan') || ((user as any).role === 'admin') || ((user as any).role === 'weaver')))
+  }, [user])
+
+  // Build status options from existing campaigns plus common defaults
+  const statusOptions = useMemo(() => {
+    const set = new Set<string>(['active', 'completed'])
+    ;(campaigns || []).forEach(c => {
+      const v = (c.status || '').trim()
+      if (v) set.add(v)
+    })
+    return Array.from(set)
+  }, [campaigns])
+
   // Resolve image URLs that may be relative from the API
   const API_ORIGIN = (api.defaults.baseURL || '').replace(/\/api\/?$/, '')
   const resolveImage = (image?: string | null) => {
     if (!image) return ''
     if (image.startsWith('http://') || image.startsWith('https://')) return image
     return `${API_ORIGIN}/${String(image).replace(/^\/?/, '')}`
+  }
+
+  // Handlers: edit/save/delete campaign (organizer/admin only)
+  const onEdit = (c: Campaign) => {
+    setEditing(c)
+    setForm({ title: c.title, description: c.description, goal_amount: c.goal_amount, status: c.status })
+  }
+
+  const onSave = async () => {
+    if (!editing) return
+    try {
+      setSaving(true)
+      await campaignsAPI.update(editing.id, {
+        title: form.title ?? editing.title,
+        description: form.description ?? editing.description,
+        goal_amount: form.goal_amount ?? editing.goal_amount,
+        status: form.status ?? editing.status,
+      })
+      // Optimistic update
+      setCampaigns(prev => prev.map(c => c.id === editing.id ? {
+        ...c,
+        title: (form.title ?? editing.title) as any,
+        description: (form.description ?? editing.description) as any,
+        goal_amount: (form.goal_amount ?? editing.goal_amount) as any,
+        status: (form.status ?? editing.status) as any,
+      } : c))
+      setEditing(null)
+      setForm({})
+    } catch (e: any) {
+      alert(e?.response?.data?.message || e?.message || 'Failed to update campaign')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const onDelete = async (c: Campaign) => {
+    if (!confirm(`Delete campaign "${c.title}"? This cannot be undone.`)) return
+    try {
+      setDeletingId(c.id)
+      await campaignsAPI.delete(c.id)
+      setCampaigns(prev => prev.filter(x => x.id !== c.id))
+    } catch (e: any) {
+      alert(e?.response?.data?.message || e?.message || 'Failed to delete campaign')
+    } finally {
+      setDeletingId(null)
+    }
   }
 
   if (loading) {
@@ -138,38 +206,35 @@ const CampaignsPage: React.FC = () => {
               <span className="text-sm font-medium">Heritage Preservation</span>
             </div>
           </div>
+          {(user && (((user as any).role === 'artisan') || ((user as any).role === 'weaver'))) && (
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to="/create-campaign"
+                className="inline-flex items-center px-6 py-3 rounded-lg bg-cordillera-gold text-cordillera-olive font-semibold hover:bg-cordillera-gold/90 shadow-md transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Create Campaign
+              </Link>
+              <Link
+                to="/my-campaigns"
+                className="inline-flex items-center px-6 py-3 rounded-lg border border-cordillera-cream/40 text-cordillera-cream hover:bg-white/10 font-semibold transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" />
+                </svg>
+                My Campaigns
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
       {/* Filters + Grid */}
       <section className="py-14 bg-cordillera-cream">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <input
-              type="text"
-              placeholder="Search campaigns..."
-              value={filters.search}
-              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-              className="md:col-span-2 px-4 py-2 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
-            />
-            <select
-              value={filters.category}
-              onChange={(e) => setFilters(prev => ({ ...prev, category: e.target.value }))}
-              className="px-4 py-2 border border-cordillera-olive/20 rounded-lg"
-            >
-              {categories.map(c => <option key={c} value={c}>{c === 'all' ? 'All Categories' : c}</option>)}
-            </select>
-            <select
-              value={filters.sort_by}
-              onChange={(e) => setFilters(prev => ({ ...prev, sort_by: e.target.value }))}
-              className="px-4 py-2 border border-cordillera-olive/20 rounded-lg"
-            >
-              <option value="newest">Newest</option>
-              <option value="ending_soon">Ending Soon</option>
-              <option value="most_funded">Most Funded</option>
-            </select>
-          </div>
-
+          {/* Filters removed per request; CTAs moved to hero */}
           {error && (
             <div className="mb-6 p-4 bg-red-50 text-red-700 border border-red-200 rounded">{error}</div>
           )}
@@ -215,6 +280,24 @@ const CampaignsPage: React.FC = () => {
                         <span>Ends {endDisplay}</span>
                         <span>Backers: {c.backers_count || 0}</span>
                       </div>
+
+                      {(user && (((user as any).role === 'admin') || ((user as any).id === (c as any).organizer_id))) && (
+                        <div className="mt-3 flex gap-2">
+                          <button
+                            onClick={(e) => { e.preventDefault(); onEdit(c) }}
+                            className="px-3 py-1 text-xs rounded border border-cordillera-sage/50 hover:bg-cordillera-cream"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            disabled={deletingId === c.id}
+                            onClick={(e) => { e.preventDefault(); onDelete(c) }}
+                            className="px-3 py-1 text-xs rounded border border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-60"
+                          >
+                            {deletingId === c.id ? 'Deleting…' : 'Delete'}
+                          </button>
+                        </div>
+                      )}
                     </CardContent>
                   </Link>
                 </Card>
@@ -223,6 +306,61 @@ const CampaignsPage: React.FC = () => {
           </div>
         </div>
       </section>
+      {editing && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-semibold text-cordillera-olive mb-4">Edit Campaign</h2>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium mb-1">Title</label>
+                <input
+                  type="text"
+                  value={form.title ?? ''}
+                  onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                  className="w-full border rounded px-3 py-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Description</label>
+                <textarea
+                  rows={6}
+                  value={form.description ?? ''}
+                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                  className="w-full border rounded px-3 py-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Goal Amount</label>
+                <input
+                  type="number"
+                  value={form.goal_amount ?? ''}
+                  onChange={(e) => setForm((f) => ({ ...f, goal_amount: Number(e.target.value) }))}
+                  className="w-full border rounded px-3 py-2"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Status</label>
+                <select
+                  value={form.status ?? ''}
+                  onChange={(e) => setForm((f) => ({ ...f, status: e.target.value || undefined }))}
+                  className="w-full border rounded px-3 py-2"
+                >
+                  <option value="">Select status</option>
+                  {statusOptions.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="mt-5 flex justify-end gap-2">
+              <button onClick={() => { setEditing(null); setForm({}) }} className="px-4 py-2 rounded border">Cancel</button>
+              <button disabled={saving} onClick={onSave} className="px-4 py-2 rounded bg-cordillera-gold text-cordillera-olive font-semibold disabled:opacity-60">
+                {saving ? 'Saving…' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
