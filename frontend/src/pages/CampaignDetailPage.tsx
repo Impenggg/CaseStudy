@@ -114,26 +114,62 @@ const CampaignDetailPage: React.FC = () => {
 
     setSavingExp(true);
     try {
-      let attachment_path: string | undefined;
+      let created = false;
+      // 1) Try direct multipart submit with 'attachment' field (common Laravel pattern)
       if (newExp.attachment) {
-        const uploadRes: any = await uploadAPI.uploadFile(newExp.attachment);
-        attachment_path = uploadRes?.data?.path ?? uploadRes?.path;
+        try {
+          const form = new FormData();
+          form.append('title', title);
+          if (newExp.description?.trim()) form.append('description', newExp.description.trim());
+          form.append('amount', String(amountNum));
+          if (newExp.used_at) form.append('used_at', newExp.used_at);
+          form.append('attachment', newExp.attachment);
+          await api.post(`/campaigns/${id}/expenditures`, form, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+          });
+          created = true;
+        } catch (mpErr) {
+          console.error('[CampaignDetail] Multipart create failed, will fallback to upload+JSON', mpErr);
+        }
       }
 
-      await campaignsAPI.createExpenditure(Number(id), {
-        title,
-        description: newExp.description?.trim() || undefined,
-        amount: amountNum,
-        used_at: newExp.used_at || undefined,
-        attachment_path,
-      });
+      // 2) Fallback: separate upload (if any) then JSON create with attachment_path
+      if (!created) {
+        let attachment_path: string | undefined;
+        if (newExp.attachment) {
+          try {
+            const uploadRes: any = await uploadAPI.uploadFile(newExp.attachment);
+            attachment_path = uploadRes?.path ?? uploadRes?.data?.path ?? uploadRes?.data?.data?.path;
+          } catch (upErr) {
+            console.error('[CampaignDetail] Attachment upload failed, continuing without attachment', upErr);
+            triggerAction('Attachment upload failed, saving without attachment.');
+          }
+        }
+
+        await campaignsAPI.createExpenditure(Number(id), {
+          title,
+          description: newExp.description?.trim() || undefined,
+          amount: amountNum,
+          used_at: newExp.used_at || undefined,
+          attachment_path,
+        });
+      }
 
       setNewExp({ title: '', description: '', amount: '', used_at: '', attachment: null });
       triggerAction('Expenditure saved');
       try { await Promise.all([loadSupplemental(), refreshCampaign()]); } catch {}
-    } catch (e) {
+    } catch (e: any) {
       console.error('[CampaignDetail] Create expenditure failed', e);
-      triggerAction('Failed to save expenditure');
+      const resp = e?.response;
+      const backendErrors = resp?.data?.errors;
+      let msg = resp?.data?.message || 'Failed to save expenditure';
+      if (backendErrors && typeof backendErrors === 'object') {
+        try {
+          const list = Object.values(backendErrors).flat() as string[];
+          if (list.length) msg = list.join(' ');
+        } catch {}
+      }
+      triggerAction(msg);
     } finally {
       setSavingExp(false);
     }
