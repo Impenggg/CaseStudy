@@ -12,7 +12,8 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\AdminModerationController;
 use App\Http\Controllers\Api\DashboardController;
-use App\Http\Controllers\Api\VerificationController;
+// use App\Http\Controllers\Api\VerificationController; // removed custom verification
+use App\Http\Controllers\Api\BuiltInVerificationController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\StoryController;
 use App\Http\Controllers\Api\CampaignController;
@@ -35,9 +36,10 @@ Route::post('/register', [AuthController::class, 'register']);
 
 Route::post('/login', [AuthController::class, 'login']);
 
-// OTP verification routes (no authentication required)
-Route::post('/email/verify/send-otp', [VerificationController::class, 'sendOtp']);
-Route::post('/email/verify', [VerificationController::class, 'verifyOtp']);
+// Laravel built-in email verification
+Route::post('/email/verification-notification', [BuiltInVerificationController::class, 'resend']);
+Route::get('/email/verify/{id}/{hash}', [BuiltInVerificationController::class, 'verify'])
+    ->name('verification.verify');
 
 // Public product routes
 Route::get('/products', [ProductController::class, 'index']);

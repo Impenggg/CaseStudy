@@ -60,31 +60,40 @@ const DialogContent = React.forwardRef<
   
   return ReactDOM.createPortal(
     <>
-      {/* Backdrop */}
+      {/* Modern Backdrop */}
       <div
-        className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm"
+        className="fixed inset-0 z-50 bg-heritage-900/40 backdrop-blur-md modal-overlay animate-fade-in"
         onClick={() => context.onOpenChange(false)}
       />
 
       {/* Centered container */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-scale-in">
         <div
           ref={ref}
           className={cn(
-            "relative grid w-full max-w-lg gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg",
+            `relative grid w-full max-w-lg gap-4 
+            border border-heritage-300
+            bg-white
+            p-6 shadow-2xl duration-200 rounded-2xl`,
             className
           )}
           {...props}
         >
           {children}
 
-          {/* Close button */}
+          {/* Clean Close button */}
           <button
-            className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            className="absolute right-4 top-4 rounded-lg p-1.5
+              text-heritage-600 hover:text-heritage-900
+              hover:bg-heritage-100
+              transition-all duration-200
+              focus:outline-none focus:ring-2 focus:ring-heritage-500"
             onClick={() => context.onOpenChange(false)}
           >
             <span className="sr-only">Close</span>
-            ✕
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
       </div>
@@ -101,7 +110,7 @@ const DialogHeader = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "flex flex-col space-y-1.5 text-center sm:text-left",
+      "flex flex-col space-y-2 text-center sm:text-left",
       className
     )}
     {...props}
@@ -116,7 +125,7 @@ const DialogTitle = React.forwardRef<
   <h3
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-none tracking-tight",
+      "text-xl font-bold text-heritage-900 font-display",
       className
     )}
     {...props}

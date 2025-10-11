@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'default' | 'outline' | 'destructive' | 'ghost';
+  variant?: 'default' | 'outline' | 'destructive' | 'ghost' | 'terracotta' | 'earth';
   size?: 'sm' | 'default' | 'lg';
   children: React.ReactNode;
 }
@@ -13,30 +13,88 @@ export const Button: React.FC<ButtonProps> = ({
   children, 
   ...props 
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center rounded-md font-medium transition-colors transition-shadow duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none shadow-sm hover:shadow-md';
+  const baseClasses = `
+    inline-flex items-center justify-center gap-2 
+    font-semibold tracking-wide
+    transition-all duration-250 ease-out
+    focus:outline-none focus-visible:ring-3 focus-visible:ring-offset-2 
+    disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+    relative overflow-hidden
+    before:absolute before:inset-0
+    before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent 
+    before:-translate-x-full
+    before:transition-transform before:duration-500 hover:before:translate-x-full
+  `;
   
   const variants = {
-    // Primary CTA using cordillera gold
-    default: 'bg-cordillera-gold text-cordillera-olive hover:bg-cordillera-gold/90 focus:ring-cordillera-gold',
-    // Outline variant harmonized with olive background
-    outline: 'border border-cordillera-gold text-cordillera-cream bg-transparent hover:bg-cordillera-cream/10 focus:ring-cordillera-gold',
-    // Keep destructive semantic with standard red
-    destructive: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-    // Ghost for subtle actions on dark backgrounds
-    ghost: 'bg-transparent text-cordillera-cream hover:bg-cordillera-cream/10 focus:ring-cordillera-gold'
+    // Primary - Professional heritage gold
+    default: `
+      bg-gradient-to-br from-heritage-500 to-accent-terracotta
+      text-white
+      rounded-lg
+      shadow-md hover:shadow-xl
+      focus-visible:ring-heritage-500 focus-visible:ring-offset-heritage-50
+      hover:-translate-y-1 active:translate-y-0
+    `,
+    // Outline - Clean and minimal
+    outline: `
+      border-2 border-heritage-300
+      text-heritage-700
+      bg-white hover:bg-heritage-50
+      rounded-lg
+      shadow-sm hover:shadow-md
+      hover:border-heritage-400
+      focus-visible:ring-heritage-500 focus-visible:ring-offset-heritage-50
+    `,
+    // Destructive - Clear warning
+    destructive: `
+      bg-gradient-to-br from-error to-red-700
+      text-white
+      rounded-lg
+      shadow-md hover:shadow-xl
+      focus-visible:ring-error focus-visible:ring-offset-heritage-50
+      hover:-translate-y-1 active:translate-y-0
+    `,
+    // Ghost - Subtle interaction
+    ghost: `
+      bg-transparent hover:bg-heritage-100
+      text-heritage-700 hover:text-heritage-800
+      rounded-lg
+      focus-visible:ring-heritage-500 focus-visible:ring-offset-heritage-50
+    `,
+    // Terracotta - Warm accent
+    terracotta: `
+      bg-gradient-to-br from-accent-terracotta to-accent-rust
+      text-white
+      rounded-lg
+      shadow-md hover:shadow-xl
+      focus-visible:ring-accent-terracotta focus-visible:ring-offset-heritage-50
+      hover:-translate-y-1 active:translate-y-0
+    `,
+    // Earth - Natural tone
+    earth: `
+      bg-gradient-to-br from-heritage-600 to-accent-moss
+      text-white
+      rounded-lg
+      shadow-md hover:shadow-xl
+      focus-visible:ring-heritage-600 focus-visible:ring-offset-heritage-50
+      hover:-translate-y-1 active:translate-y-0
+    `
   };
   
   const sizes = {
-    sm: 'h-8 px-3 text-sm',
-    default: 'h-10 px-4 py-2',
-    lg: 'h-12 px-6 text-base'
+    sm: 'h-9 px-4 text-sm',
+    default: 'h-11 px-6 text-base',
+    lg: 'h-13 px-8 text-lg'
   };
 
   const classes = `${baseClasses} ${variants[variant]} ${sizes[size]} ${className}`;
 
   return (
     <button className={classes} {...props}>
-      {children}
+      <span className="relative z-10">
+        {children}
+      </span>
     </button>
   );
 };

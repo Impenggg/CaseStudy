@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use App\Models\Product;
 use App\Models\Story;
 use App\Models\Campaign;
 use App\Models\MediaPost;
 use App\Models\MediaComment;
+use App\Mail\ContentRejectionMail;
 
 class AdminModerationController extends Controller
 {
@@ -91,6 +93,61 @@ class AdminModerationController extends Controller
         $item->reviewed_at = now();
         $item->rejection_reason = $request->input('reason');
         $item->save();
+
+        // Send rejection email notification
+        try {
+            $this->sendRejectionEmail($type, $item);
+        } catch (\Exception $e) {
+            // Log error but don't fail the rejection
+            \Log::error('Failed to send rejection email', [
+                'type' => $type,
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+        }
+
         return response()->json(['status' => 'success', 'message' => 'Rejected', 'data' => $item]);
+    }
+
+    private function sendRejectionEmail(string $type, $item): void
+    {
+        // Get user and content details based on type
+        $user = null;
+        $contentTitle = '';
+        $contentType = '';
+
+        switch ($type) {
+            case 'products':
+                $user = $item->seller;
+                $contentTitle = $item->name;
+                $contentType = 'product';
+                break;
+            case 'stories':
+                $user = $item->author;
+                $contentTitle = $item->title;
+                $contentType = 'story';
+                break;
+            case 'campaigns':
+                $user = $item->organizer;
+                $contentTitle = $item->title;
+                $contentType = 'campaign';
+                break;
+            case 'media-posts':
+                $user = $item->user;
+                $contentTitle = $item->caption ?: 'Media Post';
+                $contentType = 'media post';
+                break;
+            case 'media-comments':
+                $user = $item->user;
+                $contentTitle = 'Comment';
+                $contentType = 'comment';
+                break;
+        }
+
+        if ($user && $user->email) {
+            Mail::to($user->email)->send(
+                new ContentRejectionMail($contentType, $contentTitle, null, $user->name)
+            );
+        }
     }
 }

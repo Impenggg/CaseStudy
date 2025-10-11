@@ -8,7 +8,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import api from '@/services/api';
 
 const VerifyEmailPage = () => {
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [email, setEmail] = useState('');
   const [countdown, setCountdown] = useState(0);
   const [successMessage, setSuccessMessage] = useState('');
@@ -27,50 +26,25 @@ const VerifyEmailPage = () => {
     setEmail(emailFromState);
   }, [location.state, user, navigate]);
 
-  // Auto-send OTP when page loads and email is known
-  useEffect(() => {
-    if (email && countdown === 0 && !sendOtpMutation.isPending) {
-      sendOtpMutation.mutate();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [email]);
+  // Built-in verification handled by backend signed link; no client token handling
 
-  const sendOtpMutation = useMutation({
+  const sendLinkMutation = useMutation({
     mutationFn: async () => {
-      const response = await api.post('/email/verify/send-otp', { email });
+      const response = await api.post('/email/verification-notification', { email });
       return response.data;
     },
     onSuccess: () => {
       setCountdown(60);
-      setSuccessMessage('OTP sent successfully');
+      setSuccessMessage('Verification link sent. Check your inbox.');
       setErrorMessage('');
     },
     onError: (error: any) => {
-      setErrorMessage(error.response?.data?.message || 'Failed to send OTP');
+      setErrorMessage(error.response?.data?.message || 'Failed to send verification link');
       setSuccessMessage('');
     },
   });
 
-  const verifyOtpMutation = useMutation({
-    mutationFn: async (otpCode: string) => {
-      const response = await api.post('/email/verify', {
-        email,
-        otp: otpCode,
-      });
-      return response.data;
-    },
-    onSuccess: async () => {
-      setSuccessMessage('Email verified successfully!');
-      setErrorMessage('');
-      // Refresh user data to get updated email_verified_at
-      await refreshUser();
-      navigate('/verify-success');
-    },
-    onError: (error: any) => {
-      setErrorMessage(error.response?.data?.message || 'Verification failed');
-      setSuccessMessage('');
-    },
-  });
+  // No verify mutation needed; backend redirects on signed link
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -80,35 +54,11 @@ const VerifyEmailPage = () => {
     return () => clearTimeout(timer);
   }, [countdown]);
 
-  const handleOtpChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
-
-    const newOtp = [...otp];
-    newOtp[index] = value;
-    setOtp(newOtp);
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      const nextInput = document.getElementById(`otp-${index + 1}`);
-      if (nextInput) nextInput.focus();
-    }
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const otpCode = otp.join('');
-    if (otpCode.length !== 6) {
-      setErrorMessage('Please enter a 6-digit code');
-      setSuccessMessage('');
-      return;
-    }
-    verifyOtpMutation.mutate(otpCode);
-  };
-
-  const handleResendOtp = () => {
+  const handleResend = () => {
     if (countdown > 0) return;
-    sendOtpMutation.mutate();
+    sendLinkMutation.mutate();
   };
+
 
   return (
     <div className="min-h-screen bg-cordillera-olive flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -120,7 +70,8 @@ const VerifyEmailPage = () => {
         </CardHeader>
         <CardContent>
           <p className="text-cordillera-cream/90 mb-6">
-            We've sent a 6-digit verification code to <strong>{email}</strong>
+            Click the verification link we emailed to <strong>{email}</strong>.
+            If you didn't receive it, resend below.
           </p>
 
           {successMessage && (
@@ -135,45 +86,21 @@ const VerifyEmailPage = () => {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="flex justify-center space-x-2">
-              {otp.map((digit, index) => (
-                <Input
-                  key={index}
-                  id={`otp-${index}`}
-                  type="text"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleOtpChange(index, e.target.value)}
-                  className="w-12 h-12 text-center text-xl bg-cordillera-cream text-cordillera-olive"
-                  autoFocus={index === 0}
-                />
-              ))}
-            </div>
-
+          <div className="space-y-4">
             <Button
-              type="submit"
+              onClick={handleResend}
               className="w-full bg-cordillera-gold text-cordillera-olive hover:bg-cordillera-gold/90"
-              disabled={verifyOtpMutation.isPending}
+              disabled={sendLinkMutation.isPending || countdown > 0}
             >
-              {verifyOtpMutation.isPending ? 'Verifying...' : 'Verify Email'}
-            </Button>
-          </form>
-
-          <div className="mt-4 text-center">
-            <Button
-              variant="outline"
-              onClick={handleResendOtp}
-              disabled={countdown > 0 || sendOtpMutation.isPending}
-              className="text-cordillera-gold hover:text-cordillera-gold/80"
-            >
-              {sendOtpMutation.isPending
+              {sendLinkMutation.isPending
                 ? 'Sending...'
                 : countdown > 0
                 ? `Resend in ${countdown}s`
-                : "Didn't receive a code? Resend"}
+                : 'Resend verification link'}
             </Button>
           </div>
+
+          <div className="mt-2 text-center text-sm text-cordillera-cream/70">Check spam folder if needed.</div>
         </CardContent>
       </Card>
     </div>

@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Models\VerificationOtp;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+// Removed custom OTP model usage
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
@@ -52,13 +53,7 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Get the verification OTP associated with the user.
-     */
-    public function verificationOtp()
-    {
-        return $this->hasOne(VerificationOtp::class);
-    }
+    // Removed OTP relation; using Laravel built-in verification
 
     /**
      * Get the products created by this user (seller).

@@ -12,8 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\OtpVerificationMail;
-use App\Models\VerificationOtp;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -46,11 +45,11 @@ class AuthController extends Controller
 
             $validated = $request->validated();
 
-            // Normalize role inputs: artisan -> weaver, customer -> buyer
+            // Normalize role inputs: artisan/weaver -> weaver, customer/buyer -> buyer
             $incomingRole = strtolower((string) $request->input('role', ''));
-            if ($incomingRole === 'artisan') {
+            if ($incomingRole === 'artisan' || $incomingRole === 'weaver') {
                 $incomingRole = 'weaver';
-            } elseif ($incomingRole === 'customer') {
+            } elseif ($incomingRole === 'customer' || $incomingRole === 'buyer') {
                 $incomingRole = 'buyer';
             } else {
                 // Default to buyer if no role specified or invalid role
@@ -84,31 +83,15 @@ class AuthController extends Controller
 
             Log::info('User created successfully', ['user_id' => $user->id, 'email' => $user->email]);
 
-            // Generate and send OTP for email verification (expires in 5 minutes)
+            // Send built-in email verification notification
             try {
-                // Remove any existing OTPs for safety
-                if (method_exists($user, 'verificationOtp')) {
-                    $user->verificationOtp()->delete();
-                } else {
-                    // In case relation missing, ensure table cleanup by user_id
-                    VerificationOtp::where('user_id', $user->id)->delete();
-                }
-
-                $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-                VerificationOtp::create([
-                    'user_id' => $user->id,
-                    'otp' => $otp,
-                    'expires_at' => now()->addMinutes(5),
-                ]);
-
-                Mail::to($user->email)->send(new OtpVerificationMail($otp));
-                Log::info('OTP sent for verification', ['user_id' => $user->id]);
+                $user->sendEmailVerificationNotification();
+                Log::info('Built-in verification link sent', ['user_id' => $user->id]);
             } catch (\Throwable $mailEx) {
-                Log::error('Failed to send OTP email', [
+                Log::error('Failed to send verification email', [
                     'user_id' => $user->id,
                     'error' => $mailEx->getMessage(),
                 ]);
-                // Continue registration even if email fails; frontend has resend capability
             }
 
             $token = $user->createToken('auth_token')->plainTextToken;

@@ -39,61 +39,63 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-cordillera-olive">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-cordillera-olive/95 backdrop-blur-sm shadow-lg transition-all duration-300 border-b border-cordillera-gold/20">
+    <div className="min-h-screen bg-heritage-50">
+      {/* Modern, Professional Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 
+        bg-white/95 backdrop-blur-lg
+        shadow-sm
+        border-b border-heritage-200
+        transition-all duration-300">
+        
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+          <div className="flex justify-between items-center h-16">
 
-            {/* Logo */}
-            <Link to="/" className="flex-shrink-0">
-              <h1 className="text-3xl font-serif text-cordillera-cream font-light tracking-wide">
+            {/* Professional Logo */}
+            <Link 
+              to="/" 
+              className="flex-shrink-0 group relative flex items-center gap-3"
+            >
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-heritage-500 to-accent-terracotta flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-display font-bold text-heritage-900 
+                group-hover:text-heritage-600
+                transition-colors duration-300">
                 Cordillera Heritage
               </h1>
             </Link>
 
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-8">
-              <Link
-                to="/"
-                className={`relative text-cordillera-cream/90 hover:text-cordillera-gold transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-cordillera-gold after:transition-all after:duration-200 after:w-0 hover:after:w-full ${
-                  isActive('/') ? 'text-cordillera-gold after:w-full' : ''
-                } focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40 rounded`}
-              >
-                Home
-              </Link>
-              <Link
-                to="/marketplace"
-                className={`relative text-cordillera-cream/90 hover:text-cordillera-gold transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-cordillera-gold after:transition-all after:duration-200 after:w-0 hover:after:w-full ${
-                  isActive('/marketplace') ? 'text-cordillera-gold after:w-full' : ''
-                } focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40 rounded`}
-              >
-                Marketplace
-              </Link>
-              <Link
-                to="/stories"
-                className={`relative text-cordillera-cream/90 hover:text-cordillera-gold transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-cordillera-gold after:transition-all after:duration-200 after:w-0 hover:after:w-full ${
-                  isActive('/stories') ? 'text-cordillera-gold after:w-full' : ''
-                } focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40 rounded`}
-              >
-                Stories
-              </Link>
-              <Link
-                to="/campaigns"
-                className={`relative text-cordillera-cream/90 hover:text-cordillera-gold transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-cordillera-gold after:transition-all after:duration-200 after:w-0 hover:after:w-full ${
-                  isActive('/campaigns') ? 'text-cordillera-gold after:w-full' : ''
-                } focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40 rounded`}
-              >
-                Campaigns
-              </Link>
-              <Link
-                to="/media-creation"
-                className={`relative text-cordillera-cream/90 hover:text-cordillera-gold transition-colors after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-cordillera-gold after:transition-all after:duration-200 after:w-0 hover:after:w-full ${
-                  isActive('/media-creation') ? 'text-cordillera-gold after:w-full' : ''
-                } focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40 rounded`}
-              >
-                Media Creation
-              </Link>
+            {/* Clean Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-1">
+              {[
+                { to: '/', label: 'Home' },
+                { to: '/marketplace', label: 'Marketplace' },
+                { to: '/stories', label: 'Stories' },
+                { to: '/campaigns', label: 'Campaigns' },
+                { to: '/media-creation', label: 'Media Creation' }
+              ].map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`
+                    relative px-4 py-2 rounded-lg font-medium
+                    transition-all duration-200
+                    ${isActive(link.to) 
+                      ? 'text-white bg-gradient-to-br from-heritage-500 to-accent-terracotta shadow-sm' 
+                      : 'text-heritage-700 hover:text-heritage-900 hover:bg-heritage-100'
+                    }
+                    focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage-500 focus-visible:ring-offset-2
+                    after:absolute after:bottom-0 after:left-1/2 after:-translate-x-1/2
+                    after:h-0.5 after:w-0 after:bg-heritage-500
+                    after:transition-all after:duration-200 after:rounded-full
+                    ${isActive(link.to) ? '' : 'hover:after:w-4/5'}
+                  `}
+                >
+                  {link.label}
+                </Link>
+              ))}
             </div>
 
             {/* Right side / Account */}
@@ -103,51 +105,97 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <div className="relative" ref={accountRef}>
                   <button
                     onClick={() => setIsAccountOpen(v => !v)}
-                    className="ml-2 inline-flex items-center px-3 py-1.5 rounded-full bg-cordillera-cream/10 text-cordillera-cream hover:bg-cordillera-cream/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40"
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg 
+                      bg-heritage-100 hover:bg-heritage-200
+                      text-heritage-800
+                      border border-heritage-300 hover:border-heritage-400
+                      transition-all duration-200 
+                      focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage-500
+                      shadow-sm hover:shadow"
                     aria-haspopup="menu"
                     aria-expanded={isAccountOpen}
                   >
-                    <span className="mr-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-cordillera-gold text-cordillera-olive font-semibold">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg 
+                      bg-gradient-to-br from-heritage-500 to-accent-terracotta 
+                      text-white font-semibold text-sm shadow-sm">
                       {(user?.name || user?.email || 'A').charAt(0).toUpperCase()}
                     </span>
-                    <span className="hidden lg:inline">Account</span>
-                    <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
+                    <span className="hidden lg:inline font-medium">Account</span>
+                    <svg className={`h-4 w-4 transition-transform duration-200 ${isAccountOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
                   </button>
                   {isAccountOpen && (
-                    <div className="absolute right-0 mt-2 w-64 rounded-lg border border-cordillera-gold/30 bg-cordillera-olive shadow-xl overflow-hidden z-50" role="menu" aria-label="Account">
-                      <div className="px-4 py-3 border-b border-cordillera-gold/20">
-                        <p className="text-sm text-cordillera-cream/70">Signed in as</p>
-                        <p className="text-cordillera-cream truncate">{user?.name || user?.email}</p>
+                    <div className="absolute right-0 mt-2 w-64 rounded-xl border border-heritage-300 bg-white shadow-xl overflow-hidden z-50 animate-scale-in" role="menu" aria-label="Account">
+                      <div className="px-4 py-3 border-b border-heritage-200 bg-heritage-50">
+                        <p className="text-xs text-heritage-600 font-medium">Signed in as</p>
+                        <p className="text-heritage-900 truncate font-semibold mt-0.5">{user?.name || user?.email}</p>
                       </div>
                       <div className="py-1">
                         {/* Role-specific menus */}
                         {user?.role === 'admin' ? (
                           // Admin menu
                           <>
-                            <Link to="/admin/moderation" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Moderation</Link>
-                            <Link to="/account" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Account Information</Link>
+                            <Link to="/admin/moderation" role="menuitem" onClick={() => setIsAccountOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-heritage-700 hover:bg-heritage-50 hover:text-heritage-900 focus:outline-none focus-visible:bg-heritage-100 transition-all duration-150 group">
+                              <svg className="w-5 h-5 text-heritage-500 group-hover:text-accent-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                              <span className="font-medium">Moderation</span>
+                            </Link>
+                            <Link to="/account" role="menuitem" onClick={() => setIsAccountOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-heritage-700 hover:bg-heritage-50 hover:text-heritage-900 focus:outline-none focus-visible:bg-heritage-100 transition-all duration-150 group">
+                              <svg className="w-5 h-5 text-heritage-500 group-hover:text-accent-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                              <span className="font-medium">Account Information</span>
+                            </Link>
                           </>
                         ) : user?.role === 'artisan' ? (
                           // Artisan menu
                           <>
-                            <Link to="/dashboard/artisan" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Account Information</Link>
-                            <Link to="/my-products" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">My Products</Link>
-                            <Link to="/my-stories" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">My Stories</Link>
-                            <Link to="/my-campaigns" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">My Campaigns</Link>
-                            <Link to="/media-creation" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Media Uploads</Link>
+                            <Link to="/dashboard/artisan" role="menuitem" onClick={() => setIsAccountOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-heritage-700 hover:bg-heritage-50 hover:text-heritage-900 focus:outline-none focus-visible:bg-heritage-100 transition-all duration-150 group">
+                              <svg className="w-5 h-5 text-heritage-500 group-hover:text-accent-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                              <span className="font-medium">Account Information</span>
+                            </Link>
+                            <Link to="/my-products" role="menuitem" onClick={() => setIsAccountOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-heritage-700 hover:bg-heritage-50 hover:text-heritage-900 focus:outline-none focus-visible:bg-heritage-100 transition-all duration-150 group">
+                              <svg className="w-5 h-5 text-heritage-500 group-hover:text-accent-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                              <span className="font-medium">My Products</span>
+                            </Link>
+                            <Link to="/my-stories" role="menuitem" onClick={() => setIsAccountOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-heritage-700 hover:bg-heritage-50 hover:text-heritage-900 focus:outline-none focus-visible:bg-heritage-100 transition-all duration-150 group">
+                              <svg className="w-5 h-5 text-heritage-500 group-hover:text-accent-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                              <span className="font-medium">My Stories</span>
+                            </Link>
+                            <Link to="/my-campaigns" role="menuitem" onClick={() => setIsAccountOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-heritage-700 hover:bg-heritage-50 hover:text-heritage-900 focus:outline-none focus-visible:bg-heritage-100 transition-all duration-150 group">
+                              <svg className="w-5 h-5 text-heritage-500 group-hover:text-accent-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+                              <span className="font-medium">My Campaigns</span>
+                            </Link>
+                            <Link to="/media-creation" role="menuitem" onClick={() => setIsAccountOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-heritage-700 hover:bg-heritage-50 hover:text-heritage-900 focus:outline-none focus-visible:bg-heritage-100 transition-all duration-150 group">
+                              <svg className="w-5 h-5 text-heritage-500 group-hover:text-accent-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                              <span className="font-medium">Media Uploads</span>
+                            </Link>
                           </>
                         ) : user?.role === 'customer' ? (
                           // Customer menu
                           <>
-                            <Link to="/dashboard/customer" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Account Information</Link>
-                            <Link to="/my-purchases" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">My Purchases</Link>
-                            <Link to="/campaigns-supported" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Campaigns Supported</Link>
-                            <Link to="/media-creation" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Media Uploads</Link>
+                            <Link to="/dashboard/customer" role="menuitem" onClick={() => setIsAccountOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-heritage-700 hover:bg-heritage-50 hover:text-heritage-900 focus:outline-none focus-visible:bg-heritage-100 transition-all duration-150 group">
+                              <svg className="w-5 h-5 text-heritage-500 group-hover:text-accent-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                              <span className="font-medium">Account Information</span>
+                            </Link>
+                            <Link to="/my-purchases" role="menuitem" onClick={() => setIsAccountOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-heritage-700 hover:bg-heritage-50 hover:text-heritage-900 focus:outline-none focus-visible:bg-heritage-100 transition-all duration-150 group">
+                              <svg className="w-5 h-5 text-heritage-500 group-hover:text-accent-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                              <span className="font-medium">My Purchases</span>
+                            </Link>
+                            <Link to="/campaigns-supported" role="menuitem" onClick={() => setIsAccountOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-heritage-700 hover:bg-heritage-50 hover:text-heritage-900 focus:outline-none focus-visible:bg-heritage-100 transition-all duration-150 group">
+                              <svg className="w-5 h-5 text-heritage-500 group-hover:text-accent-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                              <span className="font-medium">Campaigns Supported</span>
+                            </Link>
+                            <Link to="/media-creation" role="menuitem" onClick={() => setIsAccountOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-heritage-700 hover:bg-heritage-50 hover:text-heritage-900 focus:outline-none focus-visible:bg-heritage-100 transition-all duration-150 group">
+                              <svg className="w-5 h-5 text-heritage-500 group-hover:text-accent-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                              <span className="font-medium">Media Uploads</span>
+                            </Link>
                           </>
                         ) : (
                           // Other roles: minimal
                           <>
-                            <Link to="/account" role="menuitem" onClick={() => setIsAccountOpen(false)} className="block px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 transition-colors">Account Information</Link>
+                            <Link to="/account" role="menuitem" onClick={() => setIsAccountOpen(false)} className="flex items-center gap-3 px-4 py-2.5 text-heritage-700 hover:bg-heritage-50 hover:text-heritage-900 focus:outline-none focus-visible:bg-heritage-100 transition-all duration-150 group">
+                              <svg className="w-5 h-5 text-heritage-500 group-hover:text-accent-terracotta transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                              <span className="font-medium">Account Information</span>
+                            </Link>
                           </>
                         )}
                         <button
@@ -156,19 +204,43 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                             await logout();
                             navigate('/');
                           }}
-                          className="w-full text-left px-4 py-2 text-cordillera-cream hover:bg-cordillera-cream/10 focus:outline-none focus-visible:bg-cordillera-cream/10 border-t border-cordillera-gold/20 transition-colors"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-heritage-700 hover:bg-red-50 hover:text-error focus:outline-none focus-visible:bg-red-50 border-t border-heritage-200 transition-all duration-150 group mt-1"
                           role="menuitem"
                         >
-                          Log out
+                          <svg className="w-5 h-5 text-heritage-500 group-hover:text-error transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                          <span className="font-medium">Log out</span>
                         </button>
                       </div>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="flex items-center space-x-3">
-                  <Link to="/login" className="text-cordillera-cream/90 hover:text-cordillera-gold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40 rounded">Login</Link>
-                  <Link to="/register" className="bg-cordillera-gold text-cordillera-olive px-4 py-1.5 rounded-full shadow-sm hover:bg-cordillera-gold/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-cordillera-gold/40">Create account</Link>
+                <div className="flex items-center gap-3">
+                  <Link 
+                    to="/login" 
+                    className="px-4 py-2 rounded-lg
+                      text-heritage-700 hover:text-heritage-900
+                      hover:bg-heritage-100
+                      font-medium
+                      transition-all duration-200 
+                      focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage-500"
+                  >
+                    Login
+                  </Link>
+                  <Link 
+                    to="/register" 
+                    className="px-6 py-2.5 rounded-lg
+                      bg-gradient-to-br from-heritage-500 to-accent-terracotta
+                      text-white font-semibold
+                      shadow-md hover:shadow-lg
+                      hover:-translate-y-0.5
+                      transition-all duration-200 
+                      focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage-500 focus-visible:ring-offset-2
+                      before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:-translate-x-full before:transition-transform before:duration-500 hover:before:translate-x-full
+                      relative overflow-hidden"
+                  >
+                    <span className="relative z-10">Create account</span>
+                  </Link>
                 </div>
               )}
             </div>
