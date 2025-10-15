@@ -70,7 +70,7 @@ const ProductEditPage: React.FC = () => {
       if (stock !== '') payload.stock_quantity = stock;
 
       const updated = await productsAPI.update(Number(id), payload);
-      navigate(`/product/${updated.id}`);
+      navigate(`/products/${updated.id}`);
     } catch (e: any) {
       setError(e?.response?.data?.message || 'Failed to update product');
     } finally {
@@ -79,64 +79,64 @@ const ProductEditPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cordillera-cream">
+    <div className="min-h-screen bg-heritage-100">
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="mb-4">
           <BackLink to="/my-products">Back to My Products</BackLink>
         </div>
         <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-serif text-cordillera-olive">Edit Product</h1>
-          <p className="text-cordillera-olive/70">Update your product details</p>
+          <h1 className="text-2xl md:text-3xl font-serif text-heritage-800">Edit Product</h1>
+          <p className="text-heritage-800/70">Update your product details</p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded border border-red-200 text-red-700 bg-red-50">{error}</div>
+          <div className="mb-4 p-3 rounded border border-error/30 text-error-dark bg-error/10">{error}</div>
         )}
 
         {loading || !product ? (
-          <div className="text-cordillera-olive">Loading…</div>
+          <div className="text-heritage-800">Loading…</div>
         ) : (
-          <form onSubmit={onSubmit} className="bg-white border border-cordillera-olive/10 rounded p-4 space-y-4">
+          <form onSubmit={onSubmit} className="bg-white border border-heritage-800/10 rounded p-4 space-y-4">
             <div>
-              <label className="block text-sm text-cordillera-olive/70 mb-1">Name</label>
+              <label className="block text-sm text-heritage-800/70 mb-1">Name</label>
               <input value={name} onChange={e => setName(e.target.value)} className="w-full border px-3 py-2 rounded" required />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-cordillera-olive/70 mb-1">Price</label>
+                <label className="block text-sm text-heritage-800/70 mb-1">Price</label>
                 <input type="number" step="0.01" value={price} onChange={e => setPrice(e.target.value === '' ? '' : Number(e.target.value))} className="w-full border px-3 py-2 rounded" required />
               </div>
               <div>
-                <label className="block text-sm text-cordillera-olive/70 mb-1">Stock Quantity</label>
+                <label className="block text-sm text-heritage-800/70 mb-1">Stock Quantity</label>
                 <input type="number" value={stock} onChange={e => setStock(e.target.value === '' ? '' : Number(e.target.value))} className="w-full border px-3 py-2 rounded" />
               </div>
             </div>
             <div>
-              <label className="block text-sm text-cordillera-olive/70 mb-1">Category</label>
+              <label className="block text-sm text-heritage-800/70 mb-1">Category</label>
               <input value={category} onChange={e => setCategory(e.target.value)} className="w-full border px-3 py-2 rounded" />
             </div>
             <div>
-              <label className="block text-sm text-cordillera-olive/70 mb-1">Description</label>
+              <label className="block text-sm text-heritage-800/70 mb-1">Description</label>
               <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full border px-3 py-2 rounded min-h-[120px]" />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm text-cordillera-olive/70 mb-1">Materials (comma-separated)</label>
+                <label className="block text-sm text-heritage-800/70 mb-1">Materials (comma-separated)</label>
                 <input value={materials} onChange={e => setMaterials(e.target.value)} className="w-full border px-3 py-2 rounded" />
               </div>
               <div>
-                <label className="block text-sm text-cordillera-olive/70 mb-1">Care Instructions</label>
+                <label className="block text-sm text-heritage-800/70 mb-1">Care Instructions</label>
                 <input value={care} onChange={e => setCare(e.target.value)} className="w-full border px-3 py-2 rounded" />
               </div>
             </div>
             <div className="flex items-center gap-2">
               <input id="featured" type="checkbox" checked={featured} onChange={e => setFeatured(e.target.checked)} />
-              <label htmlFor="featured" className="text-cordillera-olive/80">Featured</label>
+              <label htmlFor="featured" className="text-heritage-800/80">Featured</label>
             </div>
 
             <div className="flex items-center gap-3 justify-end pt-2">
-              <Link to={`/product/${product.id}`} className="px-4 py-2 rounded border border-cordillera-olive/30 text-cordillera-olive hover:bg-cordillera-olive/5">Cancel</Link>
-              <button type="submit" disabled={disabled} className="px-4 py-2 rounded bg-cordillera-olive text-white hover:bg-cordillera-olive/90 disabled:opacity-50">
+              <Link to={`/products/${product.id}`} className="px-4 py-2 rounded border border-heritage-800/30 text-heritage-800 hover:bg-heritage-800/5">Cancel</Link>
+              <button type="submit" disabled={disabled} className="px-4 py-2 rounded bg-heritage-800 text-white hover:bg-heritage-800/90 disabled:opacity-50">
                 {saving ? 'Saving…' : 'Save Changes'}
               </button>
             </div>

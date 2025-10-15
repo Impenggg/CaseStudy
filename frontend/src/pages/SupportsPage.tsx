@@ -30,35 +30,35 @@ const SupportsPage: React.FC = () => {
   }, [])
 
   return (
-    <div className="min-h-[60vh] px-4 py-10 max-w-5xl mx-auto text-cordillera-cream">
+    <div className="min-h-[60vh] px-4 py-10 max-w-5xl mx-auto text-heritage-100">
       <div className="mb-4">
-        <Link to="/" className="inline-block bg-cordillera-gold text-cordillera-olive px-4 py-1.5 rounded hover:bg-cordillera-gold/90 transition-colors">← Back to Home</Link>
+        <Link to="/" className="inline-block bg-heritage-500 text-heritage-800 px-4 py-1.5 rounded hover:bg-heritage-500/90 transition-colors">← Back to Home</Link>
       </div>
       <h1 className="text-3xl font-serif mb-6">Support & Fundraising History</h1>
-      <div className="rounded-lg border border-cordillera-gold/30 bg-cordillera-olive/40 p-6">
+      <div className="rounded-lg border border-heritage-500/30 bg-heritage-800/40 p-6">
         {isLoading && (
-          <p className="text-cordillera-cream/80">Loading your support history...</p>
+          <p className="text-heritage-100/80">Loading your support history...</p>
         )}
         {!isLoading && error && (
-          <p className="text-red-200">{error}</p>
+          <p className="text-error-light">{error}</p>
         )}
         {!isLoading && !error && donations.length === 0 && (
-          <p className="text-cordillera-cream/80">No support contributions yet.</p>
+          <p className="text-heritage-100/80">No support contributions yet.</p>
         )}
         {!isLoading && !error && donations.length > 0 && (
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="text-left text-cordillera-cream/70">
+                <tr className="text-left text-heritage-100/70">
                   <th className="py-2 pr-4">Date</th>
                   <th className="py-2 pr-4">Campaign</th>
                   <th className="py-2 pr-4">Amount</th>
                   <th className="py-2">Message</th>
                 </tr>
               </thead>
-              <tbody className="text-cordillera-cream/90">
+              <tbody className="text-heritage-100/90">
                 {donations.map((d) => (
-                  <tr key={d.id} className="border-t border-cordillera-gold/20">
+                  <tr key={d.id} className="border-t border-heritage-500/20">
                     <td className="py-3 pr-4">{d.created_at ? new Date(d.created_at).toLocaleDateString() : '-'}</td>
                     <td className="py-3 pr-4">{d.campaign?.title ?? `#${d.campaign_id}`}</td>
                     <td className="py-3 pr-4">₱{Number(d.amount).toLocaleString()}</td>

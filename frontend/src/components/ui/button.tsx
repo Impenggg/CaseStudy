@@ -20,16 +20,12 @@ export const Button: React.FC<ButtonProps> = ({
     focus:outline-none focus-visible:ring-3 focus-visible:ring-offset-2 
     disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
     relative overflow-hidden
-    before:absolute before:inset-0
-    before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent 
-    before:-translate-x-full
-    before:transition-transform before:duration-500 hover:before:translate-x-full
   `;
   
   const variants = {
     // Primary - Professional heritage gold
     default: `
-      bg-gradient-to-br from-heritage-500 to-accent-terracotta
+      bg-heritage-500
       text-white
       rounded-lg
       shadow-md hover:shadow-xl
@@ -48,7 +44,7 @@ export const Button: React.FC<ButtonProps> = ({
     `,
     // Destructive - Clear warning
     destructive: `
-      bg-gradient-to-br from-error to-red-700
+      bg-error
       text-white
       rounded-lg
       shadow-md hover:shadow-xl
@@ -64,7 +60,7 @@ export const Button: React.FC<ButtonProps> = ({
     `,
     // Terracotta - Warm accent
     terracotta: `
-      bg-gradient-to-br from-accent-terracotta to-accent-rust
+      bg-accent-terracotta
       text-white
       rounded-lg
       shadow-md hover:shadow-xl
@@ -73,7 +69,7 @@ export const Button: React.FC<ButtonProps> = ({
     `,
     // Earth - Natural tone
     earth: `
-      bg-gradient-to-br from-heritage-600 to-accent-moss
+      bg-heritage-600
       text-white
       rounded-lg
       shadow-md hover:shadow-xl

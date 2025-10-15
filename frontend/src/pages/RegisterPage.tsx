@@ -94,7 +94,7 @@ export const RegisterPage = () => {
   }, [formData.password]);
 
   return (
-    <div className="relative min-h-screen bg-cordillera-olive py-10 sm:py-12">
+    <div className="relative min-h-screen bg-heritage-800 py-10 sm:py-12">
       {/* Background gradient + woven pattern */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
@@ -121,52 +121,52 @@ export const RegisterPage = () => {
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
           {/* Hero panel */}
-          <div className="hidden lg:flex relative overflow-hidden rounded-md border border-cordillera-gold/20 bg-cordillera-cream/5">
-            <div className="absolute inset-0 bg-gradient-to-br from-cordillera-gold/10 via-transparent to-cordillera-gold/10" />
+          <div className="hidden lg:flex relative overflow-hidden rounded-md border border-heritage-500/20 bg-heritage-100/5">
+            <div className="absolute inset-0 bg-gradient-to-br from-heritage-500/10 via-transparent to-heritage-500/10" />
             <div className="relative z-10 p-10 flex flex-col">
               <div>
-                <h1 className="text-4xl font-serif text-cordillera-cream">Welcome to the Community</h1>
-                <p className="mt-4 text-cordillera-cream/80 leading-relaxed max-w-md">
+                <h1 className="text-4xl font-serif text-heritage-100">Welcome to the Community</h1>
+                <p className="mt-4 text-heritage-100/80 leading-relaxed max-w-md">
                   Create an account to support artisans, collect stories, and be part of preserving Cordillera heritage.
                 </p>
               </div>
               {/* Raised, enlarged square with role selection */}
               <div className="mt-6 flex-1 w-full flex items-start justify-center pb-2">
-                <div className="w-96 h-[26rem] rounded-md border border-cordillera-gold/30 bg-black/20 shadow-[0_0_0_1px_rgba(212,175,55,0.08)_inset] p-6 flex flex-col items-center">
-                  <p className="text-center text-cordillera-gold font-medium">Join As:</p>
+                <div className="w-96 h-[26rem] rounded-md border border-heritage-500/30 bg-black/20 shadow-[0_0_0_1px_rgba(212,175,55,0.08)_inset] p-6 flex flex-col items-center">
+                  <p className="text-center text-heritage-500 font-medium">Join As:</p>
 
                   {/* Spacer */}
                   <div className="mt-4" />
 
                   {/* Customer tile */}
                   <div
-                    className={`group flex flex-col items-center justify-center gap-2 rounded-md bg-black/20 border border-cordillera-gold/20 w-32 h-32 hover:bg-black/30 transition-colors cursor-pointer ${formData.role === 'customer' ? 'ring-1 ring-cordillera-gold' : ''}`}
+                    className={`group flex flex-col items-center justify-center gap-2 rounded-md bg-black/20 border border-heritage-500/20 w-32 h-32 hover:bg-black/30 transition-colors cursor-pointer ${formData.role === 'customer' ? 'ring-1 ring-heritage-500' : ''}`}
                     role="button"
                     tabIndex={0}
                     onClick={() => setFormData(f => ({ ...f, role: 'customer' }))}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setFormData(f => ({ ...f, role: 'customer' })); }}
                   >
-                    <div className="text-cordillera-gold">
+                    <div className="text-heritage-500">
                       <svg className="h-9 w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M5.121 17.804A7 7 0 0112 15a7 7 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </div>
-                    <p className="text-base font-medium text-cordillera-gold">Customer</p>
+                    <p className="text-base font-medium text-heritage-500">Customer</p>
                   </div>
 
                   {/* OR divider */}
-                  <div className="my-4 text-center text-cordillera-gold">Or</div>
+                  <div className="my-4 text-center text-heritage-500">Or</div>
 
                   {/* Artisan tile */}
                   <div
-                    className={`group flex flex-col items-center justify-center gap-2 rounded-md bg-black/20 border border-cordillera-gold/20 w-32 h-32 hover:bg-black/30 transition-colors cursor-pointer ${formData.role === 'artisan' ? 'ring-1 ring-cordillera-gold' : ''}`}
+                    className={`group flex flex-col items-center justify-center gap-2 rounded-md bg-black/20 border border-heritage-500/20 w-32 h-32 hover:bg-black/30 transition-colors cursor-pointer ${formData.role === 'artisan' ? 'ring-1 ring-heritage-500' : ''}`}
                     role="button"
                     tabIndex={0}
                     onClick={() => setFormData(f => ({ ...f, role: 'artisan' }))}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setFormData(f => ({ ...f, role: 'artisan' })); }}
                   >
-                    <div className="text-cordillera-gold">
+                    <div className="text-heritage-500">
                       <svg className="h-9 w-9" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 7h3l3 7 4-12 3 8h4"/></svg>
                     </div>
-                    <p className="text-base font-medium text-cordillera-gold">Artisan</p>
+                    <p className="text-base font-medium text-heritage-500">Artisan</p>
                   </div>
 
                   {/* fill remaining space to keep square balanced */}
@@ -178,17 +178,17 @@ export const RegisterPage = () => {
 
           {/* Form card */}
           <div className="relative">
-            <Card className="mx-auto max-w-md w-full bg-cordillera-cream/5 border border-cordillera-gold/20 backdrop-blur-sm">
+            <Card className="mx-auto max-w-md w-full bg-heritage-100/5 border border-heritage-500/20 backdrop-blur-sm">
               <CardContent className="space-y-8">
               {/* Header */}
               <div className="text-center">
-                <Link to="/" className="text-3xl sm:text-4xl font-serif font-light text-cordillera-cream tracking-wide">
+                <Link to="/" className="text-3xl sm:text-4xl font-serif font-light text-heritage-800 tracking-wide">
                   Cordillera Weaving
                 </Link>
-                <h2 className="mt-4 text-2xl sm:text-3xl font-serif font-light text-cordillera-cream">
+                <h2 className="mt-4 text-2xl sm:text-3xl font-serif font-light text-heritage-800">
                   Create your account
                 </h2>
-                <p className="mt-2 text-sm text-cordillera-cream/70">
+                <p className="mt-2 text-sm text-heritage-700">
                   Join in a few steps to start your journey
                 </p>
               </div>
@@ -204,7 +204,7 @@ export const RegisterPage = () => {
                       navigate('/');
                     }
                   }}
-                  className="inline-flex items-center px-4 py-2 border border-cordillera-cream/40 text-cordillera-cream/90 hover:text-cordillera-cream hover:bg-cordillera-cream/10 transition-colors"
+                  className="inline-flex items-center px-4 py-2 border border-heritage-300 text-heritage-700 hover:text-heritage-800 hover:bg-heritage-100 transition-colors"
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -217,11 +217,11 @@ export const RegisterPage = () => {
               <form className="mt-2 space-y-6" onSubmit={handleSubmit} noValidate>
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-light text-cordillera-cream mb-2">
+                    <label htmlFor="name" className="block text-sm font-light text-heritage-800 mb-2">
                       Full Name
                     </label>
                     <div className="relative">
-                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-cordillera-cream/50">
+                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-heritage-100/50">
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M5.121 17.804A7 7 0 0112 15a7 7 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                       </span>
                       <input
@@ -234,7 +234,7 @@ export const RegisterPage = () => {
                         onChange={handleChange}
                         onBlur={() => setTouched(t => ({ ...t, name: true }))}
                         aria-invalid={touched.name && !nameValid}
-                        className="w-full pl-10 pr-4 py-3 bg-cordillera-cream/10 border border-cordillera-gold/30 text-cordillera-cream placeholder-cordillera-cream/60 focus:outline-none focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 bg-white border border-heritage-300 text-heritage-800 placeholder-heritage-500 focus:outline-none focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                         placeholder="Enter your full name"
                       />
                     </div>
@@ -244,11 +244,11 @@ export const RegisterPage = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="email" className="block text-sm font-light text-cordillera-cream mb-2">
+                    <label htmlFor="email" className="block text-sm font-light text-heritage-800 mb-2">
                       Email Address
                     </label>
                     <div className="relative">
-                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-cordillera-cream/50">
+                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-heritage-100/50">
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-18 8h18a2 2 0 002-2V8a2 2 0 00-2-2H3a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
                       </span>
                       <input
@@ -262,7 +262,7 @@ export const RegisterPage = () => {
                         onBlur={() => setTouched(t => ({ ...t, email: true }))}
                         aria-invalid={touched.email && !emailValid}
                         aria-describedby="email-error"
-                        className="w-full pl-10 pr-4 py-3 bg-cordillera-cream/10 border border-cordillera-gold/30 text-cordillera-cream placeholder-cordillera-cream/60 focus:outline-none focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 bg-white border border-heritage-300 text-heritage-800 placeholder-heritage-500 focus:outline-none focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                         placeholder="Enter your email"
                       />
                     </div>
@@ -272,11 +272,11 @@ export const RegisterPage = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="role" className="block text-sm font-light text-cordillera-cream mb-2">
+                    <label htmlFor="role" className="block text-sm font-light text-heritage-800 mb-2">
                       I am a...
                     </label>
                     <div className="relative">
-                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-cordillera-cream/50">
+                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-heritage-100/50">
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 7h16M4 12h8m-8 5h16"/></svg>
                       </span>
                       <select
@@ -284,20 +284,20 @@ export const RegisterPage = () => {
                         name="role"
                         value={formData.role}
                         onChange={handleChange}
-                        className="w-full pl-10 pr-4 py-3 bg-cordillera-cream/10 border border-cordillera-gold/30 text-cordillera-cream focus:outline-none focus:ring-2 focus:ring-cordillera-gold focus:border-transparent appearance-none"
+                        className="w-full pl-10 pr-4 py-3 bg-white border border-heritage-300 text-heritage-800 focus:outline-none focus:ring-2 focus:ring-heritage-500 focus:border-transparent appearance-none"
                       >
-                        <option className="text-cordillera-olive" value="customer">Customer (I want to buy and support artisans)</option>
-                        <option className="text-cordillera-olive" value="artisan">Artisan (I create and sell traditional crafts)</option>
+                        <option className="text-heritage-800" value="customer">Customer (I want to buy and support artisans)</option>
+                        <option className="text-heritage-800" value="artisan">Artisan (I create and sell traditional crafts)</option>
                       </select>
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="password" className="block text-sm font-light text-cordillera-cream mb-2">
+                    <label htmlFor="password" className="block text-sm font-light text-heritage-800 mb-2">
                       Password
                     </label>
                     <div className="relative">
-                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-cordillera-cream/50">
+                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-heritage-100/50">
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4"/></svg>
                       </span>
                       <input
@@ -312,12 +312,12 @@ export const RegisterPage = () => {
                         onKeyUp={(e) => setCapsOn(e.getModifierState && e.getModifierState('CapsLock'))}
                         aria-invalid={touched.password && !passwordValid}
                         aria-describedby="password-help password-error"
-                        className="w-full pl-10 pr-10 py-3 bg-cordillera-cream/10 border border-cordillera-gold/30 text-cordillera-cream placeholder-cordillera-cream/60 focus:outline-none focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                        className="w-full pl-10 pr-10 py-3 bg-white border border-heritage-300 text-heritage-800 placeholder-heritage-500 focus:outline-none focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                         placeholder="Create a password (min 6 characters)"
                       />
                       <button
                         type="button"
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-cordillera-cream/60 hover:text-cordillera-cream"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-heritage-600 hover:text-heritage-800"
                         onClick={() => setShowPassword(s => !s)}
                         aria-label={showPassword ? 'Hide password' : 'Show password'}
                       >
@@ -336,25 +336,25 @@ export const RegisterPage = () => {
                     )}
                     {/* Strength meter */}
                     <div className="mt-2" aria-hidden>
-                      <div className="h-1 w-full bg-cordillera-cream/10">
+                      <div className="h-1 w-full bg-heritage-100/10">
                         <div className={
                           `h-1 transition-all ${
                             strength <= 1 ? 'w-1/4 bg-red-400' : strength === 2 ? 'w-2/4 bg-amber-300' : strength === 3 ? 'w-3/4 bg-lime-300' : 'w-full bg-green-400'
                           }`
                         }/>
                       </div>
-                      <p className="mt-1 text-xs text-cordillera-cream/70">
+                      <p className="mt-1 text-xs text-heritage-700">
                         Password strength: {['Very weak','Weak','Good','Strong','Strong'][strength]}
                       </p>
                     </div>
                   </div>
 
                   <div>
-                    <label htmlFor="confirmPassword" className="block text-sm font-light text-cordillera-cream mb-2">
+                    <label htmlFor="confirmPassword" className="block text-sm font-light text-heritage-800 mb-2">
                       Confirm Password
                     </label>
                     <div className="relative">
-                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-cordillera-cream/50">
+                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-heritage-100/50">
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4"/></svg>
                       </span>
                       <input
@@ -368,12 +368,12 @@ export const RegisterPage = () => {
                         onBlur={() => setTouched(t => ({ ...t, confirmPassword: true }))}
                         aria-invalid={touched.confirmPassword && !confirmValid}
                         aria-describedby="confirm-error"
-                        className="w-full pl-10 pr-10 py-3 bg-cordillera-cream/10 border border-cordillera-gold/30 text-cordillera-cream placeholder-cordillera-cream/60 focus:outline-none focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                        className="w-full pl-10 pr-10 py-3 bg-white border border-heritage-300 text-heritage-800 placeholder-heritage-500 focus:outline-none focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                         placeholder="Confirm your password"
                       />
                       <button
                         type="button"
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-cordillera-cream/60 hover:text-cordillera-cream"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-heritage-600 hover:text-heritage-800"
                         onClick={() => setShowConfirm(s => !s)}
                         aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
                       >
@@ -398,23 +398,23 @@ export const RegisterPage = () => {
                   type="checkbox"
                   checked={termsAccepted}
                   onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-1 h-4 w-4 border-cordillera-gold/30 text-cordillera-gold focus:ring-cordillera-gold bg-cordillera-cream/20"
+                  className="mt-1 h-4 w-4 border-heritage-500/30 text-heritage-500 focus:ring-heritage-500 bg-heritage-100/20"
                   required
                 />
-                <label htmlFor="terms" className="ml-3 text-sm text-cordillera-cream/80">
+                <label htmlFor="terms" className="ml-3 text-sm text-heritage-700">
                   I agree to the{' '}
-                  <button type="button" onClick={() => setShowTerms(true)} className="text-cordillera-gold hover:text-cordillera-gold/90 underline underline-offset-2">
+                  <button type="button" onClick={() => setShowTerms(true)} className="text-heritage-500 hover:text-heritage-500/90 underline underline-offset-2">
                     Terms of Service
                   </button>
                   {' '}and{' '}
-                  <button type="button" onClick={() => setShowPrivacy(true)} className="text-cordillera-gold hover:text-cordillera-gold/90 underline underline-offset-2">
+                  <button type="button" onClick={() => setShowPrivacy(true)} className="text-heritage-500 hover:text-heritage-500/90 underline underline-offset-2">
                     Privacy Policy
                   </button>.
                 </label>
               </div>
 
               {error && (
-                <div className="bg-red-500/10 border border-red-500/30 text-red-200 px-4 py-3 text-sm">
+                <div className="bg-error/10 border border-red-500/30 text-error-light px-4 py-3 text-sm">
                   {error}
                 </div>
               )}
@@ -423,28 +423,28 @@ export const RegisterPage = () => {
                   <button
                     type="submit"
                     disabled={isLoading || !formValid}
-                    className="w-full bg-cordillera-gold text-cordillera-olive py-3 px-4 font-medium tracking-wide hover:bg-cordillera-gold/90 focus:outline-none focus:ring-2 focus:ring-cordillera-gold focus:ring-offset-2 focus:ring-offset-cordillera-olive transition-colors disabled:opacity-50"
+                    className="w-full bg-heritage-500 text-heritage-800 py-3 px-4 font-medium tracking-wide hover:bg-heritage-500/90 focus:outline-none focus:ring-2 focus:ring-heritage-500 focus:ring-offset-2 focus:ring-offset-heritage-800 transition-colors disabled:opacity-50"
                   >
                     {isLoading ? 'Creating Account...' : 'Create Account'}
                   </button>
                 </div>
 
                 <div className="text-center">
-                  <p className="text-sm text-cordillera-cream/70">
+                  <p className="text-sm text-heritage-700">
                     Already have an account?{' '}
-                    <Link to="/login" className="text-cordillera-gold hover:text-cordillera-gold/80 font-medium">
+                    <Link to="/login" className="text-heritage-500 hover:text-heritage-500/80 font-medium">
                       Sign in here
                     </Link>
                   </p>
                 </div>
               {/* Terms Modal */}
               <Dialog open={showTerms} onOpenChange={setShowTerms}>
-                <DialogContent className="bg-cordillera-olive/95 text-cordillera-cream border border-cordillera-gold/30 w-[95vw] max-w-3xl p-0 overflow-hidden">
-                  <div className="px-6 pt-5 pb-3 border-b border-cordillera-gold/20 text-center">
+                <DialogContent className="bg-heritage-800/95 text-heritage-100 border border-heritage-500/30 w-[95vw] max-w-3xl p-0 overflow-hidden">
+                  <div className="px-6 pt-5 pb-3 border-b border-heritage-500/20 text-center">
                     <DialogHeader className="items-center">
-                      <DialogTitle className="text-xl font-serif text-cordillera-cream">Terms of Service</DialogTitle>
+                      <DialogTitle className="text-xl font-serif text-heritage-100">Terms of Service</DialogTitle>
                     </DialogHeader>
-                    <p className="mt-1 text-sm text-cordillera-cream/80">Please review the terms below before creating your account.</p>
+                    <p className="mt-1 text-sm text-heritage-100/80">Please review the terms below before creating your account.</p>
                   </div>
                   <div className="px-6 py-5 max-h-[65vh] overflow-auto">
                     <div className="prose prose-invert prose-sm sm:prose-base">
@@ -482,11 +482,11 @@ export const RegisterPage = () => {
                       <p className="mt-4 text-xs opacity-70">Last updated: {new Date().getFullYear()}</p>
                     </div>
                   </div>
-                  <div className="px-6 py-3 border-t border-cordillera-gold/20 flex items-center justify-end gap-2">
+                  <div className="px-6 py-3 border-t border-heritage-500/20 flex items-center justify-end gap-2">
                     <button
                       type="button"
                       onClick={() => setShowTerms(false)}
-                      className="px-4 py-2 text-sm text-cordillera-cream/90 hover:text-cordillera-cream border border-cordillera-cream/30 hover:border-cordillera-cream/50 transition-colors"
+                      className="px-4 py-2 text-sm text-heritage-100/90 hover:text-heritage-100 border border-heritage-100/30 hover:border-heritage-100/50 transition-colors"
                     >
                       Close
                     </button>
@@ -496,12 +496,12 @@ export const RegisterPage = () => {
 
               {/* Privacy Modal */}
               <Dialog open={showPrivacy} onOpenChange={setShowPrivacy}>
-                <DialogContent className="bg-cordillera-olive/95 text-cordillera-cream border border-cordillera-gold/30 w-[95vw] max-w-3xl p-0 overflow-hidden">
-                  <div className="px-6 pt-5 pb-3 border-b border-cordillera-gold/20 text-center">
+                <DialogContent className="bg-heritage-800/95 text-heritage-100 border border-heritage-500/30 w-[95vw] max-w-3xl p-0 overflow-hidden">
+                  <div className="px-6 pt-5 pb-3 border-b border-heritage-500/20 text-center">
                     <DialogHeader className="items-center">
-                      <DialogTitle className="text-xl font-serif text-cordillera-cream">Privacy Policy</DialogTitle>
+                      <DialogTitle className="text-xl font-serif text-heritage-100">Privacy Policy</DialogTitle>
                     </DialogHeader>
-                    <p className="mt-1 text-sm text-cordillera-cream/80">Learn how we collect, use, and protect your information.</p>
+                    <p className="mt-1 text-sm text-heritage-100/80">Learn how we collect, use, and protect your information.</p>
                   </div>
                   <div className="px-6 py-5 max-h-[65vh] overflow-auto">
                     <div className="prose prose-invert prose-sm sm:prose-base">
@@ -539,11 +539,11 @@ export const RegisterPage = () => {
                       <p className="mt-4 text-xs opacity-70">Last updated: {new Date().getFullYear()}</p>
                     </div>
                   </div>
-                  <div className="px-6 py-3 border-t border-cordillera-gold/20 flex items-center justify-end gap-2">
+                  <div className="px-6 py-3 border-t border-heritage-500/20 flex items-center justify-end gap-2">
                     <button
                       type="button"
                       onClick={() => setShowPrivacy(false)}
-                      className="px-4 py-2 text-sm text-cordillera-cream/90 hover:text-cordillera-cream border border-cordillera-cream/30 hover:border-cordillera-cream/50 transition-colors"
+                      className="px-4 py-2 text-sm text-heritage-100/90 hover:text-heritage-100 border border-heritage-100/30 hover:border-heritage-100/50 transition-colors"
                     >
                       Close
                     </button>

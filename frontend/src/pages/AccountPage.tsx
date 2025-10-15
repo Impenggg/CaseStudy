@@ -103,33 +103,33 @@ const AccountPage: React.FC = () => {
   }, [user?.id, user?.role])
 
   return (
-    <div className="min-h-[60vh] px-4 py-10 max-w-5xl mx-auto text-cordillera-cream">
+    <div className="min-h-[60vh] px-4 py-10 max-w-5xl mx-auto text-heritage-100">
       <h1 className="text-3xl font-serif mb-6">Account Information</h1>
       {user ? (
-        <div className="rounded-lg border border-cordillera-gold/30 bg-cordillera-olive/40 p-6">
+        <div className="rounded-lg border border-heritage-500/30 bg-heritage-800/40 p-6">
           <div className="flex items-center space-x-4 mb-6">
-            <div className="h-12 w-12 rounded-full bg-cordillera-gold text-cordillera-olive flex items-center justify-center font-bold text-lg">
+            <div className="h-12 w-12 rounded-full bg-heritage-500 text-heritage-800 flex items-center justify-center font-bold text-lg">
               {(user.name || user.email || 'A').charAt(0).toUpperCase()}
             </div>
             <div>
               <div className="text-lg">{user.name || 'Unnamed User'}</div>
-              <div className="text-cordillera-cream/70 text-sm">{user.email}</div>
+              <div className="text-heritage-100/70 text-sm">{user.email}</div>
             </div>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4 mb-8">
-            <div className="p-4 bg-cordillera-cream/5 border border-cordillera-gold/20">
-              <div className="text-cordillera-cream/70 text-sm">Role</div>
-              <div className="text-cordillera-cream">{user.role || 'member'}</div>
+            <div className="p-4 bg-heritage-100/5 border border-heritage-500/20">
+              <div className="text-heritage-100/70 text-sm">Role</div>
+              <div className="text-heritage-100">{user.role || 'member'}</div>
             </div>
-            <div className="p-4 bg-cordillera-cream/5 border border-cordillera-gold/20">
-              <div className="text-cordillera-cream/70 text-sm">User ID</div>
-              <div className="text-cordillera-cream">{user.id}</div>
+            <div className="p-4 bg-heritage-100/5 border border-heritage-500/20">
+              <div className="text-heritage-100/70 text-sm">User ID</div>
+              <div className="text-heritage-100">{user.id}</div>
             </div>
           </div>
 
           {loading && (
-            <div className="text-cordillera-cream/70">Refreshing recent activity…</div>
+            <div className="text-heritage-100/70">Refreshing recent activity…</div>
           )}
           {error && (
             <div className="text-red-300">{error}</div>
@@ -138,31 +138,31 @@ const AccountPage: React.FC = () => {
           {/* Community Impact (Realtime) */}
           {user.role === 'artisan' || user.role === 'admin' ? (
             <div className="grid sm:grid-cols-3 gap-4 mb-8">
-              <div className="p-4 bg-cordillera-olive/60 border border-cordillera-cream/10">
-                <div className="text-cordillera-cream/80">Products</div>
+              <div className="p-4 bg-heritage-800/60 border border-heritage-100/10">
+                <div className="text-heritage-100/80">Products</div>
                 <div className="text-2xl font-serif">{myProducts.length}</div>
               </div>
-              <div className="p-4 bg-cordillera-olive/60 border border-cordillera-cream/10">
-                <div className="text-cordillera-cream/80">Stories</div>
+              <div className="p-4 bg-heritage-800/60 border border-heritage-100/10">
+                <div className="text-heritage-100/80">Stories</div>
                 <div className="text-2xl font-serif">{myStories.length}</div>
               </div>
-              <div className="p-4 bg-cordillera-olive/60 border border-cordillera-cream/10">
-                <div className="text-cordillera-cream/80">Active Campaigns</div>
+              <div className="p-4 bg-heritage-800/60 border border-heritage-100/10">
+                <div className="text-heritage-100/80">Active Campaigns</div>
                 <div className="text-2xl font-serif">{myCampaigns.filter((c: any) => (c.status || '').toLowerCase() !== 'completed').length}</div>
               </div>
             </div>
           ) : (
             <div className="grid sm:grid-cols-3 gap-4 mb-8">
-              <div className="p-4 bg-cordillera-olive/60 border border-cordillera-cream/10">
-                <div className="text-cordillera-cream/80">Pending Orders</div>
+              <div className="p-4 bg-heritage-800/60 border border-heritage-100/10">
+                <div className="text-heritage-100/80">Pending Orders</div>
                 <div className="text-2xl font-serif">{purchases.filter((o: any) => (o.status || '').toLowerCase() === 'pending').length}</div>
               </div>
-              <div className="p-4 bg-cordillera-olive/60 border border-cordillera-cream/10">
-                <div className="text-cordillera-cream/80">Stories Viewed</div>
+              <div className="p-4 bg-heritage-800/60 border border-heritage-100/10">
+                <div className="text-heritage-100/80">Stories Viewed</div>
                 <div className="text-2xl font-serif">{storiesViewed}</div>
               </div>
-              <div className="p-4 bg-cordillera-olive/60 border border-cordillera-cream/10">
-                <div className="text-cordillera-cream/80">Total Campaigns Supported</div>
+              <div className="p-4 bg-heritage-800/60 border border-heritage-100/10">
+                <div className="text-heritage-100/80">Total Campaigns Supported</div>
                 <div className="text-2xl font-serif">{donations.length}</div>
               </div>
             </div>
@@ -178,20 +178,20 @@ const AccountPage: React.FC = () => {
                     const raw = p.image_url || p.image || p.thumbnail
                     const src = resolveUrl(raw) || PLACEHOLDER_IMG
                     return (
-                      <div key={p.id} className="flex items-center gap-3 bg-cordillera-olive/30 p-3 border border-cordillera-cream/10">
+                      <div key={p.id} className="flex items-center gap-3 bg-heritage-800/30 p-3 border border-heritage-100/10">
                         <img src={src} alt={p.name} className="w-10 h-10 object-cover rounded" onError={(e) => { const t=e.currentTarget; if (t.src!==PLACEHOLDER_IMG) t.src=PLACEHOLDER_IMG }} />
                         <div className="flex-1">
                           <div className="font-medium">{p.name}</div>
-                          <div className="text-sm text-cordillera-cream/70">₱{Number(p.price ?? 0).toLocaleString()}</div>
+                          <div className="text-sm text-heritage-100/70">₱{Number(p.price ?? 0).toLocaleString()}</div>
                         </div>
                         {p.created_at && (
-                          <div className="text-xs text-cordillera-cream/60">{new Date(p.created_at).toLocaleString()}</div>
+                          <div className="text-xs text-heritage-100/60">{new Date(p.created_at).toLocaleString()}</div>
                         )}
                       </div>
                     )
                   })}
                   {myProducts.length === 0 && (
-                    <div className="text-cordillera-cream/60">No products yet.</div>
+                    <div className="text-heritage-100/60">No products yet.</div>
                   )}
                 </div>
               </section>
@@ -200,13 +200,13 @@ const AccountPage: React.FC = () => {
                 <h2 className="text-xl font-serif mb-3">Recent Stories</h2>
                 <div className="space-y-3">
                   {myStories.slice(0, 5).map((s: any) => (
-                    <div key={s.id} className="flex items-center justify-between bg-cordillera-olive/30 p-3 border border-cordillera-cream/10">
+                    <div key={s.id} className="flex items-center justify-between bg-heritage-800/30 p-3 border border-heritage-100/10">
                       <div className="font-medium">{s.title}</div>
-                      {s.created_at && <div className="text-xs text-cordillera-cream/60">{new Date(s.created_at).toLocaleString()}</div>}
+                      {s.created_at && <div className="text-xs text-heritage-100/60">{new Date(s.created_at).toLocaleString()}</div>}
                     </div>
                   ))}
                   {myStories.length === 0 && (
-                    <div className="text-cordillera-cream/60">No stories yet.</div>
+                    <div className="text-heritage-100/60">No stories yet.</div>
                   )}
                 </div>
               </section>
@@ -218,20 +218,20 @@ const AccountPage: React.FC = () => {
                     const raw = c.image_url || c.image
                     const src = resolveUrl(raw) || PLACEHOLDER_IMG
                     return (
-                      <div key={c.id} className="flex items-center gap-3 bg-cordillera-olive/30 p-3 border border-cordillera-cream/10">
+                      <div key={c.id} className="flex items-center gap-3 bg-heritage-800/30 p-3 border border-heritage-100/10">
                         <img src={src} alt={c.title} className="w-10 h-10 object-cover rounded" onError={(e) => { const t=e.currentTarget; if (t.src!==PLACEHOLDER_IMG) t.src=PLACEHOLDER_IMG }} />
                         <div className="flex-1">
                           <div className="font-medium">{c.title}</div>
-                          <div className="text-sm text-cordillera-cream/70">Goal ₱{Number(c.goal_amount ?? 0).toLocaleString()}</div>
+                          <div className="text-sm text-heritage-100/70">Goal ₱{Number(c.goal_amount ?? 0).toLocaleString()}</div>
                         </div>
                         {c.created_at && (
-                          <div className="text-xs text-cordillera-cream/60">{new Date(c.created_at).toLocaleString()}</div>
+                          <div className="text-xs text-heritage-100/60">{new Date(c.created_at).toLocaleString()}</div>
                         )}
                       </div>
                     )
                   })}
                   {myCampaigns.length === 0 && (
-                    <div className="text-cordillera-cream/60">No campaigns yet.</div>
+                    <div className="text-heritage-100/60">No campaigns yet.</div>
                   )}
                 </div>
               </section>
@@ -246,20 +246,20 @@ const AccountPage: React.FC = () => {
                     const raw = p.image_url || p.image
                     const src = resolveUrl(raw) || PLACEHOLDER_IMG
                     return (
-                      <div key={o.id} className="flex items-center gap-3 bg-cordillera-olive/30 p-3 border border-cordillera-cream/10">
+                      <div key={o.id} className="flex items-center gap-3 bg-heritage-800/30 p-3 border border-heritage-100/10">
                         <img src={src} alt={p.name || `#${o.product_id}`} className="w-10 h-10 object-cover rounded" onError={(e) => { const t=e.currentTarget; if (t.src!==PLACEHOLDER_IMG) t.src=PLACEHOLDER_IMG }} />
                         <div className="flex-1">
                           <div className="font-medium">{p.name || `Product #${o.product_id}`}</div>
-                          <div className="text-sm text-cordillera-cream/70">Qty {o.quantity}</div>
+                          <div className="text-sm text-heritage-100/70">Qty {o.quantity}</div>
                         </div>
                         {o.created_at && (
-                          <div className="text-xs text-cordillera-cream/60">{new Date(o.created_at).toLocaleString()}</div>
+                          <div className="text-xs text-heritage-100/60">{new Date(o.created_at).toLocaleString()}</div>
                         )}
                       </div>
                     )
                   })}
                   {purchases.length === 0 && (
-                    <div className="text-cordillera-cream/60">No purchases yet.</div>
+                    <div className="text-heritage-100/60">No purchases yet.</div>
                   )}
                 </div>
               </section>
@@ -268,14 +268,14 @@ const AccountPage: React.FC = () => {
                 <h2 className="text-xl font-serif mb-3">Supported Campaigns</h2>
                 <div className="space-y-3">
                   {donations.slice(0, 5).map((d: any) => (
-                    <div key={d.id} className="flex items-center justify-between bg-cordillera-olive/30 p-3 border border-cordillera-cream/10">
+                    <div key={d.id} className="flex items-center justify-between bg-heritage-800/30 p-3 border border-heritage-100/10">
                       <div className="font-medium">{d.campaign?.title || `Campaign #${d.campaign_id}`}</div>
-                      <div className="text-sm text-cordillera-cream/70">₱{Number(d.amount ?? 0).toLocaleString()}</div>
-                      {d.created_at && <div className="text-xs text-cordillera-cream/60">{new Date(d.created_at).toLocaleString()}</div>}
+                      <div className="text-sm text-heritage-100/70">₱{Number(d.amount ?? 0).toLocaleString()}</div>
+                      {d.created_at && <div className="text-xs text-heritage-100/60">{new Date(d.created_at).toLocaleString()}</div>}
                     </div>
                   ))}
                   {donations.length === 0 && (
-                    <div className="text-cordillera-cream/60">No supported campaigns yet.</div>
+                    <div className="text-heritage-100/60">No supported campaigns yet.</div>
                   )}
                 </div>
               </section>

@@ -11,8 +11,8 @@ interface BackLinkProps {
 const BackLink: React.FC<BackLinkProps> = ({ to, children = 'Back', variant = 'dark', className = '' }) => {
   const base = 'inline-flex items-center transition-colors';
   const color = variant === 'light'
-    ? 'text-cordillera-cream hover:text-cordillera-gold'
-    : 'text-cordillera-olive hover:text-cordillera-gold';
+    ? 'text-heritage-100 hover:text-heritage-500'
+    : 'text-heritage-800 hover:text-heritage-500';
 
   return (
     <Link to={to} className={`${base} ${color} ${className}`.trim()}>

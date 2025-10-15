@@ -59,17 +59,26 @@ const VerifyEmailPage = () => {
     sendLinkMutation.mutate();
   };
 
+  const handleRefreshStatus = async () => {
+    try {
+      await refreshUser();
+      // If user is now verified, the ProtectedRoute will redirect them
+    } catch (error) {
+      console.error('Failed to refresh user status:', error);
+    }
+  };
+
 
   return (
-    <div className="min-h-screen bg-cordillera-olive flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <Card className="max-w-md w-full space-y-6 text-center bg-cordillera-cream/5 border border-cordillera-gold/20 p-8">
+    <div className="min-h-screen bg-heritage-800 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <Card className="max-w-md w-full space-y-6 text-center bg-heritage-100/5 border border-heritage-500/20 p-8">
         <CardHeader>
-          <CardTitle className="text-3xl font-serif font-light text-cordillera-cream tracking-wide">
+          <CardTitle className="text-3xl font-serif font-light text-heritage-100 tracking-wide">
             Verify Your Email
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-cordillera-cream/90 mb-6">
+          <p className="text-heritage-100/90 mb-6">
             Click the verification link we emailed to <strong>{email}</strong>.
             If you didn't receive it, resend below.
           </p>
@@ -81,7 +90,7 @@ const VerifyEmailPage = () => {
           )}
 
           {errorMessage && (
-            <div className="text-sm text-red-200 bg-red-900/20 border border-red-700/40 px-3 py-2 mb-4">
+            <div className="text-sm text-error-light bg-red-900/20 border border-red-700/40 px-3 py-2 mb-4">
               {errorMessage}
             </div>
           )}
@@ -89,7 +98,7 @@ const VerifyEmailPage = () => {
           <div className="space-y-4">
             <Button
               onClick={handleResend}
-              className="w-full bg-cordillera-gold text-cordillera-olive hover:bg-cordillera-gold/90"
+              className="w-full bg-heritage-500 text-heritage-800 hover:bg-heritage-500/90"
               disabled={sendLinkMutation.isPending || countdown > 0}
             >
               {sendLinkMutation.isPending
@@ -98,9 +107,17 @@ const VerifyEmailPage = () => {
                 ? `Resend in ${countdown}s`
                 : 'Resend verification link'}
             </Button>
+            
+            <Button
+              onClick={handleRefreshStatus}
+              variant="outline"
+              className="w-full border-heritage-500/50 text-heritage-200 hover:bg-heritage-500/10"
+            >
+              Refresh Status
+            </Button>
           </div>
 
-          <div className="mt-2 text-center text-sm text-cordillera-cream/70">Check spam folder if needed.</div>
+          <div className="mt-2 text-center text-sm text-heritage-100/70">Check spam folder if needed.</div>
         </CardContent>
       </Card>
     </div>

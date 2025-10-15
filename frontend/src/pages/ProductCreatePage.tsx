@@ -78,7 +78,7 @@ const ProductCreatePage: React.FC = () => {
 
       // Navigate to product detail if id exists, else to marketplace
       if (created?.id) {
-        navigate(`/product/${created.id}`);
+        navigate(`/products/${created.id}`);
       } else {
         navigate('/marketplace');
       }
@@ -91,13 +91,13 @@ const ProductCreatePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cordillera-olive text-cordillera-cream py-10">
-      <div className="max-w-3xl mx-auto bg-cordillera-olive/40 border border-cordillera-cream/20 p-6">
+    <div className="min-h-screen bg-heritage-800 text-heritage-100 py-10">
+      <div className="max-w-3xl mx-auto bg-heritage-800/40 border border-heritage-100/20 p-6">
         <div className="mb-4">
           <BackLink
             to="/marketplace"
             variant="dark"
-            className="bg-cordillera-gold text-cordillera-olive px-4 py-1.5 hover:bg-cordillera-gold/90"
+            className="bg-heritage-500 text-heritage-800 px-4 py-1.5 hover:bg-heritage-500/90"
           >
             ← Back to Marketplace
           </BackLink>
@@ -110,54 +110,54 @@ const ProductCreatePage: React.FC = () => {
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
             <label className="block mb-1">Name</label>
-            <input name="name" value={form.name} onChange={onChange} className="w-full p-2 bg-cordillera-cream text-cordillera-olive" />
+            <input name="name" value={form.name} onChange={onChange} className="w-full p-2 bg-heritage-100 text-heritage-800" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="block mb-1">Price</label>
-              <input name="price" value={form.price} onChange={onChange} className="w-full p-2 bg-cordillera-cream text-cordillera-olive" />
+              <input name="price" value={form.price} onChange={onChange} className="w-full p-2 bg-heritage-100 text-heritage-800" />
             </div>
             <div>
               <label className="block mb-1">Category</label>
-              <input name="category" value={form.category} onChange={onChange} className="w-full p-2 bg-cordillera-cream text-cordillera-olive" />
+              <input name="category" value={form.category} onChange={onChange} className="w-full p-2 bg-heritage-100 text-heritage-800" />
             </div>
             <div>
               <label className="block mb-1">Stock Quantity</label>
-              <input name="stock_quantity" value={form.stock_quantity} onChange={onChange} className="w-full p-2 bg-cordillera-cream text-cordillera-olive" />
+              <input name="stock_quantity" value={form.stock_quantity} onChange={onChange} className="w-full p-2 bg-heritage-100 text-heritage-800" />
             </div>
           </div>
           <div>
             <label className="block mb-1">Description</label>
-            <textarea name="description" value={form.description} onChange={onChange} rows={4} className="w-full p-2 bg-cordillera-cream text-cordillera-olive" />
+            <textarea name="description" value={form.description} onChange={onChange} rows={4} className="w-full p-2 bg-heritage-100 text-heritage-800" />
           </div>
           <div>
             <label className="block mb-1">Cultural Background (optional)</label>
-            <input name="cultural_background" value={form.cultural_background} onChange={onChange} className="w-full p-2 bg-cordillera-cream text-cordillera-olive" />
+            <input name="cultural_background" value={form.cultural_background} onChange={onChange} className="w-full p-2 bg-heritage-100 text-heritage-800" />
           </div>
           <div>
             <label className="block mb-1">Materials (comma-separated)</label>
-            <input name="materials" value={form.materials} onChange={onChange} className="w-full p-2 bg-cordillera-cream text-cordillera-olive" />
+            <input name="materials" value={form.materials} onChange={onChange} className="w-full p-2 bg-heritage-100 text-heritage-800" />
           </div>
           <div>
             <label className="block mb-1">Care Instructions</label>
-            <textarea name="care_instructions" value={form.care_instructions} onChange={onChange} rows={3} className="w-full p-2 bg-cordillera-cream text-cordillera-olive" />
+            <textarea name="care_instructions" value={form.care_instructions} onChange={onChange} rows={3} className="w-full p-2 bg-heritage-100 text-heritage-800" />
           </div>
           {/* Dimensions removed by request */}
           <div>
             <label className="block mb-1">Tags (comma-separated)</label>
-            <input name="tags" value={form.tags} onChange={onChange} className="w-full p-2 bg-cordillera-cream text-cordillera-olive" />
+            <input name="tags" value={form.tags} onChange={onChange} className="w-full p-2 bg-heritage-100 text-heritage-800" />
           </div>
           {/* Removed 'Featured' checkbox; featuring is admin-controlled */}
           <div>
             <label className="block mb-1">Product Image</label>
             <input type="file" accept="image/png,image/jpeg,image/jpg,image/webp,image/jfif" onChange={onFile} className="w-full" />
-            <p className="text-xs text-cordillera-cream/70 mt-1">Max 4MB. Allowed: jpg, jpeg, png, webp, jfif.</p>
+            <p className="text-xs text-heritage-100/70 mt-1">Max 4MB. Allowed: jpg, jpeg, png, webp, jfif.</p>
           </div>
           <div className="pt-2">
-            <button disabled={submitting} className="bg-cordillera-gold text-cordillera-olive px-6 py-2 font-medium hover:bg-cordillera-gold/90 disabled:opacity-60">
+            <button disabled={submitting} className="bg-heritage-500 text-heritage-800 px-6 py-2 font-medium hover:bg-heritage-500/90 disabled:opacity-60">
               {submitting ? 'Creating…' : 'Create Product'}
             </button>
-            <button type="button" onClick={() => navigate('/marketplace')} className="ml-3 px-6 py-2 border border-cordillera-cream/40 hover:bg-cordillera-cream/10">
+            <button type="button" onClick={() => navigate('/marketplace')} className="ml-3 px-6 py-2 border border-heritage-100/40 hover:bg-heritage-100/10">
               Cancel
             </button>
           </div>

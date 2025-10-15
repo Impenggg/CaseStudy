@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
+import EnhancedCartModal from './EnhancedCartModal';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,7 +12,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const [isAccountOpen, setIsAccountOpen] = React.useState(false);
+  const [isCartOpen, setIsCartOpen] = React.useState(false);
   const { user, isAuthenticated, logout } = useAuth();
+  const { totalItems } = useCart();
   const navigate = useNavigate();
   const accountRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -55,7 +59,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               to="/" 
               className="flex-shrink-0 group relative flex items-center gap-3"
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-heritage-500 to-accent-terracotta flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
+              <div className="w-10 h-10 rounded-xl bg-heritage-500 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                 </svg>
@@ -83,7 +87,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     relative px-4 py-2 rounded-lg font-medium
                     transition-all duration-200
                     ${isActive(link.to) 
-                      ? 'text-white bg-gradient-to-br from-heritage-500 to-accent-terracotta shadow-sm' 
+                      ? 'text-white bg-heritage-500 shadow-sm' 
                       : 'text-heritage-700 hover:text-heritage-900 hover:bg-heritage-100'
                     }
                     focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage-500 focus-visible:ring-offset-2
@@ -116,7 +120,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     aria-expanded={isAccountOpen}
                   >
                     <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg 
-                      bg-gradient-to-br from-heritage-500 to-accent-terracotta 
+                      bg-heritage-500 
                       text-white font-semibold text-sm shadow-sm">
                       {(user?.name || user?.email || 'A').charAt(0).toUpperCase()}
                     </span>
@@ -216,6 +220,21 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 </div>
               ) : (
                 <div className="flex items-center gap-3">
+                  {/* Cart Icon */}
+                  <button
+                    onClick={() => setIsCartOpen(true)}
+                    className="relative p-2 text-heritage-700 hover:text-heritage-900 hover:bg-heritage-100 rounded-lg transition-all duration-200"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 5M7 13v6a2 2 0 002 2h6a2 2 0 002-2v-6" />
+                    </svg>
+                    {totalItems > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-heritage-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                        {totalItems > 99 ? '99+' : totalItems}
+                      </span>
+                    )}
+                  </button>
+                  
                   <Link 
                     to="/login" 
                     className="px-4 py-2 rounded-lg
@@ -230,13 +249,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   <Link 
                     to="/register" 
                     className="px-6 py-2.5 rounded-lg
-                      bg-gradient-to-br from-heritage-500 to-accent-terracotta
+                      bg-heritage-500
                       text-white font-semibold
                       shadow-md hover:shadow-lg
                       hover:-translate-y-0.5
                       transition-all duration-200 
                       focus:outline-none focus-visible:ring-2 focus-visible:ring-heritage-500 focus-visible:ring-offset-2
-                      before:absolute before:inset-0 before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent before:-translate-x-full before:transition-transform before:duration-500 hover:before:translate-x-full
                       relative overflow-hidden"
                   >
                     <span className="relative z-10">Create account</span>
@@ -347,6 +365,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Main Content */}
       <main className="pt-20">{children}</main>
+      
+      {/* Cart Modal */}
+      <EnhancedCartModal 
+        isOpen={isCartOpen} 
+        onClose={() => setIsCartOpen(false)} 
+      />
     </div>
   );
 };

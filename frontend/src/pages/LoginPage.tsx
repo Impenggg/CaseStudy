@@ -47,7 +47,7 @@ export const LoginPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-cordillera-olive py-10 sm:py-12">
+    <div className="relative min-h-screen bg-heritage-800 py-10 sm:py-12">
       {/* Background gradient + woven pattern */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/20" />
@@ -74,36 +74,36 @@ export const LoginPage = () => {
       <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
           {/* Hero panel */}
-          <div className="hidden lg:flex relative overflow-hidden rounded-md border border-cordillera-gold/20 bg-cordillera-cream/5">
-            <div className="absolute inset-0 bg-gradient-to-br from-cordillera-gold/10 via-transparent to-cordillera-gold/10" />
+          <div className="hidden lg:flex relative overflow-hidden rounded-md border border-heritage-500/20 bg-heritage-100/5">
+            <div className="absolute inset-0 bg-gradient-to-br from-heritage-500/10 via-transparent to-heritage-500/10" />
             <div className="relative z-10 p-10 flex flex-col justify-between">
               <div>
-                <h1 className="text-4xl font-serif text-cordillera-cream">Cordillera Weaving</h1>
-                <p className="mt-4 text-cordillera-cream/80 leading-relaxed max-w-md">
+                <h1 className="text-4xl font-serif text-heritage-100">Cordillera Weaving</h1>
+                <p className="mt-4 text-heritage-100/80 leading-relaxed max-w-md">
                   Discover stories and handcrafted pieces from the highlands. Sign in to support artisans, save favorites, and continue your journey.
                 </p>
               </div>
-              <ul className="mt-10 space-y-3 text-cordillera-cream/80 text-sm text-right self-end ml-auto max-w-md pr-2">
-                <li className="flex items-center justify-end flex-row-reverse"><span className="ml-2 text-cordillera-gold">•</span> Seamless checkout and campaign support</li>
-                <li className="flex items-center justify-end flex-row-reverse"><span className="ml-2 text-cordillera-gold">•</span> Save artworks and stories you love</li>
-                <li className="flex items-center justify-end flex-row-reverse"><span className="ml-2 text-cordillera-gold">•</span> Personalized recommendations</li>
+              <ul className="mt-10 space-y-3 text-heritage-100/80 text-sm text-right self-end ml-auto max-w-md pr-2">
+                <li className="flex items-center justify-end flex-row-reverse"><span className="ml-2 text-heritage-500">•</span> Seamless checkout and campaign support</li>
+                <li className="flex items-center justify-end flex-row-reverse"><span className="ml-2 text-heritage-500">•</span> Save artworks and stories you love</li>
+                <li className="flex items-center justify-end flex-row-reverse"><span className="ml-2 text-heritage-500">•</span> Personalized recommendations</li>
               </ul>
             </div>
           </div>
 
           {/* Form card */}
           <div className="relative">
-            <Card className="mx-auto max-w-md w-full bg-cordillera-cream/5 border border-cordillera-gold/20 backdrop-blur-sm">
+            <Card className="mx-auto max-w-md w-full bg-heritage-100/5 border border-heritage-500/20 backdrop-blur-sm">
               <CardContent className="space-y-8">
               {/* Header */}
               <div className="text-center">
-                <Link to="/" className="text-3xl sm:text-4xl font-serif font-light text-cordillera-cream tracking-wide">
+                <Link to="/" className="text-3xl sm:text-4xl font-serif font-light text-heritage-800 tracking-wide">
                   Cordillera Weaving
                 </Link>
-                <h2 className="mt-4 text-2xl sm:text-3xl font-serif font-light text-cordillera-cream">
+                <h2 className="mt-4 text-2xl sm:text-3xl font-serif font-light text-heritage-800">
                   Welcome Back
                 </h2>
-                <p className="mt-2 text-sm text-cordillera-cream/70">
+                <p className="mt-2 text-sm text-heritage-700">
                   Sign in to your account to continue your journey
                 </p>
               </div>
@@ -119,7 +119,7 @@ export const LoginPage = () => {
                       navigate('/');
                     }
                   }}
-                  className="inline-flex items-center px-4 py-2 border border-cordillera-cream/40 text-cordillera-cream/90 hover:text-cordillera-cream hover:bg-cordillera-cream/10 transition-colors"
+                  className="inline-flex items-center px-4 py-2 border border-heritage-300 text-heritage-700 hover:text-heritage-800 hover:bg-heritage-100 transition-colors"
                 >
                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -132,11 +132,11 @@ export const LoginPage = () => {
               <form className="mt-2 space-y-6" onSubmit={handleSubmit} noValidate>
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="email" className="block text-sm font-light text-cordillera-cream mb-2">
+                    <label htmlFor="email" className="block text-sm font-light text-heritage-800 mb-2">
                       Email Address
                     </label>
                     <div className="relative">
-                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-cordillera-cream/50">
+                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-heritage-100/50">
                         {/* Mail icon */}
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8m-18 8h18a2 2 0 002-2V8a2 2 0 00-2-2H3a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
                       </span>
@@ -151,7 +151,7 @@ export const LoginPage = () => {
                         onBlur={() => setTouched((t) => ({ ...t, email: true }))}
                         aria-invalid={touched.email && !emailValid}
                         aria-describedby="email-help email-error"
-                        className="w-full pl-10 pr-4 py-3 bg-cordillera-cream/10 border border-cordillera-gold/30 text-cordillera-cream placeholder-cordillera-cream/60 focus:outline-none focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 bg-white border border-heritage-300 text-heritage-800 placeholder-heritage-500 focus:outline-none focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                         placeholder="Enter your email"
                       />
                     </div>
@@ -160,11 +160,11 @@ export const LoginPage = () => {
                     )}
                   </div>
                   <div>
-                    <label htmlFor="password" className="block text-sm font-light text-cordillera-cream mb-2">
+                    <label htmlFor="password" className="block text-sm font-light text-heritage-800 mb-2">
                       Password
                     </label>
                     <div className="relative">
-                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-cordillera-cream/50">
+                      <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-heritage-100/50">
                         {/* Lock icon */}
                         <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4"/></svg>
                       </span>
@@ -180,13 +180,13 @@ export const LoginPage = () => {
                         onKeyUp={(e) => setCapsOn(e.getModifierState && e.getModifierState('CapsLock'))}
                         aria-invalid={touched.password && !passwordValid}
                         aria-describedby="password-error"
-                        className="w-full pl-10 pr-10 py-3 bg-cordillera-cream/10 border border-cordillera-gold/30 text-cordillera-cream placeholder-cordillera-cream/60 focus:outline-none focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                        className="w-full pl-10 pr-10 py-3 bg-white border border-heritage-300 text-heritage-800 placeholder-heritage-500 focus:outline-none focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                         placeholder="Enter your password"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(v => !v)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-cordillera-cream/60 hover:text-cordillera-cream"
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-heritage-600 hover:text-heritage-800"
                         aria-label={showPassword ? 'Hide password' : 'Show password'}
                       >
                         {showPassword ? (
@@ -207,15 +207,15 @@ export const LoginPage = () => {
 
                 {/* Remember/Forgot */}
                 <div className="flex items-center justify-between">
-                  <label className="inline-flex items-center text-sm text-cordillera-cream/80 select-none">
-                    <input type="checkbox" className="mr-2 accent-cordillera-gold" />
+                  <label className="inline-flex items-center text-sm text-heritage-700 select-none">
+                    <input type="checkbox" className="mr-2 accent-heritage-500" />
                     Remember me
                   </label>
-                  <a href="#" className="text-sm text-cordillera-gold hover:text-cordillera-gold/80">Forgot password?</a>
+                  <a href="#" className="text-sm text-heritage-500 hover:text-heritage-500/80">Forgot password?</a>
                 </div>
 
                 {error && (
-                  <div className="bg-red-500/10 border border-red-500/30 text-red-200 px-4 py-3 text-sm">
+                  <div className="bg-error/10 border border-red-500/30 text-error-light px-4 py-3 text-sm">
                     {error}
                   </div>
                 )}
@@ -224,16 +224,16 @@ export const LoginPage = () => {
                   <button
                     type="submit"
                     disabled={isLoading || !emailValid || !passwordValid}
-                    className="w-full bg-cordillera-gold text-cordillera-olive py-3 px-4 font-medium tracking-wide hover:bg-cordillera-gold/90 focus:outline-none focus:ring-2 focus:ring-cordillera-gold focus:ring-offset-2 focus:ring-offset-cordillera-olive transition-colors disabled:opacity-50"
+                    className="w-full bg-heritage-500 text-heritage-800 py-3 px-4 font-medium tracking-wide hover:bg-heritage-500/90 focus:outline-none focus:ring-2 focus:ring-heritage-500 focus:ring-offset-2 focus:ring-offset-heritage-800 transition-colors disabled:opacity-50"
                   >
                     {isLoading ? 'Signing In...' : 'Sign In'}
                   </button>
                 </div>
 
                 <div className="text-center">
-                  <p className="text-sm text-cordillera-cream/70">
+                  <p className="text-sm text-heritage-700">
                     Don't have an account?{' '}
-                    <Link to="/register" className="text-cordillera-gold hover:text-cordillera-gold/80 font-medium">
+                    <Link to="/register" className="text-heritage-500 hover:text-heritage-500/80 font-medium">
                       Join our community
                     </Link>
                   </p>

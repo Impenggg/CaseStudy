@@ -436,10 +436,10 @@ const CampaignDetailPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-cordillera-cream flex items-center justify-center">
+      <div className="min-h-screen bg-heritage-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cordillera-gold mx-auto mb-4"></div>
-          <p className="text-cordillera-olive">Loading campaign...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-heritage-500 mx-auto mb-4"></div>
+          <p className="text-heritage-800">Loading campaign...</p>
         </div>
       </div>
     );
@@ -447,10 +447,10 @@ const CampaignDetailPage: React.FC = () => {
 
   if (!campaign) {
     return (
-      <div className="min-h-screen bg-cordillera-cream flex items-center justify-center">
+      <div className="min-h-screen bg-heritage-100 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-serif text-cordillera-olive mb-4">Campaign Not Found</h1>
-          <Link to="/campaigns" className="text-cordillera-gold hover:text-cordillera-gold/80 transition-colors">
+          <h1 className="text-2xl font-serif text-heritage-800 mb-4">Campaign Not Found</h1>
+          <Link to="/campaigns" className="text-heritage-500 hover:text-heritage-500/80 transition-colors">
             Back to Campaigns
           </Link>
         </div>
@@ -459,15 +459,15 @@ const CampaignDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-cordillera-olive">
+    <div className="min-h-screen bg-heritage-800">
 
       {/* Breadcrumb */}
-      <div className="bg-cordillera-olive py-4">
+      <div className="bg-heritage-800 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center text-sm text-cordillera-cream/80">
-            <Link to="/campaigns" className="hover:text-cordillera-cream transition-colors">Campaigns</Link>
+          <nav className="flex items-center text-sm text-heritage-100/80">
+            <Link to="/campaigns" className="hover:text-heritage-100 transition-colors">Campaigns</Link>
             <span className="mx-2">/</span>
-            <span className="text-cordillera-cream/60">Campaign</span>
+            <span className="text-heritage-100/60">Campaign</span>
           </nav>
         </div>
       </div>
@@ -478,21 +478,21 @@ const CampaignDetailPage: React.FC = () => {
       </div>
 
       {/* Title & Meta below breadcrumb and return button */}
-      <section className="bg-cordillera-olive pb-8">
+      <section className="bg-heritage-800 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-start justify-between gap-4">
-            <h1 className="text-4xl md:text-5xl font-serif text-cordillera-cream mb-3 leading-tight">
+            <h1 className="text-4xl md:text-5xl font-serif text-heritage-100 mb-3 leading-tight">
               {campaign.title}
             </h1>
           </div>
-          <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-cordillera-cream/80">
-            <span className="text-cordillera-gold font-medium">By {campaign.organizer}</span>
+          <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-heritage-100/80">
+            <span className="text-heritage-500 font-medium">By {campaign.organizer}</span>
             {campaign.endDate && (<>
               <span className="hidden sm:inline">•</span>
               <span>{campaign.endDate}</span>
             </>)}
             <span className="hidden sm:inline">•</span>
-            <span className="bg-cordillera-gold/20 px-3 py-1 text-sm">{campaign.category || 'community'}</span>
+            <span className="bg-heritage-500/20 px-3 py-1 text-sm">{campaign.category || 'community'}</span>
           </div>
         </div>
       </section>
@@ -500,7 +500,7 @@ const CampaignDetailPage: React.FC = () => {
       {/* Removed extra header card to match StoryDetailPage */}
 
       {/* Campaign Content (cream section like StoryDetailPage) */}
-      <section className="py-16 bg-cordillera-cream">
+      <section className="py-16 bg-heritage-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content */}
@@ -511,7 +511,7 @@ const CampaignDetailPage: React.FC = () => {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-4 py-2 rounded border ${activeTab === tab ? 'bg-cordillera-gold text-cordillera-olive border-cordillera-gold' : 'bg-white text-cordillera-olive/80 border-cordillera-sage hover:bg-cordillera-cream'}`}
+                  className={`px-4 py-2 rounded border ${activeTab === tab ? 'bg-heritage-500 text-heritage-800 border-heritage-500' : 'bg-white text-heritage-800/80 border-brand-sage hover:bg-heritage-100'}`}
                 >
                   {tab === 'overview' ? 'Overview' : tab === 'transparency' ? 'Transparency' : 'Donation History'}
                 </button>
@@ -521,23 +521,23 @@ const CampaignDetailPage: React.FC = () => {
             {activeTab === 'overview' && (
               <div className="mb-10">
                 <article className="prose prose-lg max-w-none">
-                  <h2 className="text-2xl font-serif text-cordillera-olive mb-4">About This Campaign</h2>
-                  <p className="text-cordillera-olive/80 leading-relaxed">{campaign.description}</p>
+                  <h2 className="text-2xl font-serif text-heritage-800 mb-4">About This Campaign</h2>
+                  <p className="text-heritage-800/80 leading-relaxed">{campaign.description}</p>
                 </article>
-                <div className="mt-8 pt-6 border-t border-cordillera-sage/30">
-                  <h3 className="text-xl font-serif text-cordillera-olive mb-4">Campaign Details</h3>
+                <div className="mt-8 pt-6 border-t border-brand-sage/30">
+                  <h3 className="text-xl font-serif text-heritage-800 mb-4">Campaign Details</h3>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-medium text-cordillera-olive mb-2">Category</h4>
-                      <p className="text-cordillera-olive/70">{campaign.category}</p>
+                      <h4 className="font-medium text-heritage-800 mb-2">Category</h4>
+                      <p className="text-heritage-800/70">{campaign.category}</p>
                     </div>
                     <div>
-                      <h4 className="font-medium text-cordillera-olive mb-2">Organizer</h4>
-                      <p className="text-cordillera-olive/70">{campaign.organizer}</p>
+                      <h4 className="font-medium text-heritage-800 mb-2">Organizer</h4>
+                      <p className="text-heritage-800/70">{campaign.organizer}</p>
                     </div>
                     <div>
-                      <h4 className="font-medium text-cordillera-olive mb-2">End Date</h4>
-                      <p className="text-cordillera-olive/70">{campaign.endDate}</p>
+                      <h4 className="font-medium text-heritage-800 mb-2">End Date</h4>
+                      <p className="text-heritage-800/70">{campaign.endDate}</p>
                     </div>
                   </div>
                 </div>
@@ -547,80 +547,80 @@ const CampaignDetailPage: React.FC = () => {
             {activeTab === 'transparency' && (
               <div className="space-y-6">
                 {/* Summary */}
-                <div className="bg-white border border-cordillera-sage p-6">
-                  <h3 className="text-xl font-serif text-cordillera-olive mb-4">Transparency Summary</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-cordillera-olive">
+                <div className="bg-white border border-brand-sage p-6">
+                  <h3 className="text-xl font-serif text-heritage-800 mb-4">Transparency Summary</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-heritage-800">
                     <div>
-                      <div className="text-sm text-cordillera-olive/60">Total Donations</div>
+                      <div className="text-sm text-heritage-800/60">Total Donations</div>
                       <div className="text-lg font-semibold">{formatCurrency(transparency?.donations_total)}</div>
                     </div>
                     <div>
-                      <div className="text-sm text-cordillera-olive/60">Total Spent</div>
+                      <div className="text-sm text-heritage-800/60">Total Spent</div>
                       <div className="text-lg font-semibold">{formatCurrency(transparency?.expenditures_total)}</div>
                     </div>
                     <div>
-                      <div className="text-sm text-cordillera-olive/60">Utilization</div>
+                      <div className="text-sm text-heritage-800/60">Utilization</div>
                       <div className="text-lg font-semibold">{(transparency?.utilization_percentage ?? 0).toFixed(2)}%</div>
                     </div>
                     <div>
-                      <div className="text-sm text-cordillera-olive/60">Records</div>
+                      <div className="text-sm text-heritage-800/60">Records</div>
                       <div className="text-lg font-semibold">{(transparency?.expenditures_count ?? 0)} expenditures</div>
                     </div>
                   </div>
                 </div>
 
                 {/* Expenditures list */}
-                <div className="bg-white border border-cordillera-sage p-6">
-                  <h3 className="text-xl font-serif text-cordillera-olive mb-4">Expenditures</h3>
+                <div className="bg-white border border-brand-sage p-6">
+                  <h3 className="text-xl font-serif text-heritage-800 mb-4">Expenditures</h3>
                   {loadingExtras ? (
-                    <div className="text-cordillera-olive/70">Loading...</div>
+                    <div className="text-heritage-800/70">Loading...</div>
                   ) : expenditures.length === 0 ? (
-                    <div className="text-cordillera-olive/70">No expenditures recorded yet.</div>
+                    <div className="text-heritage-800/70">No expenditures recorded yet.</div>
                   ) : (
-                    <ul className="divide-y divide-cordillera-sage/30">
+                    <ul className="divide-y divide-brand-sage/30">
                       {expenditures.map(exp => (
                         <li key={exp.id} className="py-3">
                           <div className="flex items-start justify-between gap-4">
                             <div>
-                              <div className="font-medium text-cordillera-olive">{exp.title}</div>
-                              {exp.description && <div className="text-sm text-cordillera-olive/70">{exp.description}</div>}
-                              <div className="text-xs text-cordillera-olive/60">{formatDate(exp.used_at)} by {exp.creator?.name || 'Organizer'}</div>
+                              <div className="font-medium text-heritage-800">{exp.title}</div>
+                              {exp.description && <div className="text-sm text-heritage-800/70">{exp.description}</div>}
+                              <div className="text-xs text-heritage-800/60">{formatDate(exp.used_at)} by {exp.creator?.name || 'Organizer'}</div>
                               {exp.attachment_path && (
-                                <a className="text-xs text-cordillera-gold hover:underline" href={exp.attachment_path.startsWith('http') ? exp.attachment_path : `${(api.defaults.baseURL || '').replace(/\/api\/??$/, '')}/${exp.attachment_path}`} target="_blank" rel="noreferrer">View Attachment</a>
+                                <a className="text-xs text-heritage-500 hover:underline" href={exp.attachment_path.startsWith('http') ? exp.attachment_path : `${(api.defaults.baseURL || '').replace(/\/api\/??$/, '')}/${exp.attachment_path}`} target="_blank" rel="noreferrer">View Attachment</a>
                               )}
                             </div>
                             <div className="flex items-center gap-3">
-                              <div className="text-cordillera-olive font-semibold">{formatCurrency(exp.amount as any)}</div>
+                              <div className="text-heritage-800 font-semibold">{formatCurrency(exp.amount as any)}</div>
                               {isOrganizerOrAdmin && (
                                 <div className="flex items-center gap-2">
-                                  <button onClick={() => handleEditExpenditure(exp)} className="px-2 py-1 text-xs border rounded hover:bg-cordillera-cream">Edit</button>
-                                  <button onClick={() => handleDeleteExpenditure(exp)} disabled={deletingId === exp.id} className="px-2 py-1 text-xs border border-red-200 text-red-700 rounded hover:bg-red-50 disabled:opacity-60">{deletingId === exp.id ? 'Deleting…' : 'Delete'}</button>
+                                  <button onClick={() => handleEditExpenditure(exp)} className="px-2 py-1 text-xs border rounded hover:bg-heritage-100">Edit</button>
+                                  <button onClick={() => handleDeleteExpenditure(exp)} disabled={deletingId === exp.id} className="px-2 py-1 text-xs border border-error/30 text-error-dark rounded hover:bg-error/10 disabled:opacity-60">{deletingId === exp.id ? 'Deleting…' : 'Delete'}</button>
                                 </div>
                               )}
                             </div>
                           </div>
                           {isOrganizerOrAdmin && editingExp?.id === exp.id && (
-                            <div className="mt-3 p-3 bg-cordillera-cream border border-cordillera-sage rounded">
+                            <div className="mt-3 p-3 bg-heritage-100 border border-brand-sage rounded">
                               <div className="grid md:grid-cols-2 gap-3">
                                 <div className="md:col-span-2">
-                                  <label className="block text-xs text-cordillera-olive mb-1">Title</label>
-                                  <input className="w-full px-3 py-2 border border-cordillera-sage rounded" value={editExp.title} onChange={(e) => setEditExp(prev => ({ ...prev, title: e.target.value }))} />
+                                  <label className="block text-xs text-heritage-800 mb-1">Title</label>
+                                  <input className="w-full px-3 py-2 border border-brand-sage rounded" value={editExp.title} onChange={(e) => setEditExp(prev => ({ ...prev, title: e.target.value }))} />
                                 </div>
                                 <div className="md:col-span-2">
-                                  <label className="block text-xs text-cordillera-olive mb-1">Description</label>
-                                  <textarea className="w-full px-3 py-2 border border-cordillera-sage rounded" rows={3} value={editExp.description} onChange={(e) => setEditExp(prev => ({ ...prev, description: e.target.value }))} />
+                                  <label className="block text-xs text-heritage-800 mb-1">Description</label>
+                                  <textarea className="w-full px-3 py-2 border border-brand-sage rounded" rows={3} value={editExp.description} onChange={(e) => setEditExp(prev => ({ ...prev, description: e.target.value }))} />
                                 </div>
                                 <div>
-                                  <label className="block text-xs text-cordillera-olive mb-1">Amount (₱)</label>
-                                  <input type="number" className="w-full px-3 py-2 border border-cordillera-sage rounded" value={editExp.amount} onChange={(e) => setEditExp(prev => ({ ...prev, amount: e.target.value }))} />
+                                  <label className="block text-xs text-heritage-800 mb-1">Amount (₱)</label>
+                                  <input type="number" className="w-full px-3 py-2 border border-brand-sage rounded" value={editExp.amount} onChange={(e) => setEditExp(prev => ({ ...prev, amount: e.target.value }))} />
                                 </div>
                                 <div>
-                                  <label className="block text-xs text-cordillera-olive mb-1">Used At</label>
-                                  <input type="date" className="w-full px-3 py-2 border border-cordillera-sage rounded" value={editExp.used_at} onChange={(e) => setEditExp(prev => ({ ...prev, used_at: e.target.value }))} />
+                                  <label className="block text-xs text-heritage-800 mb-1">Used At</label>
+                                  <input type="date" className="w-full px-3 py-2 border border-brand-sage rounded" value={editExp.used_at} onChange={(e) => setEditExp(prev => ({ ...prev, used_at: e.target.value }))} />
                                 </div>
                               </div>
                               <div className="mt-3 flex items-center gap-2">
-                                <button disabled={updatingExp} onClick={handleUpdateExpenditure} className="px-3 py-2 bg-cordillera-gold text-cordillera-olive rounded disabled:opacity-60">{updatingExp ? 'Saving…' : 'Save'}</button>
+                                <button disabled={updatingExp} onClick={handleUpdateExpenditure} className="px-3 py-2 bg-heritage-500 text-heritage-800 rounded disabled:opacity-60">{updatingExp ? 'Saving…' : 'Save'}</button>
                                 <button onClick={handleCancelEditExpenditure} className="px-3 py-2 border rounded">Cancel</button>
                               </div>
                             </div>
@@ -633,32 +633,32 @@ const CampaignDetailPage: React.FC = () => {
 
                 {/* Add expenditure (organizer/admin only) */}
                 {isOrganizerOrAdmin && (
-                  <div className="bg-white border border-cordillera-sage p-6">
-                    <h3 className="text-xl font-serif text-cordillera-olive mb-4">Add Expenditure</h3>
+                  <div className="bg-white border border-brand-sage p-6">
+                    <h3 className="text-xl font-serif text-heritage-800 mb-4">Add Expenditure</h3>
                     <div className="grid md:grid-cols-2 gap-4">
                       <div className="md:col-span-2">
-                        <label className="block text-sm text-cordillera-olive mb-1">Title</label>
-                        <input className="w-full px-3 py-2 border border-cordillera-sage rounded" value={newExp.title} onChange={(e) => setNewExp(prev => ({ ...prev, title: e.target.value }))} />
+                        <label className="block text-sm text-heritage-800 mb-1">Title</label>
+                        <input className="w-full px-3 py-2 border border-brand-sage rounded" value={newExp.title} onChange={(e) => setNewExp(prev => ({ ...prev, title: e.target.value }))} />
                       </div>
                       <div className="md:col-span-2">
-                        <label className="block text-sm text-cordillera-olive mb-1">Description</label>
-                        <textarea className="w-full px-3 py-2 border border-cordillera-sage rounded" rows={3} value={newExp.description} onChange={(e) => setNewExp(prev => ({ ...prev, description: e.target.value }))} />
+                        <label className="block text-sm text-heritage-800 mb-1">Description</label>
+                        <textarea className="w-full px-3 py-2 border border-brand-sage rounded" rows={3} value={newExp.description} onChange={(e) => setNewExp(prev => ({ ...prev, description: e.target.value }))} />
                       </div>
                       <div>
-                        <label className="block text-sm text-cordillera-olive mb-1">Amount (₱)</label>
-                        <input type="number" className="w-full px-3 py-2 border border-cordillera-sage rounded" value={newExp.amount} onChange={(e) => setNewExp(prev => ({ ...prev, amount: e.target.value }))} />
+                        <label className="block text-sm text-heritage-800 mb-1">Amount (₱)</label>
+                        <input type="number" className="w-full px-3 py-2 border border-brand-sage rounded" value={newExp.amount} onChange={(e) => setNewExp(prev => ({ ...prev, amount: e.target.value }))} />
                       </div>
                       <div>
-                        <label className="block text-sm text-cordillera-olive mb-1">Used At</label>
-                        <input type="date" className="w-full px-3 py-2 border border-cordillera-sage rounded" value={newExp.used_at} onChange={(e) => setNewExp(prev => ({ ...prev, used_at: e.target.value }))} />
+                        <label className="block text-sm text-heritage-800 mb-1">Used At</label>
+                        <input type="date" className="w-full px-3 py-2 border border-brand-sage rounded" value={newExp.used_at} onChange={(e) => setNewExp(prev => ({ ...prev, used_at: e.target.value }))} />
                       </div>
                       <div className="md:col-span-2">
-                        <label className="block text-sm text-cordillera-olive mb-1">Attachment (optional)</label>
+                        <label className="block text-sm text-heritage-800 mb-1">Attachment (optional)</label>
                         <input type="file" onChange={(e) => setNewExp(prev => ({ ...prev, attachment: e.target.files?.[0] || null }))} />
                       </div>
                     </div>
                     <div className="mt-4">
-                      <button disabled={savingExp} onClick={handleCreateExpenditure} className="bg-cordillera-gold text-cordillera-olive px-5 py-2 rounded hover:bg-cordillera-gold/90 disabled:opacity-60">{savingExp ? 'Saving...' : 'Save Expenditure'}</button>
+                      <button disabled={savingExp} onClick={handleCreateExpenditure} className="bg-heritage-500 text-heritage-800 px-5 py-2 rounded hover:bg-heritage-500/90 disabled:opacity-60">{savingExp ? 'Saving...' : 'Save Expenditure'}</button>
                     </div>
                   </div>
                 )}
@@ -666,22 +666,22 @@ const CampaignDetailPage: React.FC = () => {
             )}
 
             {activeTab === 'history' && (
-              <div className="bg-white border border-cordillera-sage p-6">
-                <h3 className="text-xl font-serif text-cordillera-olive mb-4">Recent Supporters</h3>
+              <div className="bg-white border border-brand-sage p-6">
+                <h3 className="text-xl font-serif text-heritage-800 mb-4">Recent Supporters</h3>
                 {loadingExtras ? (
-                  <div className="text-cordillera-olive/70">Loading...</div>
+                  <div className="text-heritage-800/70">Loading...</div>
                 ) : donations.length === 0 ? (
-                  <div className="text-cordillera-olive/70">No donations yet. Be the first to support!</div>
+                  <div className="text-heritage-800/70">No donations yet. Be the first to support!</div>
                 ) : (
-                  <ul className="divide-y divide-cordillera-sage/30">
+                  <ul className="divide-y divide-brand-sage/30">
                     {donations.map(d => (
                       <li key={d.id} className="py-3 flex items-center justify-between">
                         <div>
-                          <div className="font-medium text-cordillera-olive">{d.anonymous ? 'Anonymous' : (d.donor?.name || 'Supporter')}</div>
-                          {d.message && <div className="text-sm text-cordillera-olive/70">"{d.message}"</div>}
-                          <div className="text-xs text-cordillera-olive/60">{formatDate(d.created_at)}</div>
+                          <div className="font-medium text-heritage-800">{d.anonymous ? 'Anonymous' : (d.donor?.name || 'Supporter')}</div>
+                          {d.message && <div className="text-sm text-heritage-800/70">"{d.message}"</div>}
+                          <div className="text-xs text-heritage-800/60">{formatDate(d.created_at)}</div>
                         </div>
-                        <div className="text-cordillera-olive font-semibold">{formatCurrency(d.amount)}</div>
+                        <div className="text-heritage-800 font-semibold">{formatCurrency(d.amount)}</div>
                       </li>
                     ))}
                   </ul>
@@ -692,22 +692,22 @@ const CampaignDetailPage: React.FC = () => {
 
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-cordillera-cream border border-cordillera-sage p-6 sticky top-6">
-              <h3 className="text-xl font-serif text-cordillera-olive mb-4">Support This Campaign</h3>
+            <div className="bg-heritage-100 border border-brand-sage p-6 sticky top-6">
+              <h3 className="text-xl font-serif text-heritage-800 mb-4">Support This Campaign</h3>
               
               {/* Progress */}
               <div className="mb-6">
-                <div className="flex justify-between text-cordillera-olive/80 text-sm mb-2">
+                <div className="flex justify-between text-heritage-800/80 text-sm mb-2">
                   <span>{getProgressPercentage(campaign.currentAmount, campaign.goalAmount).toFixed(0)}% funded</span>
                   <span>₱{campaign.currentAmount.toLocaleString()}</span>
                 </div>
-                <div className="h-3 bg-cordillera-sage/30 rounded-full overflow-hidden mb-2">
+                <div className="h-3 bg-brand-sage/30 rounded-full overflow-hidden mb-2">
                   <div 
-                    className="h-full bg-cordillera-gold rounded-full transition-all duration-500"
+                    className="h-full bg-heritage-500 rounded-full transition-all duration-500"
                     style={{ width: `${getProgressPercentage(campaign.currentAmount, campaign.goalAmount)}%` }}
                   ></div>
                 </div>
-                <p className="text-sm text-cordillera-olive/60">Goal: ₱{campaign.goalAmount.toLocaleString()}</p>
+                <p className="text-sm text-heritage-800/60">Goal: ₱{campaign.goalAmount.toLocaleString()}</p>
               </div>
 
              {/* Support Button */}
@@ -715,15 +715,15 @@ const CampaignDetailPage: React.FC = () => {
   <button
     onClick={handleSupport}
     disabled={(user ? (user as any).role !== 'customer' : false) || (((campaign as any)?.status) && (campaign as any).status !== 'active')}
-    className="w-full bg-cordillera-gold text-cordillera-olive py-4 px-6 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+    className="w-full bg-heritage-500 text-heritage-800 py-4 px-6 rounded-lg font-medium hover:bg-heritage-500/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
   >
     Support This Campaign
   </button>
   {(user && !isCustomer) && (
-    <p className="mt-2 text-xs text-cordillera-olive/70">Only customers can support campaigns.</p>
+    <p className="mt-2 text-xs text-heritage-800/70">Only customers can support campaigns.</p>
   )}
   {(((campaign as any)?.status) && (campaign as any).status !== 'active') && (
-    <p className="mt-2 text-xs text-cordillera-olive/70">This campaign is not active.</p>
+    <p className="mt-2 text-xs text-heritage-800/70">This campaign is not active.</p>
   )}
 </>
             </div>
@@ -739,49 +739,49 @@ const CampaignDetailPage: React.FC = () => {
           <div className="absolute inset-0 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-2xl w-full max-w-md">
               <div className="p-6">
-                <h3 className="text-xl font-serif text-cordillera-olive mb-4">Support This Campaign</h3>
+                <h3 className="text-xl font-serif text-heritage-800 mb-4">Support This Campaign</h3>
                 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-cordillera-olive mb-2">Support Amount (₱)</label>
+                    <label className="block text-sm font-medium text-heritage-800 mb-2">Support Amount (₱)</label>
                     <input
                       type="number"
                       value={supportAmount}
                       onChange={(e) => setSupportAmount(parseInt(e.target.value) || 0)}
-                      className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                      className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                       min="100"
                       step="100"
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-cordillera-olive mb-2">Your Name</label>
+                    <label className="block text-sm font-medium text-heritage-800 mb-2">Your Name</label>
                     <input
                       type="text"
                       value={supportForm.name}
                       onChange={(e) => setSupportForm(prev => ({ ...prev, name: e.target.value }))}
-                      className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                      className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                       placeholder="Enter your name"
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-cordillera-olive mb-2">Email</label>
+                    <label className="block text-sm font-medium text-heritage-800 mb-2">Email</label>
                     <input
                       type="email"
                       value={supportForm.email}
                       onChange={(e) => setSupportForm(prev => ({ ...prev, email: e.target.value }))}
-                      className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                      className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                       placeholder="Enter your email"
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-cordillera-olive mb-2">Message (Optional)</label>
+                    <label className="block text-sm font-medium text-heritage-800 mb-2">Message (Optional)</label>
                     <textarea
                       value={supportForm.message}
                       onChange={(e) => setSupportForm(prev => ({ ...prev, message: e.target.value }))}
-                      className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                      className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                       rows={3}
                       placeholder="Leave a message of support..."
                     />
@@ -791,13 +791,13 @@ const CampaignDetailPage: React.FC = () => {
                 <div className="flex gap-3 mt-6">
                   <button
                     onClick={() => setShowSupportModal(false)}
-                    className="flex-1 px-4 py-3 border border-cordillera-olive/20 rounded-lg text-cordillera-olive hover:bg-cordillera-olive/5 transition-colors"
+                    className="flex-1 px-4 py-3 border border-heritage-800/20 rounded-lg text-heritage-800 hover:bg-heritage-800/5 transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSupportSubmit}
-                    className="flex-1 bg-cordillera-gold text-cordillera-olive px-4 py-3 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
+                    className="flex-1 bg-heritage-500 text-heritage-800 px-4 py-3 rounded-lg font-medium hover:bg-heritage-500/90 transition-colors"
                   >
                     Support with ₱{supportAmount.toLocaleString()}
                   </button>

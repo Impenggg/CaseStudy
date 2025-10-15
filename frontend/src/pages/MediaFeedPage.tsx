@@ -186,10 +186,10 @@ const MediaFeedPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cordillera-cream">
+    <div className="min-h-screen bg-heritage-100">
       <div className="max-w-6xl mx-auto py-6 px-4">
-        <div className="sticky top-0 z-10 -mx-4 px-4 py-3 bg-cordillera-cream/90 backdrop-blur supports-[backdrop-filter]:bg-cordillera-cream/70 border-b border-cordillera-sage/30">
-          <h1 className="text-2xl font-serif text-cordillera-olive">Media Creation</h1>
+        <div className="sticky top-0 z-10 -mx-4 px-4 py-3 bg-heritage-100/90 backdrop-blur supports-[backdrop-filter]:bg-heritage-100/70 border-b border-brand-sage/30">
+          <h1 className="text-2xl font-serif text-heritage-800">Media Creation</h1>
         </div>
         <div className="h-4" />
 
@@ -203,17 +203,17 @@ const MediaFeedPage: React.FC = () => {
                 onClick={() => setIsComposerOpen(true)}
                 className="w-full text-left card-surface rounded-md p-4"
               >
-                <div className="text-cordillera-olive/70">Share something…</div>
+                <div className="text-heritage-800/70">Share something…</div>
               </button>
             )}
 
             {/* User's images grid (sticky) */}
             <div className="sticky top-20 self-start">
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-lg font-medium text-cordillera-olive">Your images</h2>
-                {loadingMyPosts && <span className="text-sm text-cordillera-olive/60">Loading…</span>}
+                <h2 className="text-lg font-medium text-heritage-800">Your images</h2>
+                {loadingMyPosts && <span className="text-sm text-heritage-800/60">Loading…</span>}
               </div>
-              {myError && <div className="text-sm text-red-700 mb-2">{myError}</div>}
+              {myError && <div className="text-sm text-error-dark mb-2">{myError}</div>}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {myPosts.map((p) => {
                   const isApproved = (p as any).moderation_status === 'approved' || !(p as any).moderation_status;
@@ -228,18 +228,17 @@ const MediaFeedPage: React.FC = () => {
                         className="w-full h-32 object-cover transform transition-transform duration-300 group-hover:scale-[1.03]"
                         onError={(e) => {
                           const target = e.currentTarget as HTMLImageElement;
-                          const q = encodeURIComponent('handicraft');
-                          const fallback = `https://source.unsplash.com/400x300/?${q}`;
+                          const fallback = `/api/placeholder/400/300`;
                           if (target.src !== fallback) target.src = fallback;
                         }}
                       />
-                      <div className="pointer-events-none absolute inset-0 bg-cordillera-olive/0 group-hover:bg-cordillera-olive/5 transition-colors" />
+                      <div className="pointer-events-none absolute inset-0 bg-heritage-800/0 group-hover:bg-heritage-800/5 transition-colors" />
                       {/* Delete button (visible for customers/artisans) */}
                       {!isAdmin && (
                         <button
                           type="button"
                           onClick={() => deleteMyPost(p.id)}
-                          className="absolute top-2 left-2 z-10 inline-flex items-center justify-center w-8 h-8 rounded-md bg-white/90 text-red-600 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30"
+                          className="absolute top-2 left-2 z-10 inline-flex items-center justify-center w-8 h-8 rounded-md bg-white/90 text-error shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/30"
                           title="Delete post"
                         >
                           <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -252,7 +251,7 @@ const MediaFeedPage: React.FC = () => {
                       {!isApproved && (
                         <div className="absolute top-2 right-2 z-10">
                           <div className={`px-2 py-1 text-xs rounded-full font-medium ${
-                            isPending ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white'
+                            isPending ? 'bg-yellow-500 text-white' : 'bg-error text-white'
                           }`}>
                             {isPending ? 'Pending' : 'Rejected'}
                           </div>
@@ -271,7 +270,7 @@ const MediaFeedPage: React.FC = () => {
                   );
                 })}
                 {!loadingMyPosts && myPosts.length === 0 && !myError && (
-                  <div className="col-span-2 sm:col-span-3 text-center text-cordillera-olive/70 text-sm card-surface rounded-md p-6">
+                  <div className="col-span-2 sm:col-span-3 text-center text-heritage-800/70 text-sm card-surface rounded-md p-6">
                     No images yet. Share your first one using the composer above.
                   </div>
                 )}
@@ -281,7 +280,7 @@ const MediaFeedPage: React.FC = () => {
 
           {/* Right: 2/3 column (feed) */}
           <div className="lg:col-span-2">
-            {feedError && <div className="text-sm text-red-700 mb-3">{feedError}</div>}
+            {feedError && <div className="text-sm text-error-dark mb-3">{feedError}</div>}
 
             {/* Loading placeholder (initial) */}
             {loadingFeed && feed.length === 0 && (
@@ -294,13 +293,13 @@ const MediaFeedPage: React.FC = () => {
 
             {/* Empty state */}
             {!loadingFeed && feed.length === 0 && !feedError && (
-              <div className="card-surface rounded-md p-8 text-center text-cordillera-olive/70">
-                <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-cordillera-gold/15 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-cordillera-gold" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <div className="card-surface rounded-md p-8 text-center text-heritage-800/70">
+                <div className="mx-auto mb-3 w-12 h-12 rounded-full bg-heritage-500/15 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-heritage-500" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-cordillera-olive mb-1">No posts yet</h3>
+                <h3 className="text-lg font-medium text-heritage-800 mb-1">No posts yet</h3>
                 <p>Be the first to share an image with a caption using the composer.</p>
               </div>
             )}
@@ -320,15 +319,15 @@ const MediaFeedPage: React.FC = () => {
                       <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] rounded-lg z-10 flex items-center justify-center">
                         <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg">
                           <div className="flex items-center gap-2">
-                            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 text-heritage-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m0 0v2m0-2h2m-2 0H10m9-9a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span className="text-sm font-medium text-gray-700">
+                            <span className="text-sm font-medium text-heritage-700">
                               {isPending ? 'Pending Review' : isRejected ? 'Rejected' : 'Under Review'}
                             </span>
                           </div>
                           {isOwner && (
-                            <p className="text-xs text-gray-600 mt-1">
+                            <p className="text-xs text-heritage-700 mt-1">
                               {isPending ? 'Your post is awaiting admin approval' : 'Your post was rejected by admin'}
                             </p>
                           )}
@@ -336,22 +335,22 @@ const MediaFeedPage: React.FC = () => {
                       </div>
                     )}
                     
-                    <div className="p-3 border-b border-cordillera-sage/20 flex items-center justify-between">
+                    <div className="p-3 border-b border-brand-sage/20 flex items-center justify-between">
                       <div>
-                        <div className="text-sm font-medium text-cordillera-olive">{post.user?.name || 'User'}</div>
-                        <div className="text-xs text-cordillera-olive/60">{new Date(post.created_at).toLocaleString()}</div>
+                        <div className="text-sm font-medium text-heritage-800">{post.user?.name || 'User'}</div>
+                        <div className="text-xs text-heritage-800/60">{new Date(post.created_at).toLocaleString()}</div>
                       </div>
                       {/* Status Badge for Owner */}
                       {isOwner && !isApproved && (
                         <div className={`px-2 py-1 text-xs rounded-full ${
-                          isPending ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                          isPending ? 'bg-yellow-100 text-yellow-800' : 'bg-error/10 text-red-800'
                         }`}>
                           {isPending ? 'Pending' : 'Rejected'}
                         </div>
                       )}
                     </div>
                     <div className="p-3">
-                      {post.caption && <p className="mb-2 text-cordillera-olive">{post.caption}</p>}
+                      {post.caption && <p className="mb-2 text-heritage-800">{post.caption}</p>}
                       <div className="relative overflow-hidden rounded-md group">
                         <img
                           src={post.image_url}
@@ -359,17 +358,16 @@ const MediaFeedPage: React.FC = () => {
                           className="w-full object-cover transform transition-transform duration-500 group-hover:scale-[1.02]"
                           onError={(e) => {
                             const target = e.currentTarget as HTMLImageElement;
-                            const q = encodeURIComponent('handicraft');
-                            const fallback = `https://source.unsplash.com/800x600/?${q}`;
+                            const fallback = `/api/placeholder/800/600`;
                             if (target.src !== fallback) target.src = fallback;
                           }}
                         />
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="pointer-events-none absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
                     </div>
-                    <div className="px-3 pb-3 flex items-center gap-4 text-sm text-cordillera-olive/80">
+                    <div className="px-3 pb-3 flex items-center gap-4 text-sm text-heritage-800/80">
                       <button
-                        className="hover:text-cordillera-olive transition-colors"
+                        className="hover:text-heritage-800 transition-colors"
                         onClick={() => toggleLike(post.id, i)}
                       >
                         👍 Like {post.reactions_count ? `(${post.reactions_count})` : ''}
@@ -392,7 +390,7 @@ const MediaFeedPage: React.FC = () => {
                           {!commentApproved && (
                             <div className="absolute inset-0 bg-black/10 backdrop-blur-[1px] rounded flex items-center justify-center z-10">
                               <div className="bg-white/90 px-2 py-1 rounded text-xs">
-                                <span className="text-gray-600">
+                                <span className="text-heritage-700">
                                   {commentPending ? 'Pending' : commentRejected ? 'Rejected' : 'Under Review'}
                                 </span>
                               </div>
@@ -401,13 +399,13 @@ const MediaFeedPage: React.FC = () => {
                           
                           <div className="flex items-start gap-2">
                             <div className="flex-1">
-                              <span className="font-medium text-cordillera-olive">{c.user?.name || 'User'}</span>{' '}
-                              <span className="text-cordillera-olive/80">{c.body}</span>
+                              <span className="font-medium text-heritage-800">{c.user?.name || 'User'}</span>{' '}
+                              <span className="text-heritage-800/80">{c.body}</span>
                             </div>
                             {/* Status Badge for Comment Owner */}
                             {isCommentOwner && !commentApproved && (
                               <div className={`px-1 py-0.5 text-xs rounded ${
-                                commentPending ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
+                                commentPending ? 'bg-yellow-100 text-yellow-700' : 'bg-error/10 text-error-dark'
                               }`}>
                                 {commentPending ? 'P' : 'R'}
                               </div>
@@ -425,16 +423,16 @@ const MediaFeedPage: React.FC = () => {
             {/* Infinite scroll sentinel + fallback button */}
             <div ref={sentinelRef} className="h-1" />
             <div className="mt-8 text-center">
-              {loadingFeed && <div className="text-cordillera-olive/60 text-sm">Loading…</div>}
+              {loadingFeed && <div className="text-heritage-800/60 text-sm">Loading…</div>}
               {hasMore && !loadingFeed && (
                 <button
                   onClick={() => loadFeed(page + 1)}
-                  className={`border border-cordillera-gold text-cordillera-olive px-4 py-2 rounded-md hover:bg-cordillera-gold/10 shadow-sm hover:shadow-md transition-shadow`}
+                  className={`border border-heritage-500 text-heritage-800 px-4 py-2 rounded-md hover:bg-heritage-500/10 shadow-sm hover:shadow-md transition-shadow`}
                 >
                   Load more
                 </button>
               )}
-              {!hasMore && <div className="text-cordillera-olive/60 text-sm">No more posts</div>}
+              {!hasMore && <div className="text-heritage-800/60 text-sm">No more posts</div>}
             </div>
           </div>
         </div>
@@ -454,14 +452,14 @@ const MediaFeedPage: React.FC = () => {
           />
           {/* Dialog */}
           <div
-            className="relative w-full max-w-lg mx-4 rounded-lg shadow-xl border border-cordillera-olive/15 bg-cordillera-cream text-cordillera-olive dark:bg-cordillera-olive/90 dark:text-cordillera-cream"
+            className="relative w-full max-w-lg mx-4 rounded-lg shadow-xl border border-heritage-800/15 bg-heritage-100 text-heritage-800 dark:bg-heritage-800/90 dark:text-heritage-100"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="px-5 py-4 border-b border-cordillera-sage/20 flex items-center justify-between">
-              <h3 className="text-lg font-medium text-cordillera-olive">Create post</h3>
+            <div className="px-5 py-4 border-b border-brand-sage/20 flex items-center justify-between">
+              <h3 className="text-lg font-medium text-heritage-800">Create post</h3>
               <button
                 onClick={() => setIsComposerOpen(false)}
-                className="text-cordillera-olive/70 hover:text-cordillera-olive"
+                className="text-heritage-800/70 hover:text-heritage-800"
                 aria-label="Close"
               >
                 ✕
@@ -472,7 +470,7 @@ const MediaFeedPage: React.FC = () => {
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
                 placeholder="Say something about your image…"
-                className="w-full border border-cordillera-sage/30 rounded-md p-2 mb-3 focus:outline-none focus:ring-1 focus:ring-cordillera-gold"
+                className="w-full border border-brand-sage/30 rounded-md p-2 mb-3 focus:outline-none focus:ring-1 focus:ring-heritage-500"
                 rows={3}
               />
 
@@ -495,7 +493,7 @@ const MediaFeedPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => fileRef.current?.click()}
-                    className="inline-flex items-center gap-2 border border-cordillera-gold text-cordillera-olive px-3 py-1.5 rounded-md hover:bg-cordillera-gold/10 transition-colors"
+                    className="inline-flex items-center gap-2 border border-heritage-500 text-heritage-800 px-3 py-1.5 rounded-md hover:bg-heritage-500/10 transition-colors"
                   >
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -505,11 +503,11 @@ const MediaFeedPage: React.FC = () => {
 
                   {file && (
                     <>
-                      <span className="text-cordillera-olive/70 truncate max-w-[10rem] sm:max-w-[14rem]" title={file.name}>{file.name}</span>
+                      <span className="text-heritage-800/70 truncate max-w-[10rem] sm:max-w-[14rem]" title={file.name}>{file.name}</span>
                       <button
                         type="button"
                         onClick={() => { setFile(null); if (fileRef.current) fileRef.current.value = ''; }}
-                        className="inline-flex items-center gap-1 text-cordillera-olive/80 hover:text-cordillera-olive px-2 py-1 rounded-md hover:bg-cordillera-sage/20 whitespace-nowrap"
+                        className="inline-flex items-center gap-1 text-heritage-800/80 hover:text-heritage-800 px-2 py-1 rounded-md hover:bg-brand-sage/20 whitespace-nowrap"
                       >
                         <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
@@ -524,7 +522,7 @@ const MediaFeedPage: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setIsComposerOpen(false)}
-                    className="px-4 py-2 rounded-md border border-cordillera-sage/40 text-cordillera-olive hover:bg-cordillera-sage/10"
+                    className="px-4 py-2 rounded-md border border-brand-sage/40 text-heritage-800 hover:bg-brand-sage/10"
                   >
                     Cancel
                   </button>
@@ -533,8 +531,8 @@ const MediaFeedPage: React.FC = () => {
                     disabled={posting || !file}
                     className={`inline-flex items-center gap-2 px-4 py-2 rounded-md shadow-sm transition-colors whitespace-nowrap ${
                       posting || !file
-                        ? 'bg-cordillera-olive/30 text-white cursor-not-allowed'
-                        : 'bg-cordillera-gold text-cordillera-olive hover:bg-cordillera-gold/90'
+                        ? 'bg-heritage-800/30 text-white cursor-not-allowed'
+                        : 'bg-heritage-500 text-heritage-800 hover:bg-heritage-500/90'
                     }`}
                   >
                     {posting ? (
@@ -556,7 +554,7 @@ const MediaFeedPage: React.FC = () => {
                 </div>
               </div>
 
-              {postError && <p className="text-sm text-red-700 mt-3">{postError}</p>}
+              {postError && <p className="text-sm text-error-dark mt-3">{postError}</p>}
             </div>
           </div>
         </div>
@@ -575,7 +573,7 @@ const CommentBox: React.FC<{ onSubmit: (body: string) => void }> = ({ onSubmit }
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder="Write a comment…"
-        className="flex-1 border border-cordillera-sage/30 rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-cordillera-gold"
+        className="flex-1 border border-brand-sage/30 rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-heritage-500"
       />
       <button
         onClick={() => {
@@ -586,7 +584,7 @@ const CommentBox: React.FC<{ onSubmit: (body: string) => void }> = ({ onSubmit }
         }}
         disabled={isAdmin}
         title={isAdmin ? 'Admin accounts cannot post comments.' : undefined}
-        className={`text-sm px-3 py-1 rounded-md ${isAdmin ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-cordillera-gold text-cordillera-olive hover:bg-cordillera-gold/90'}`}
+        className={`text-sm px-3 py-1 rounded-md ${isAdmin ? 'bg-heritage-200 text-heritage-600 cursor-not-allowed' : 'bg-heritage-500 text-heritage-800 hover:bg-heritage-500/90'}`}
       >
         Send
       </button>
@@ -597,16 +595,16 @@ const CommentBox: React.FC<{ onSubmit: (body: string) => void }> = ({ onSubmit }
 // Lightweight loading skeleton for feed posts
 const SkeletonPost: React.FC = () => {
   return (
-    <div className="bg-white rounded-md shadow-sm border border-cordillera-sage/30 p-3 animate-pulse">
+    <div className="bg-white rounded-md shadow-sm border border-brand-sage/30 p-3 animate-pulse">
       <div className="flex items-center justify-between mb-3">
-        <div className="h-4 bg-cordillera-sage/30 rounded w-32" />
-        <div className="h-3 bg-cordillera-sage/20 rounded w-24" />
+        <div className="h-4 bg-brand-sage/30 rounded w-32" />
+        <div className="h-3 bg-brand-sage/20 rounded w-24" />
       </div>
-      <div className="h-3 bg-cordillera-sage/30 rounded w-3/4 mb-2" />
-      <div className="h-64 bg-cordillera-sage/20 rounded" />
+      <div className="h-3 bg-brand-sage/30 rounded w-3/4 mb-2" />
+      <div className="h-64 bg-brand-sage/20 rounded" />
       <div className="flex gap-4 mt-3">
-        <div className="h-4 bg-cordillera-sage/30 rounded w-16" />
-        <div className="h-4 bg-cordillera-sage/20 rounded w-12" />
+        <div className="h-4 bg-brand-sage/30 rounded w-16" />
+        <div className="h-4 bg-brand-sage/20 rounded w-12" />
       </div>
     </div>
   );

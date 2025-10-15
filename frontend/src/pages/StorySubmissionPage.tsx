@@ -94,27 +94,27 @@ const StorySubmissionPage: React.FC = () => {
 
   if (showSuccess) {
     return (
-      <div className="min-h-screen bg-cordillera-cream flex items-center justify-center">
+      <div className="min-h-screen bg-heritage-100 flex items-center justify-center">
         <div className="max-w-md mx-auto text-center">
           <div className="w-16 h-16 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-2xl font-serif text-cordillera-olive mb-4">Story Submitted Successfully!</h1>
-          <p className="text-cordillera-olive/70 mb-8">
+          <h1 className="text-2xl font-serif text-heritage-800 mb-4">Story Submitted Successfully!</h1>
+          <p className="text-heritage-800/70 mb-8">
             Thank you for sharing your story. Our team will review it and get back to you soon.
           </p>
           <div className="space-y-3">
             <Link
               to="/my-stories"
-              className="block w-full bg-cordillera-gold text-cordillera-olive py-3 px-6 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
+              className="block w-full bg-heritage-500 text-heritage-800 py-3 px-6 rounded-lg font-medium hover:bg-heritage-500/90 transition-colors"
             >
               Go to My Stories
             </Link>
             <button
               onClick={() => setShowSuccess(false)}
-              className="block w-full border border-cordillera-olive/20 text-cordillera-olive py-3 px-6 rounded-lg font-medium hover:bg-cordillera-olive/5 transition-colors"
+              className="block w-full border border-heritage-800/20 text-heritage-800 py-3 px-6 rounded-lg font-medium hover:bg-heritage-800/5 transition-colors"
             >
               Submit Another Story
             </button>
@@ -125,14 +125,14 @@ const StorySubmissionPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-cordillera-cream">
+    <div className="min-h-screen bg-heritage-100">
       {/* Breadcrumb */}
-      <div className="bg-cordillera-olive py-4">
+      <div className="bg-heritage-800 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-2 text-cordillera-cream">
-            <Link to="/stories" className="hover:text-cordillera-gold transition-colors">Stories</Link>
+          <div className="flex items-center space-x-2 text-heritage-100">
+            <Link to="/stories" className="hover:text-heritage-500 transition-colors">Stories</Link>
             <span>/</span>
-            <span className="text-cordillera-cream/60">Submit Story</span>
+            <span className="text-heritage-100/60">Submit Story</span>
           </div>
         </div>
       </div>
@@ -145,10 +145,10 @@ const StorySubmissionPage: React.FC = () => {
       {/* Header */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <div className="text-center">
-          <h1 className="text-4xl md:text-5xl font-serif text-cordillera-olive mb-6">
+          <h1 className="text-4xl md:text-5xl font-serif text-heritage-800 mb-6">
             Share Your Story
           </h1>
-          <p className="text-xl text-cordillera-olive/70 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-heritage-800/70 max-w-2xl mx-auto leading-relaxed">
             Help preserve Cordillera heritage by sharing your weaving journey, techniques, 
             or cultural insights with our community.
           </p>
@@ -160,13 +160,13 @@ const StorySubmissionPage: React.FC = () => {
         <div className="bg-white rounded-lg shadow-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {errorMsg && (
-              <div className="p-3 rounded bg-red-50 text-red-700 border border-red-200">
+              <div className="p-3 rounded bg-error/10 text-error-dark border border-error/30">
                 {errorMsg}
               </div>
             )}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-cordillera-olive mb-2">
+                <label className="block text-sm font-medium text-heritage-800 mb-2">
                   Story Title *
                 </label>
                 <input
@@ -175,13 +175,13 @@ const StorySubmissionPage: React.FC = () => {
                   value={formData.title}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                   placeholder="Enter your story title"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-cordillera-olive mb-2">
+                <label className="block text-sm font-medium text-heritage-800 mb-2">
                   Category *
                 </label>
                 <select
@@ -189,7 +189,7 @@ const StorySubmissionPage: React.FC = () => {
                   value={formData.category}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                 >
                   <option value="">Select a category</option>
                   {categories.map(category => (
@@ -201,7 +201,7 @@ const StorySubmissionPage: React.FC = () => {
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-cordillera-olive mb-2">
+                <label className="block text-sm font-medium text-heritage-800 mb-2">
                   Author Name *
                 </label>
                 <input
@@ -210,13 +210,13 @@ const StorySubmissionPage: React.FC = () => {
                   value={formData.author}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                   placeholder="Enter your name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-cordillera-olive mb-2">
+                <label className="block text-sm font-medium text-heritage-800 mb-2">
                   Email *
                 </label>
                 <input
@@ -225,14 +225,14 @@ const StorySubmissionPage: React.FC = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                   placeholder="Enter your email"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-cordillera-olive mb-2">
+              <label className="block text-sm font-medium text-heritage-800 mb-2">
                 Story Content *
               </label>
               <textarea
@@ -241,14 +241,14 @@ const StorySubmissionPage: React.FC = () => {
                 onChange={handleInputChange}
                 required
                 rows={8}
-                className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                 placeholder="Share your story, techniques, or cultural insights..."
               />
             </div>
 
             <div className="grid md:grid-cols-1 gap-6">
               <div>
-                <label className="block text-sm font-medium text-cordillera-olive mb-2">
+                <label className="block text-sm font-medium text-heritage-800 mb-2">
                   Estimated Read Time (minutes)
                 </label>
                 <input
@@ -258,14 +258,14 @@ const StorySubmissionPage: React.FC = () => {
                   onChange={handleInputChange}
                   min="1"
                   max="60"
-                  className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                 />
               </div>
             </div>
 
-            <div className="bg-cordillera-sage/20 rounded-lg p-6">
-              <h3 className="text-lg font-medium text-cordillera-olive mb-3">Submission Guidelines</h3>
-              <ul className="text-sm text-cordillera-olive/70 space-y-2">
+            <div className="bg-brand-sage/20 rounded-lg p-6">
+              <h3 className="text-lg font-medium text-heritage-800 mb-3">Submission Guidelines</h3>
+              <ul className="text-sm text-heritage-800/70 space-y-2">
                 <li>• Stories should be authentic and related to Cordillera weaving heritage</li>
                 <li>• Include personal experiences, techniques, or cultural insights</li>
                 <li>• Respect cultural traditions and community values</li>
@@ -276,14 +276,14 @@ const StorySubmissionPage: React.FC = () => {
             <div className="flex gap-4 pt-6">
               <Link
                 to="/stories"
-                className="flex-1 px-6 py-3 border border-cordillera-olive/20 rounded-lg text-cordillera-olive hover:bg-cordillera-olive/5 transition-colors text-center"
+                className="flex-1 px-6 py-3 border border-heritage-800/20 rounded-lg text-heritage-800 hover:bg-heritage-800/5 transition-colors text-center"
               >
                 Cancel
               </Link>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 bg-cordillera-gold text-cordillera-olive py-3 px-6 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-heritage-500 text-heritage-800 py-3 px-6 rounded-lg font-medium hover:bg-heritage-500/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">

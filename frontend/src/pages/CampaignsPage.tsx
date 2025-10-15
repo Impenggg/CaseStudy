@@ -160,20 +160,20 @@ const CampaignsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cordillera-cream flex items-center justify-center">
+      <div className="min-h-screen bg-heritage-100 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cordillera-gold mx-auto mb-4"></div>
-          <p className="text-cordillera-olive">Loading campaigns...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-heritage-500 mx-auto mb-4"></div>
+          <p className="text-heritage-800">Loading campaigns...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-cordillera-olive">
+    <div className="min-h-screen bg-heritage-800">
       {/* Header */}
             {/* Header */}
-      <section className="relative py-24 bg-cordillera-olive overflow-hidden">
+      <section className="relative py-24 bg-heritage-800 overflow-hidden">
         {/* Subtle Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{
@@ -182,25 +182,25 @@ const CampaignsPage: React.FC = () => {
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="mb-6">
-            <span className="inline-block bg-cordillera-gold/20 text-cordillera-gold px-4 py-2 text-sm font-medium uppercase tracking-wider mb-4 backdrop-blur-sm">Campaigns</span>
+            <span className="inline-block bg-heritage-500/20 text-heritage-500 px-4 py-2 text-sm font-medium uppercase tracking-wider mb-4 backdrop-blur-sm">Campaigns</span>
           </div>
-          <h1 className="text-6xl md:text-7xl font-serif font-light text-cordillera-cream mb-8 tracking-wide">Campaigns</h1>
-          <p className="text-xl md:text-2xl text-cordillera-cream/90 max-w-4xl mx-auto font-light leading-relaxed mb-8">Discover and support initiatives that preserve our cultural heritage.</p>
-          <div className="flex justify-center items-center space-x-8 text-cordillera-cream/70">
+          <h1 className="text-6xl md:text-7xl font-serif font-light text-heritage-100 mb-8 tracking-wide">Campaigns</h1>
+          <p className="text-xl md:text-2xl text-heritage-100/90 max-w-4xl mx-auto font-light leading-relaxed mb-8">Discover and support initiatives that preserve our cultural heritage.</p>
+          <div className="flex justify-center items-center space-x-8 text-heritage-100/70">
             <div className="flex items-center">
-              <svg className="w-5 h-5 mr-2 text-cordillera-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-2 text-heritage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span className="text-sm font-medium">Transparency</span>
             </div>
             <div className="flex items-center">
-              <svg className="w-5 h-5 mr-2 text-cordillera-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-2 text-heritage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
               <span className="text-sm font-medium">Community Support</span>
             </div>
             <div className="flex items-center">
-              <svg className="w-5 h-5 mr-2 text-cordillera-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-2 text-heritage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span className="text-sm font-medium">Heritage Preservation</span>
@@ -210,7 +210,7 @@ const CampaignsPage: React.FC = () => {
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 to="/create-campaign"
-                className="inline-flex items-center px-6 py-3 rounded-lg bg-cordillera-gold text-cordillera-olive font-semibold hover:bg-cordillera-gold/90 shadow-md transition-colors"
+                className="inline-flex items-center px-6 py-3 rounded-lg bg-heritage-500 text-heritage-800 font-semibold hover:bg-heritage-500/90 shadow-md transition-colors"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -219,7 +219,7 @@ const CampaignsPage: React.FC = () => {
               </Link>
               <Link
                 to="/my-campaigns"
-                className="inline-flex items-center px-6 py-3 rounded-lg border border-cordillera-cream/40 text-cordillera-cream hover:bg-white/10 font-semibold transition-colors"
+                className="inline-flex items-center px-6 py-3 rounded-lg border border-heritage-100/40 text-heritage-100 hover:bg-white/10 font-semibold transition-colors"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" />
@@ -232,11 +232,11 @@ const CampaignsPage: React.FC = () => {
       </section>
 
       {/* Filters + Grid */}
-      <section className="py-14 bg-cordillera-cream">
+      <section className="py-14 bg-heritage-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Filters removed per request; CTAs moved to hero */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 text-red-700 border border-red-200 rounded">{error}</div>
+            <div className="mb-6 p-4 bg-error/10 text-error-dark border border-error/30 rounded">{error}</div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
@@ -255,28 +255,28 @@ const CampaignsPage: React.FC = () => {
                 <Card key={c.id} className="group block overflow-hidden h-full">
                   <Link to={`/campaigns/${c.id}`} className="block h-full">
                     <div className="px-6 pt-6">
-                      <span className="inline-block bg-cordillera-olive/90 text-cordillera-cream px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded">Campaign</span>
+                      <span className="inline-block bg-heritage-800/90 text-heritage-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider rounded">Campaign</span>
                     </div>
                     <CardContent className="pt-4 flex flex-col h-full">
-                      <span className="text-cordillera-gold text-[11px] font-medium uppercase tracking-wider">{c.category || 'Community'}</span>
-                      <h3 className="text-lg font-serif text-cordillera-olive mt-1 mb-2 leading-snug group-hover:text-cordillera-gold transition-colors duration-300">{c.title}</h3>
-                      <p className="text-cordillera-olive/70 text-[13px] leading-relaxed line-clamp-2 md:line-clamp-3">{c.description}</p>
+                      <span className="text-heritage-500 text-[11px] font-medium uppercase tracking-wider">{c.category || 'Community'}</span>
+                      <h3 className="text-lg font-serif text-heritage-800 mt-1 mb-2 leading-snug group-hover:text-heritage-500 transition-colors duration-300">{c.title}</h3>
+                      <p className="text-heritage-800/70 text-[13px] leading-relaxed line-clamp-2 md:line-clamp-3">{c.description}</p>
 
                       <div className="mt-3 mb-4">
-                        <div className="flex justify-between text-cordillera-olive/80 text-[13px] mb-1.5">
+                        <div className="flex justify-between text-heritage-800/80 text-[13px] mb-1.5">
                           <span>{p.toFixed(0)}% funded</span>
                           <span>{currency(c.current_amount as any)}</span>
                         </div>
-                        <div className="h-2 bg-cordillera-sage/30 rounded-full overflow-hidden">
+                        <div className="h-2 bg-brand-sage/30 rounded-full overflow-hidden">
                           <div
-                            className={`h-full bg-cordillera-gold rounded-full transition-all duration-500 ${p <= 0 ? 'opacity-0' : 'opacity-100'}`}
+                            className={`h-full bg-heritage-500 rounded-full transition-all duration-500 ${p <= 0 ? 'opacity-0' : 'opacity-100'}`}
                             style={widthStyle}
                           />
                         </div>
-                        <p className="text-[11px] text-cordillera-olive/60 mt-1">Goal: {currency(c.goal_amount as any)}</p>
+                        <p className="text-[11px] text-heritage-800/60 mt-1">Goal: {currency(c.goal_amount as any)}</p>
                       </div>
 
-                      <div className="mt-auto flex justify-between items-center text-[11px] text-cordillera-olive/60">
+                      <div className="mt-auto flex justify-between items-center text-[11px] text-heritage-800/60">
                         <span>Ends {endDisplay}</span>
                         <span>Backers: {c.backers_count || 0}</span>
                       </div>
@@ -285,14 +285,14 @@ const CampaignsPage: React.FC = () => {
                         <div className="mt-3 flex gap-2">
                           <button
                             onClick={(e) => { e.preventDefault(); onEdit(c) }}
-                            className="px-3 py-1 text-xs rounded border border-cordillera-sage/50 hover:bg-cordillera-cream"
+                            className="px-3 py-1 text-xs rounded border border-brand-sage/50 hover:bg-heritage-100"
                           >
                             Edit
                           </button>
                           <button
                             disabled={deletingId === c.id}
                             onClick={(e) => { e.preventDefault(); onDelete(c) }}
-                            className="px-3 py-1 text-xs rounded border border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-60"
+                            className="px-3 py-1 text-xs rounded border border-error/30 text-error-dark hover:bg-error/10 disabled:opacity-60"
                           >
                             {deletingId === c.id ? 'Deleting…' : 'Delete'}
                           </button>
@@ -309,7 +309,7 @@ const CampaignsPage: React.FC = () => {
       {editing && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6">
-            <h2 className="text-xl font-semibold text-cordillera-olive mb-4">Edit Campaign</h2>
+            <h2 className="text-xl font-semibold text-heritage-800 mb-4">Edit Campaign</h2>
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium mb-1">Title</label>
@@ -354,7 +354,7 @@ const CampaignsPage: React.FC = () => {
             </div>
             <div className="mt-5 flex justify-end gap-2">
               <button onClick={() => { setEditing(null); setForm({}) }} className="px-4 py-2 rounded border">Cancel</button>
-              <button disabled={saving} onClick={onSave} className="px-4 py-2 rounded bg-cordillera-gold text-cordillera-olive font-semibold disabled:opacity-60">
+              <button disabled={saving} onClick={onSave} className="px-4 py-2 rounded bg-heritage-500 text-heritage-800 font-semibold disabled:opacity-60">
                 {saving ? 'Saving…' : 'Save Changes'}
               </button>
             </div>

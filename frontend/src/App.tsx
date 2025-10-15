@@ -39,7 +39,7 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <Router>
         <ScrollToTop />
-        <Suspense fallback={<div className="min-h-screen bg-cordillera-olive" />}>
+        <Suspense fallback={<div className="min-h-screen bg-heritage-800" />}>
           <Routes>
             {/* Public pages */}
             <Route path="/" element={<Layout><HomePage /></Layout>} />
@@ -251,10 +251,10 @@ const App: React.FC = () => {
               path="*"
               element={
                 <Layout>
-                  <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
+                  <div className="min-h-screen bg-heritage-800 flex items-center justify-center">
                     <div className="text-center">
-                      <h1 className="text-4xl font-serif text-cordillera-cream mb-4">Page Not Found</h1>
-                      <Link to="/" className="text-cordillera-gold hover:text-cordillera-gold/80 transition-colors">
+                      <h1 className="text-4xl font-serif text-heritage-100 mb-4">Page Not Found</h1>
+                      <Link to="/" className="text-heritage-500 hover:text-heritage-500/80 transition-colors">
                         Return to Homepage
                       </Link>
                     </div>

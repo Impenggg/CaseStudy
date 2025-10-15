@@ -65,25 +65,25 @@ const CartModal: React.FC<CartModalProps> = ({
       <div className="flex min-h-full items-center justify-center p-4 relative z-[100] pointer-events-auto">
         <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden transform transition-all duration-300 scale-100">
           {/* Modal Header */}
-          <div className="bg-gradient-to-r from-cordillera-olive to-cordillera-sage text-cordillera-cream p-6 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-cordillera-gold/10 to-transparent"></div>
+          <div className="bg-heritage-800 text-heritage-100 p-6 relative overflow-hidden">
+            <div className="absolute inset-0 bg-heritage-500/10"></div>
             <div className="relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="p-3 bg-cordillera-gold/20 rounded-xl backdrop-blur-sm">
-                  <svg className="w-6 h-6 text-cordillera-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="p-3 bg-heritage-500/20 rounded-xl backdrop-blur-sm">
+                  <svg className="w-6 h-6 text-heritage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
                   </svg>
                 </div>
                 <div>
                   <h3 className="text-2xl font-serif font-light tracking-wide">Shopping Cart</h3>
-                  <p className="text-cordillera-cream/90 text-sm font-medium">
+                  <p className="text-heritage-100/90 text-sm font-medium">
                     {cartCount === 0 ? 'Your cart is empty' : `${cartCount} item${cartCount !== 1 ? 's' : ''} in your cart`}
                   </p>
                 </div>
               </div>
               <button 
                 onClick={onClose}
-                className="p-2 hover:bg-cordillera-gold/20 rounded-xl transition-all duration-300 hover:scale-110"
+                className="p-2 hover:bg-heritage-500/20 rounded-xl transition-all duration-300 hover:scale-110"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -96,16 +96,16 @@ const CartModal: React.FC<CartModalProps> = ({
           <div className="max-h-[60vh] overflow-y-auto">
             {cartItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-12 text-center">
-                <div className="w-20 h-20 bg-cordillera-sage/20 rounded-full flex items-center justify-center mb-6">
-                  <svg className="w-10 h-10 text-cordillera-olive/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-20 h-20 bg-brand-sage/20 rounded-full flex items-center justify-center mb-6">
+                  <svg className="w-10 h-10 text-heritage-800/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
                   </svg>
                 </div>
-                <h4 className="text-xl font-serif text-cordillera-olive mb-2">Your cart is empty</h4>
-                <p className="text-cordillera-olive/60 mb-6">Start shopping to add items to your cart</p>
+                <h4 className="text-xl font-serif text-heritage-800 mb-2">Your cart is empty</h4>
+                <p className="text-heritage-800/60 mb-6">Start shopping to add items to your cart</p>
                 <button 
                   onClick={onClose}
-                  className="bg-cordillera-gold text-cordillera-olive px-6 py-3 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
+                  className="bg-heritage-500 text-heritage-800 px-6 py-3 rounded-lg font-medium hover:bg-heritage-500/90 transition-colors"
                 >
                   Continue Shopping
                 </button>
@@ -113,43 +113,43 @@ const CartModal: React.FC<CartModalProps> = ({
             ) : (
               <div className="p-6 space-y-4">
                 {cartItems.map((item) => (
-                  <div key={item.id} className="group bg-cordillera-cream/30 rounded-2xl border border-cordillera-sage/20 p-4 shadow-sm hover:shadow-md transition-all duration-300">
+                  <div key={item.id} className="group bg-heritage-100/30 rounded-2xl border border-brand-sage/20 p-4 shadow-sm hover:shadow-md transition-all duration-300">
                     <div className="flex items-center gap-4">
                       <div className="relative">
                         <img 
                           src={item.image || PLACEHOLDER_IMG}
                           alt={item.name}
-                          className="w-16 h-16 object-cover rounded-xl border border-cordillera-sage/30"
+                          className="w-16 h-16 object-cover rounded-xl border border-brand-sage/30"
                           onError={(e) => { const t = e.currentTarget as HTMLImageElement; if (t.src !== PLACEHOLDER_IMG) t.src = PLACEHOLDER_IMG; }}
                         />
-                        <div className="absolute -top-2 -right-2 bg-cordillera-gold text-cordillera-olive text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        <div className="absolute -top-2 -right-2 bg-heritage-500 text-heritage-800 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                           {item.quantity}
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-lg font-semibold text-cordillera-olive truncate mb-1">{item.name}</h4>
+                        <h4 className="text-lg font-semibold text-heritage-800 truncate mb-1">{item.name}</h4>
                         {typeof item.stock === 'number' && (
                           <p className="text-xs mb-1">
                             {item.stock === 0 ? (
-                              <span className="text-red-600 font-medium">Out of stock</span>
+                              <span className="text-error font-medium">Out of stock</span>
                             ) : item.stock <= 5 ? (
-                              <span className="text-orange-600">Only <span className="font-semibold">{item.stock}</span> left</span>
+                              <span className="text-warning-dark">Only <span className="font-semibold">{item.stock}</span> left</span>
                             ) : (
-                              <span className="text-cordillera-olive/70">Available: <span className="font-medium text-cordillera-olive">{item.stock}</span></span>
+                              <span className="text-heritage-800/70">Available: <span className="font-medium text-heritage-800">{item.stock}</span></span>
                             )}
                           </p>
                         )}
-                        <p className="text-cordillera-gold font-bold text-lg">₱{item.price.toLocaleString()}</p>
+                        <p className="text-heritage-500 font-bold text-lg">₱{item.price.toLocaleString()}</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex items-center border border-cordillera-sage/40 rounded-lg overflow-hidden">
+                        <div className="flex items-center border border-brand-sage/40 rounded-lg overflow-hidden">
                           <button 
                             onClick={() => onDecrement(item.id)} 
-                            className="px-3 py-1 bg-cordillera-sage/10 hover:bg-cordillera-sage/20 transition-colors text-cordillera-olive font-bold"
+                            className="px-3 py-1 bg-brand-sage/10 hover:bg-brand-sage/20 transition-colors text-heritage-800 font-bold"
                           >
                             -
                           </button>
-                          <span className="px-3 py-1 text-cordillera-olive font-bold bg-white min-w-[2rem] text-center">
+                          <span className="px-3 py-1 text-heritage-800 font-bold bg-white min-w-[2rem] text-center">
                             {item.quantity}
                           </span>
                           <button 
@@ -162,9 +162,9 @@ const CartModal: React.FC<CartModalProps> = ({
                                   ? 'Reached available stock'
                                   : undefined
                             }
-                            className={`px-3 py-1 bg-cordillera-sage/10 hover:bg-cordillera-sage/20 transition-colors text-cordillera-olive font-bold ${
+                            className={`px-3 py-1 bg-brand-sage/10 hover:bg-brand-sage/20 transition-colors text-heritage-800 font-bold ${
                               disableIncrease || (typeof item.stock === 'number' && item.quantity >= item.stock)
-                                ? 'opacity-50 cursor-not-allowed hover:bg-cordillera-sage/10'
+                                ? 'opacity-50 cursor-not-allowed hover:bg-brand-sage/10'
                                 : ''
                             }`}
                           >
@@ -173,7 +173,7 @@ const CartModal: React.FC<CartModalProps> = ({
                         </div>
                         <button 
                           onClick={() => onRemove(item.id)} 
-                          className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-2 text-error hover:text-error hover:bg-error/10 rounded-lg transition-colors"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -181,7 +181,7 @@ const CartModal: React.FC<CartModalProps> = ({
                         </button>
                       </div>
                       <div className="text-right">
-                        <p className="text-cordillera-olive font-bold text-lg">₱{(item.price * item.quantity).toLocaleString()}</p>
+                        <p className="text-heritage-800 font-bold text-lg">₱{(item.price * item.quantity).toLocaleString()}</p>
                       </div>
                     </div>
                   </div>
@@ -192,21 +192,21 @@ const CartModal: React.FC<CartModalProps> = ({
 
           {/* Modal Footer */}
           {cartItems.length > 0 && (
-            <div className="border-t border-cordillera-sage/30 bg-gradient-to-r from-white to-cordillera-cream/30 p-6">
+            <div className="border-t border-brand-sage/30 bg-white p-6">
               <div className="space-y-4">
-                <div className="flex justify-between items-center text-lg font-semibold text-cordillera-olive">
+                <div className="flex justify-between items-center text-lg font-semibold text-heritage-800">
                   <span>Total ({cartCount} items)</span>
-                  <span className="text-2xl text-cordillera-gold">₱{cartTotal.toLocaleString()}</span>
+                  <span className="text-2xl text-heritage-500">₱{cartTotal.toLocaleString()}</span>
                 </div>
                 {disableCheckout && (
-                  <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3" role="note">
+                  <div className="text-sm text-error bg-error/10 border border-error/30 rounded-lg p-3" role="note">
                     {disabledReason || 'Checkout is disabled for your account.'}
                   </div>
                 )}
                 <div className="flex gap-3">
                   <button 
                     onClick={onClose}
-                    className="flex-1 px-6 py-3 border-2 border-cordillera-olive/20 text-cordillera-olive rounded-lg font-medium hover:bg-cordillera-olive/5 transition-colors"
+                    className="flex-1 px-6 py-3 border-2 border-heritage-800/20 text-heritage-800 rounded-lg font-medium hover:bg-heritage-800/5 transition-colors"
                   >
                     Continue Shopping
                   </button>
@@ -215,8 +215,8 @@ const CartModal: React.FC<CartModalProps> = ({
                     disabled={disableCheckout}
                     title={disableCheckout ? (disabledReason || 'Checkout disabled') : undefined}
                     className={`flex-1 px-6 py-3 rounded-lg font-medium transition-colors shadow-lg transform ${disableCheckout 
-                      ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                      : 'bg-cordillera-gold text-cordillera-olive hover:bg-cordillera-gold/90 hover:shadow-xl hover:-translate-y-0.5'}`}
+                      ? 'bg-heritage-200 text-heritage-600 cursor-not-allowed'
+                      : 'bg-heritage-500 text-heritage-800 hover:bg-heritage-500/90 hover:shadow-xl hover:-translate-y-0.5'}`}
                   >
                     Proceed to Checkout
                   </button>

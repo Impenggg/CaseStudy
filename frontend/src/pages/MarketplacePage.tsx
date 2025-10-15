@@ -3,9 +3,12 @@ import { triggerAction } from '../lib/uiActions';
 import { Link } from 'react-router-dom';
 import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext';
 import api, { productsAPI, ordersAPI, favoritesAPI } from '@/services/api';
 import LoadingScreen from '../components/LoadingScreen';
 import { Card, CardContent } from '@/components/ui/card';
+import ImageWithFallback from '../components/ImageWithFallback';
+import { ProductCardSkeleton } from '../components/LoadingSkeleton';
 
 interface Product {
   id: number;
@@ -22,11 +25,13 @@ interface Product {
 
 const MarketplacePage: React.FC = () => {
   const { isAuthenticated, requireAuth, user } = useAuth();
+  const { addItem, isInCart, getItemQuantity } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
 
   const [selectedCategory, setSelectedCategory] = useState('');
   const [sortBy, setSortBy] = useState('');
@@ -347,18 +352,20 @@ const MarketplacePage: React.FC = () => {
       return;
     }
     // Respect stock limits if provided
-    const stock = typeof product.stockQuantity === 'number' ? product.stockQuantity : undefined;
-    if (stock !== undefined && stock <= 0) {
+    const stock = typeof product.stockQuantity === 'number' ? product.stockQuantity : 999;
+    if (stock <= 0) {
       return; // out of stock, do nothing
     }
-    setCartItems((prev) => {
-      const existing = prev.find((p) => p.id === product.id);
-      if (existing) {
-        const nextQty = stock !== undefined ? Math.min(existing.quantity + 1, stock) : existing.quantity + 1;
-        return prev.map((p) => (p.id === product.id ? { ...p, quantity: nextQty, stock: stock ?? p.stock } : p));
-      }
-      const initialQty = stock !== undefined ? Math.min(1, stock) : 1;
-      return [...prev, { id: product.id, name: product.name, price: product.price, image: product.image, quantity: initialQty, stock }];
+    
+    // Use the cart context
+    addItem({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image || '/api/placeholder/400/300',
+      stock: stock,
+      artisanId: product.ownerId || 0,
+      artisanName: product.artisan || 'Unknown Artisan'
     });
     triggerAction(`Add ${product.name} to cart (Marketplace)`);
   };
@@ -566,6 +573,16 @@ const MarketplacePage: React.FC = () => {
     }
   }, [isAuthenticated, products, user]);
 
+  // Debounce search term with loading indicator
+  useEffect(() => {
+    setIsSearching(searchTerm.length > 0);
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+      setIsSearching(false);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   // Filter and search functionality
   useEffect(() => {
     let filtered = products;
@@ -600,49 +617,39 @@ const MarketplacePage: React.FC = () => {
 
   const categories = Array.from(new Set(products.map(p => p.category)));
 
-  // Loading UI
+  // Loading UI with skeletons
   if (isLoading) {
-    return <LoadingScreen title="Loading Marketplace" subtitle="Fetching products from artisans..." />;
+    return (
+      <div className="min-h-screen bg-heritage-100">
+        <div className="container mx-auto px-4 py-8">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-serif text-heritage-800 mb-4">Marketplace</h1>
+            <p className="text-heritage-600">Loading authentic handwoven treasures...</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  // Product image component: static single image (no carousel)
+  // Product image component with improved fallback handling
   const ProductCardImage: React.FC<{ product: Product }> = ({ product }) => {
-    const list = (product.gallery && product.gallery.length > 0) ? product.gallery : [product.image].filter(Boolean);
-    const fallback = `https://source.unsplash.com/800x600/?${encodeURIComponent(product.category || 'handicraft')}`;
-    const [idx, setIdx] = React.useState<number>(0);
-    const [src, setSrc] = React.useState<string>(list[0] || fallback);
-
-    // When the candidate list changes (product change), reset index and src
-    React.useEffect(() => {
-      setIdx(0);
-      setSrc(list[0] || fallback);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [product.id, product.gallery?.join('|')]);
-
-    const onErr: React.ReactEventHandler<HTMLImageElement> = () => {
-      // Try next candidate if available; otherwise use fallback
-      const nextIdx = idx + 1;
-      if (nextIdx < list.length) {
-        setIdx(nextIdx);
-        setSrc(list[nextIdx]);
-      } else {
-        setSrc(fallback);
-      }
-    };
+    const primaryImage = product.image || (product.gallery && product.gallery[0]) || null;
 
     return (
-      <div className="relative h-56 overflow-hidden rounded-t-xl bg-cordillera-sage/10">
-        <img
-          src={src || fallback}
-          onError={onErr}
+      <div className="relative h-56 overflow-hidden rounded-t-xl bg-brand-sage/10">
+        <ImageWithFallback
+          src={primaryImage}
           alt={product.name}
-          loading="lazy"
-          decoding="async"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          fallbackSrc="/api/placeholder/800/600"
         />
         {/* Top-left badge */}
-        <div className="absolute top-3 left-3 bg-cordillera-gold text-cordillera-olive text-xs font-semibold px-2 py-1 rounded">
+        <div className="absolute top-3 left-3 bg-heritage-500 text-heritage-800 text-xs font-semibold px-2 py-1 rounded">
           {product.category}
         </div>
         {/* Favorite toggle */}
@@ -650,7 +657,7 @@ const MarketplacePage: React.FC = () => {
           type="button"
           aria-label={favoriteIds.has(product.id) ? 'Remove from favorites' : 'Add to favorites'}
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleFavorite(product.id); }}
-          className={`absolute top-3 right-3 rounded-full p-2 transition-colors ${favoriteIds.has(product.id) ? 'bg-red-600 text-white' : 'bg-white/90 text-cordillera-olive hover:bg-white'}`}
+          className={`absolute top-3 right-3 rounded-full p-2 transition-colors ${favoriteIds.has(product.id) ? 'bg-error-dark text-white' : 'bg-white/90 text-heritage-800 hover:bg-white'}`}
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill={favoriteIds.has(product.id) ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8">
             <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -661,16 +668,16 @@ const MarketplacePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cordillera-cream">
+    <div className="min-h-screen bg-heritage-100">
       {errorMsg && (
-        <div className="bg-red-50 text-red-700 border border-red-200 px-4 py-3 text-sm">{errorMsg}</div>
+        <div className="bg-error/10 text-error-dark border border-error/30 px-4 py-3 text-sm">{errorMsg}</div>
       )}
       {/* Premium Cart Button (hidden for admin) */}
       {!(user && (user as any).role === 'admin') && (
         <div className="fixed right-6 bottom-6 z-50">
           <button
             onClick={() => setIsCartOpen(true)}
-            className="group relative bg-gradient-to-r from-cordillera-gold to-cordillera-gold/90 text-cordillera-olive px-6 py-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-500 flex items-center gap-3 border-2 border-cordillera-olive/20 hover:border-cordillera-olive transform hover:scale-110 backdrop-blur-sm"
+            className="group relative bg-heritage-500 text-heritage-800 px-6 py-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-500 flex items-center gap-3 border-2 border-heritage-800/20 hover:border-heritage-800 transform hover:scale-110 backdrop-blur-sm"
             aria-label="Open cart"
           >
             <div className="relative">
@@ -678,7 +685,7 @@ const MarketplacePage: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
               </svg>
               {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse shadow-lg border border-white">
+                <span className="absolute -top-2 -right-2 bg-error text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse shadow-lg border border-white">
                   {cartCount}
                 </span>
               )}
@@ -690,15 +697,15 @@ const MarketplacePage: React.FC = () => {
               </span>
             </div>
             {cartTotal > 0 && (
-              <div className="ml-2 pl-3 border-l border-cordillera-olive/30">
-                <span className="text-sm font-bold text-cordillera-olive">₱{cartTotal.toLocaleString()}</span>
+              <div className="ml-2 pl-3 border-l border-heritage-800/30">
+                <span className="text-sm font-bold text-heritage-800">₱{cartTotal.toLocaleString()}</span>
               </div>
             )}
           </button>
         </div>
       )}
       {/* Enhanced Hero Section */}
-      <section className="relative py-24 bg-cordillera-olive overflow-hidden">
+      <section className="relative py-24 bg-heritage-800 overflow-hidden">
         {/* Subtle Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{
@@ -708,32 +715,32 @@ const MarketplacePage: React.FC = () => {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="mb-6">
-            <span className="inline-block bg-cordillera-gold/20 text-cordillera-gold px-4 py-2 text-sm font-medium uppercase tracking-wider mb-4 backdrop-blur-sm">
+            <span className="inline-block bg-heritage-500/20 text-heritage-500 px-4 py-2 text-sm font-medium uppercase tracking-wider mb-4 backdrop-blur-sm">
               Authentic Collection
             </span>
           </div>
-          <h1 className="text-6xl md:text-7xl font-serif font-light text-cordillera-cream mb-8 tracking-wide">
+          <h1 className="text-6xl md:text-7xl font-serif font-light text-heritage-100 mb-8 tracking-wide">
             Marketplace
           </h1>
-          <p className="text-xl md:text-2xl text-cordillera-cream/90 max-w-4xl mx-auto font-light leading-relaxed mb-8">
+          <p className="text-xl md:text-2xl text-heritage-100/90 max-w-4xl mx-auto font-light leading-relaxed mb-8">
             Discover authentic handwoven treasures crafted by master artisans, 
             each piece carrying the soul of Cordillera heritage and generations of wisdom.
           </p>
-          <div className="flex justify-center items-center space-x-8 text-cordillera-cream/70">
+          <div className="flex justify-center items-center space-x-8 text-heritage-100/70">
             <div className="flex items-center">
-              <svg className="w-5 h-5 mr-2 text-cordillera-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-2 text-heritage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               <span className="text-sm font-medium">Authentic Products</span>
             </div>
             <div className="flex items-center">
-              <svg className="w-5 h-5 mr-2 text-cordillera-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-2 text-heritage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
               <span className="text-sm font-medium">Master Artisans</span>
             </div>
             <div className="flex items-center">
-              <svg className="w-5 h-5 mr-2 text-cordillera-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 mr-2 text-heritage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span className="text-sm font-medium">Heritage Quality</span>
@@ -743,7 +750,7 @@ const MarketplacePage: React.FC = () => {
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
               <Link
                 to="/create-product"
-                className="inline-flex items-center px-6 py-3 rounded-lg bg-cordillera-gold text-cordillera-olive font-semibold hover:bg-cordillera-gold/90 shadow-md transition-colors"
+                className="inline-flex items-center px-6 py-3 rounded-lg bg-heritage-500 text-heritage-800 font-semibold hover:bg-heritage-500/90 shadow-md transition-colors"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -752,7 +759,7 @@ const MarketplacePage: React.FC = () => {
               </Link>
               <Link
                 to="/my-products"
-                className="inline-flex items-center px-6 py-3 rounded-lg border border-cordillera-cream/40 text-cordillera-cream hover:bg-white/10 font-semibold transition-colors"
+                className="inline-flex items-center px-6 py-3 rounded-lg border border-heritage-100/40 text-heritage-100 hover:bg-white/10 font-semibold transition-colors"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7h18M3 12h18M3 17h18" />
@@ -768,17 +775,17 @@ const MarketplacePage: React.FC = () => {
         <div className="flex flex-col lg:flex-row gap-12">
                      {/* Enhanced Sidebar Filters - Sage Green Background */}
            <div className="lg:w-1/4">
-            <div className="bg-cordillera-sage p-6 sticky top-8 shadow-lg rounded-xl border border-cordillera-olive/15">
+            <div className="bg-brand-sage p-6 sticky top-8 shadow-lg rounded-xl border border-heritage-800/15">
               <div className="flex items-center mb-4">
-                <svg className="w-5 h-5 text-cordillera-gold mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-heritage-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
-                <h3 className="text-xl font-serif text-cordillera-olive">Refine Search</h3>
+                <h3 className="text-xl font-serif text-heritage-800">Refine Search</h3>
               </div>
                
                {/* Enhanced Search */}
                <div className="mb-4">
-                 <label className="block text-cordillera-olive/80 text-sm font-semibold mb-2">
+                 <label className="block text-heritage-800/80 text-sm font-semibold mb-2">
                    Search Products
                  </label>
                  <div className="relative">
@@ -787,31 +794,37 @@ const MarketplacePage: React.FC = () => {
                      value={searchTerm}
                      onChange={(e) => setSearchTerm(e.target.value)}
                      placeholder="Search by name or description..."
-                     className="w-full px-3 py-2 pl-10 bg-white border-2 border-cordillera-olive/20 text-cordillera-olive placeholder-cordillera-olive/50 focus:outline-none focus:border-cordillera-gold focus:ring-2 focus:ring-cordillera-gold/20 transition-all duration-200 rounded-lg"
+                     className="w-full px-3 py-2 pl-10 bg-white border-2 border-heritage-800/20 text-heritage-800 placeholder-heritage-800/50 focus:outline-none focus:border-heritage-500 focus:ring-2 focus:ring-heritage-500/20 transition-all duration-200 rounded-lg"
                    />
-                   <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-cordillera-olive/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                   </svg>
+                   {isSearching ? (
+                     <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                       <div className="animate-spin w-4 h-4 border-2 border-heritage-500 border-t-transparent rounded-full"></div>
+                     </div>
+                   ) : (
+                     <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-heritage-800/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                     </svg>
+                   )}
                  </div>
                </div>
 
                {/* Enhanced Category Filter */}
                <div className="mb-4">
-                 <label className="block text-cordillera-olive/80 text-sm font-semibold mb-2">
+                 <label className="block text-heritage-800/80 text-sm font-semibold mb-2">
                    Category
                  </label>
                  <div className="relative">
                    <select
                      value={selectedCategory}
                      onChange={(e) => setSelectedCategory(e.target.value)}
-                     className="w-full px-3 py-2 bg-white border-2 border-cordillera-olive/20 text-cordillera-olive focus:outline-none focus:border-cordillera-gold focus:ring-2 focus:ring-cordillera-gold/20 transition-all duration-200 rounded-lg appearance-none cursor-pointer"
+                     className="w-full px-3 py-2 bg-white border-2 border-heritage-800/20 text-heritage-800 focus:outline-none focus:border-heritage-500 focus:ring-2 focus:ring-heritage-500/20 transition-all duration-200 rounded-lg appearance-none cursor-pointer"
                    >
                      <option value="">All Categories</option>
                      {categories.map(category => (
                        <option key={category} value={category}>{category}</option>
                      ))}
                    </select>
-                   <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-cordillera-olive/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-heritage-800/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                    </svg>
                  </div>
@@ -819,21 +832,21 @@ const MarketplacePage: React.FC = () => {
 
                {/* Enhanced Sort By */}
                <div className="mb-6">
-                 <label className="block text-cordillera-olive/80 text-sm font-semibold mb-2">
+                 <label className="block text-heritage-800/80 text-sm font-semibold mb-2">
                    Sort By
                  </label>
                  <div className="relative">
                    <select
                      value={sortBy}
                      onChange={(e) => setSortBy(e.target.value)}
-                     className="w-full px-3 py-2 bg-white border-2 border-cordillera-olive/20 text-cordillera-olive focus:outline-none focus:border-cordillera-gold focus:ring-2 focus:ring-cordillera-gold/20 transition-all duration-200 rounded-lg appearance-none cursor-pointer"
+                     className="w-full px-3 py-2 bg-white border-2 border-heritage-800/20 text-heritage-800 focus:outline-none focus:border-heritage-500 focus:ring-2 focus:ring-heritage-500/20 transition-all duration-200 rounded-lg appearance-none cursor-pointer"
                    >
                      <option value="">Default</option>
                      <option value="price-low">Price: Low to High</option>
                      <option value="price-high">Price: High to Low</option>
                      <option value="name">Name: A to Z</option>
                    </select>
-                   <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-cordillera-olive/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-heritage-800/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
                    </svg>
                  </div>
@@ -847,7 +860,7 @@ const MarketplacePage: React.FC = () => {
                    setSortBy('');
                    triggerAction('Clear Marketplace Filters');
                  }}
-                 className="group relative w-full bg-cordillera-gold text-cordillera-olive py-3 font-semibold hover:bg-cordillera-gold/90 transition-all duration-300 overflow-hidden shadow-md hover:shadow-lg transform hover:-translate-y-0.5 rounded-lg"
+                 className="group relative w-full bg-heritage-500 text-heritage-800 py-3 font-semibold hover:bg-heritage-500/90 transition-all duration-300 overflow-hidden shadow-md hover:shadow-lg transform hover:-translate-y-0.5 rounded-lg"
                >
                  <span className="relative z-10 flex items-center justify-center">
                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -855,8 +868,8 @@ const MarketplacePage: React.FC = () => {
                    </svg>
                    Clear All Filters
                  </span>
-                 <div className="absolute inset-0 bg-cordillera-olive transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-                 <span className="absolute inset-0 flex items-center justify-center text-cordillera-cream opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 font-semibold">
+                 <div className="absolute inset-0 bg-heritage-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                 <span className="absolute inset-0 flex items-center justify-center text-heritage-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 font-semibold">
                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                    </svg>
@@ -866,9 +879,9 @@ const MarketplacePage: React.FC = () => {
 
                {/* Filter Summary */}
                {(searchTerm || selectedCategory || sortBy) && (
-                 <div className="mt-4 p-3 bg-cordillera-olive/10 rounded-lg">
-                   <h4 className="text-sm font-semibold text-cordillera-olive mb-2">Active Filters:</h4>
-                   <div className="space-y-1 text-xs text-cordillera-olive/70">
+                 <div className="mt-4 p-3 bg-heritage-800/10 rounded-lg">
+                   <h4 className="text-sm font-semibold text-heritage-800 mb-2">Active Filters:</h4>
+                   <div className="space-y-1 text-xs text-heritage-800/70">
                      {searchTerm && <div>Search: "{searchTerm}"</div>}
                      {selectedCategory && <div>Category: {selectedCategory}</div>}
                      {sortBy && <div>Sort: {sortBy.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}</div>}
@@ -882,18 +895,18 @@ const MarketplacePage: React.FC = () => {
           <div className="lg:w-3/4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
               <div>
-                <p className="text-lg font-medium text-cordillera-olive">
+                <p className="text-lg font-medium text-heritage-800">
                   {filteredProducts.length === products.length 
                     ? `All ${products.length} Products` 
                     : `${filteredProducts.length} of ${products.length} Products`}
                 </p>
-                <p className="text-sm text-cordillera-olive/60 mt-1">
+                <p className="text-sm text-heritage-800/60 mt-1">
                   Authentic handwoven treasures from master artisans
                 </p>
               </div>
               {filteredProducts.length > 0 && (
-                <div className="flex items-center text-sm text-cordillera-olive/60">
-                  <svg className="w-4 h-4 mr-2 text-cordillera-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center text-sm text-heritage-800/60">
+                  <svg className="w-4 h-4 mr-2 text-heritage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
                   Curated Collection
@@ -904,16 +917,16 @@ const MarketplacePage: React.FC = () => {
             <div ref={productsGridRef} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
               {filteredProducts.length === 0 ? (
                 <div className="col-span-full text-center py-12">
-                  <div className="w-24 h-24 mx-auto mb-6 bg-cordillera-sage/20 rounded-full flex items-center justify-center">
-                    <svg className="w-12 h-12 text-cordillera-olive/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-24 h-24 mx-auto mb-6 bg-brand-sage/20 rounded-full flex items-center justify-center">
+                    <svg className="w-12 h-12 text-heritage-800/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-2xl font-serif text-cordillera-olive mb-4">No Products Found</h3>
-                  <p className="text-cordillera-olive/60 text-lg mb-8 leading-relaxed">We couldn't find any products matching your search criteria. Try adjusting your filters or browse our full collection.</p>
+                  <h3 className="text-2xl font-serif text-heritage-800 mb-4">No Products Found</h3>
+                  <p className="text-heritage-800/60 text-lg mb-8 leading-relaxed">We couldn't find any products matching your search criteria. Try adjusting your filters or browse our full collection.</p>
                   <button
                     onClick={() => { setSearchTerm(''); setSelectedCategory(''); setSortBy(''); triggerAction('View All Products from Empty State'); }}
-                    className="group relative bg-cordillera-gold text-cordillera-olive px-8 py-4 font-semibold hover:bg-cordillera-gold/90 transition-all duration-300 overflow-hidden shadow-md hover:shadow-lg transform hover:-translate-y-0.5 rounded-lg"
+                    className="group relative bg-heritage-500 text-heritage-800 px-8 py-4 font-semibold hover:bg-heritage-500/90 transition-all duration-300 overflow-hidden shadow-md hover:shadow-lg transform hover:-translate-y-0.5 rounded-lg"
                   >
                     <span className="relative z-10 flex items-center">
                       <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -921,8 +934,8 @@ const MarketplacePage: React.FC = () => {
                       </svg>
                       View All Products
                     </span>
-                    <div className="absolute inset-0 bg-cordillera-olive transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
-                    <span className="absolute inset-0 flex items-center justify-center text-cordillera-cream opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 font-semibold">
+                    <div className="absolute inset-0 bg-heritage-800 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+                    <span className="absolute inset-0 flex items-center justify-center text-heritage-100 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 font-semibold">
                       <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
@@ -934,27 +947,27 @@ const MarketplacePage: React.FC = () => {
                 <>
                   {filteredProducts.map((product) => (
                     <Card key={product.id} className="group overflow-hidden flex flex-col h-full">
-                    <Link to={`/product/${product.id}`} className="block">
+                    <Link to={`/products/${product.id}`} className="block">
                       <ProductCardImage product={product} />
                     </Link>
                     <CardContent className="flex flex-col flex-grow text-center">
-                      <Link to={`/product/${product.id}`} className="block">
-                        <h3 className="text-lg font-serif text-cordillera-olive mb-2 leading-tight group-hover:text-cordillera-gold transition-colors duration-300 line-clamp-2">
+                      <Link to={`/products/${product.id}`} className="block">
+                        <h3 className="text-lg font-serif text-heritage-800 mb-2 leading-tight group-hover:text-heritage-500 transition-colors duration-300 line-clamp-2">
                           {product.name}
                         </h3>
                       </Link>
-                      <p className="text-cordillera-olive/60 text-sm mb-4 leading-relaxed line-clamp-2 flex-grow">{product.description}</p>
+                      <p className="text-heritage-800/60 text-sm mb-4 leading-relaxed line-clamp-2 flex-grow">{product.description}</p>
                       <div className="flex flex-col items-center mt-auto gap-3">
                         <div className="text-center">
-                          <span className="text-xl font-light text-cordillera-gold block mb-1">₱{product.price.toLocaleString()}</span>
-                          <div className="flex items-center justify-center text-xs text-cordillera-olive/50">
+                          <span className="text-xl font-light text-heritage-500 block mb-1">₱{product.price.toLocaleString()}</span>
+                          <div className="flex items-center justify-center text-xs text-heritage-800/50">
                             <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                             </svg>
                             <span className="uppercase tracking-wider">{product.artisan}</span>
                           </div>
                           {typeof product.stockQuantity === 'number' && (
-                            <div className="text-xs text-cordillera-olive/60 mt-1">Stock: {product.stockQuantity}</div>
+                            <div className="text-xs text-heritage-800/60 mt-1">Stock: {product.stockQuantity}</div>
                           )}
                         </div>
                         <div className="opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex gap-2 justify-center">
@@ -962,14 +975,14 @@ const MarketplacePage: React.FC = () => {
                             onClick={() => addToCart(product)}
                             disabled={(typeof product.stockQuantity === 'number' && product.stockQuantity === 0) || Boolean(user && ((((user as any).role) === 'artisan') || ((user as any).role === 'admin')))}
                             title={(typeof product.stockQuantity === 'number' && product.stockQuantity === 0) ? 'Out of stock' : (user && ((((user as any).role) === 'artisan') || ((user as any).role === 'admin'))) ? 'This account type cannot add items to the cart.' : undefined}
-                            className={`bg-cordillera-olive text-cordillera-cream px-4 py-2 text-sm font-medium rounded hover:bg-cordillera-olive/90 ${((typeof product.stockQuantity === 'number' && product.stockQuantity === 0) || Boolean(user && ((((user as any).role) === 'artisan') || ((user as any).role === 'admin')))) ? 'opacity-50 cursor-not-allowed hover:bg-cordillera-olive' : ''}`}
+                            className={`bg-heritage-800 text-heritage-100 px-4 py-2 text-sm font-medium rounded hover:bg-heritage-800/90 ${((typeof product.stockQuantity === 'number' && product.stockQuantity === 0) || Boolean(user && ((((user as any).role) === 'artisan') || ((user as any).role === 'admin')))) ? 'opacity-50 cursor-not-allowed hover:bg-heritage-800' : ''}`}
                           >
                             Add to Cart
                           </button>
 
                           <button
                             onClick={() => openQuickView(product)}
-                            className="bg-cordillera-gold text-cordillera-olive px-4 py-2 text-sm font-medium rounded hover:bg-cordillera-gold/90"
+                            className="bg-heritage-500 text-heritage-800 px-4 py-2 text-sm font-medium rounded hover:bg-heritage-500/90"
                           >
                             Quick View
                           </button>
@@ -1008,8 +1021,8 @@ const MarketplacePage: React.FC = () => {
             <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
               {/* Header */}
               <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-                <h2 className="text-2xl font-serif text-cordillera-olive">Checkout</h2>
-                <button onClick={() => setIsCheckoutOpen(false)} className="text-cordillera-olive/60 hover:text-cordillera-olive">
+                <h2 className="text-2xl font-serif text-heritage-800">Checkout</h2>
+                <button onClick={() => setIsCheckoutOpen(false)} className="text-heritage-800/60 hover:text-heritage-800">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -1019,20 +1032,20 @@ const MarketplacePage: React.FC = () => {
               {/* Progress Steps */}
               <div className="px-6 py-4 border-b">
                 <div className="flex items-center justify-center space-x-8">
-                  <div className={`flex items-center ${checkoutStep === 'shipping' ? 'text-cordillera-gold' : 'text-cordillera-olive/40'}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${checkoutStep === 'shipping' ? 'bg-cordillera-gold text-cordillera-olive' : 'bg-cordillera-olive/20'}`}>
+                  <div className={`flex items-center ${checkoutStep === 'shipping' ? 'text-heritage-500' : 'text-heritage-800/40'}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${checkoutStep === 'shipping' ? 'bg-heritage-500 text-heritage-800' : 'bg-heritage-800/20'}`}>
                       1
                     </div>
                     <span className="ml-2 font-medium">Shipping</span>
                   </div>
-                  <div className={`flex items-center ${checkoutStep === 'payment' ? 'text-cordillera-gold' : 'text-cordillera-olive/40'}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${checkoutStep === 'payment' ? 'bg-cordillera-gold text-cordillera-olive' : 'bg-cordillera-olive/20'}`}>
+                  <div className={`flex items-center ${checkoutStep === 'payment' ? 'text-heritage-500' : 'text-heritage-800/40'}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${checkoutStep === 'payment' ? 'bg-heritage-500 text-heritage-800' : 'bg-heritage-800/20'}`}>
                       2
                     </div>
                     <span className="ml-2 font-medium">Payment</span>
                   </div>
-                  <div className={`flex items-center ${checkoutStep === 'confirmation' ? 'text-cordillera-gold' : 'text-cordillera-olive/40'}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${checkoutStep === 'confirmation' ? 'bg-cordillera-gold text-cordillera-olive' : 'bg-cordillera-olive/20'}`}>
+                  <div className={`flex items-center ${checkoutStep === 'confirmation' ? 'text-heritage-500' : 'text-heritage-800/40'}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${checkoutStep === 'confirmation' ? 'bg-heritage-500 text-heritage-800' : 'bg-heritage-800/20'}`}>
                       3
                     </div>
                     <span className="ml-2 font-medium">Confirm</span>
@@ -1044,40 +1057,40 @@ const MarketplacePage: React.FC = () => {
               <div className="p-6">
                 {checkoutStep === 'shipping' && (
                   <div className="space-y-6">
-                    <h3 className="text-xl font-serif text-cordillera-olive mb-4">Shipping Information</h3>
+                    <h3 className="text-xl font-serif text-heritage-800 mb-4">Shipping Information</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-sm font-medium text-cordillera-olive mb-2">Full Name</label>
+                        <label className="block text-sm font-medium text-heritage-800 mb-2">Full Name</label>
                         <input
                           type="text"
                           value={shippingDetails.fullName}
                           onChange={(e) => setShippingDetails(prev => ({ ...prev, fullName: e.target.value }))}
                           required
                           aria-invalid={!!shippingErrors.fullName}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent ${shippingErrors.fullName ? 'border-red-500' : 'border-cordillera-olive/20'}`}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent ${shippingErrors.fullName ? 'border-red-500' : 'border-heritage-800/20'}`}
                           placeholder="Enter your full name"
                         />
                         {shippingErrors.fullName && (
-                          <p className="text-red-600 text-sm mt-1">{shippingErrors.fullName}</p>
+                          <p className="text-error text-sm mt-1">{shippingErrors.fullName}</p>
                         )}
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-cordillera-olive mb-2">Email</label>
+                        <label className="block text-sm font-medium text-heritage-800 mb-2">Email</label>
                         <input
                           type="email"
                           value={shippingDetails.email}
                           onChange={(e) => setShippingDetails(prev => ({ ...prev, email: e.target.value }))}
                           required
                           aria-invalid={!!shippingErrors.email}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent ${shippingErrors.email ? 'border-red-500' : 'border-cordillera-olive/20'}`}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent ${shippingErrors.email ? 'border-red-500' : 'border-heritage-800/20'}`}
                           placeholder="Enter your email"
                         />
                         {shippingErrors.email && (
-                          <p className="text-red-600 text-sm mt-1">{shippingErrors.email}</p>
+                          <p className="text-error text-sm mt-1">{shippingErrors.email}</p>
                         )}
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-cordillera-olive mb-2">Phone</label>
+                        <label className="block text-sm font-medium text-heritage-800 mb-2">Phone</label>
                         <input
                           type="tel"
                           value={shippingDetails.phone}
@@ -1086,78 +1099,78 @@ const MarketplacePage: React.FC = () => {
                           pattern="^(?:\+63\d{10}|0\d{10})$"
                           required
                           aria-invalid={!!shippingErrors.phone}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent ${shippingErrors.phone ? 'border-red-500' : 'border-cordillera-olive/20'}`}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent ${shippingErrors.phone ? 'border-red-500' : 'border-heritage-800/20'}`}
                           placeholder="+63XXXXXXXXXX or 0XXXXXXXXXX"
                         />
                         {shippingErrors.phone && (
-                          <p className="text-red-600 text-sm mt-1">{shippingErrors.phone}</p>
+                          <p className="text-error text-sm mt-1">{shippingErrors.phone}</p>
                         )}
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-cordillera-olive mb-2">City</label>
+                        <label className="block text-sm font-medium text-heritage-800 mb-2">City</label>
                         <input
                           type="text"
                           value={shippingDetails.city}
                           onChange={(e) => setShippingDetails(prev => ({ ...prev, city: e.target.value }))}
                           required
                           aria-invalid={!!shippingErrors.city}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent ${shippingErrors.city ? 'border-red-500' : 'border-cordillera-olive/20'}`}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent ${shippingErrors.city ? 'border-red-500' : 'border-heritage-800/20'}`}
                           placeholder="Enter your city"
                         />
                         {shippingErrors.city && (
-                          <p className="text-red-600 text-sm mt-1">{shippingErrors.city}</p>
+                          <p className="text-error text-sm mt-1">{shippingErrors.city}</p>
                         )}
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-cordillera-olive mb-2">Province</label>
+                        <label className="block text-sm font-medium text-heritage-800 mb-2">Province</label>
                         <input
                           type="text"
                           value={shippingDetails.province}
                           onChange={(e) => setShippingDetails(prev => ({ ...prev, province: e.target.value }))}
                           required
                           aria-invalid={!!shippingErrors.province}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent ${shippingErrors.province ? 'border-red-500' : 'border-cordillera-olive/20'}`}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent ${shippingErrors.province ? 'border-red-500' : 'border-heritage-800/20'}`}
                           placeholder="Enter your province"
                         />
                         {shippingErrors.province && (
-                          <p className="text-red-600 text-sm mt-1">{shippingErrors.province}</p>
+                          <p className="text-error text-sm mt-1">{shippingErrors.province}</p>
                         )}
                       </div>
                       <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-cordillera-olive mb-2">Address</label>
+                        <label className="block text-sm font-medium text-heritage-800 mb-2">Address</label>
                         <textarea
                           value={shippingDetails.address}
                           onChange={(e) => setShippingDetails(prev => ({ ...prev, address: e.target.value }))}
                           required
                           aria-invalid={!!shippingErrors.address}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent ${shippingErrors.address ? 'border-red-500' : 'border-cordillera-olive/20'}`}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent ${shippingErrors.address ? 'border-red-500' : 'border-heritage-800/20'}`}
                           rows={3}
                           placeholder="Enter your complete address"
                         />
                         {shippingErrors.address && (
-                          <p className="text-red-600 text-sm mt-1">{shippingErrors.address}</p>
+                          <p className="text-error text-sm mt-1">{shippingErrors.address}</p>
                         )}
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-cordillera-olive mb-2">Postal Code</label>
+                        <label className="block text-sm font-medium text-heritage-800 mb-2">Postal Code</label>
                         <input
                           type="text"
                           value={shippingDetails.postalCode}
                           onChange={(e) => setShippingDetails(prev => ({ ...prev, postalCode: e.target.value }))}
                           required
                           aria-invalid={!!shippingErrors.postalCode}
-                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent ${shippingErrors.postalCode ? 'border-red-500' : 'border-cordillera-olive/20'}`}
+                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent ${shippingErrors.postalCode ? 'border-red-500' : 'border-heritage-800/20'}`}
                           placeholder="Enter postal code"
                         />
                         {shippingErrors.postalCode && (
-                          <p className="text-red-600 text-sm mt-1">{shippingErrors.postalCode}</p>
+                          <p className="text-error text-sm mt-1">{shippingErrors.postalCode}</p>
                         )}
                       </div>
                     </div>
                     <div className="flex justify-end pt-4">
                       <button
                         onClick={handleShippingSubmit}
-                        className="bg-cordillera-gold text-cordillera-olive px-8 py-3 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
+                        className="bg-heritage-500 text-heritage-800 px-8 py-3 rounded-lg font-medium hover:bg-heritage-500/90 transition-colors"
                       >
                         Continue to Payment
                       </button>
@@ -1167,24 +1180,24 @@ const MarketplacePage: React.FC = () => {
 
                 {checkoutStep === 'payment' && (
                   <div className="space-y-6">
-                    <h3 className="text-xl font-serif text-cordillera-olive mb-4">Payment</h3>
-                    <div className="p-5 border border-cordillera-olive/20 rounded-lg bg-cordillera-olive/5">
-                      <div className="font-medium text-cordillera-olive">Cash on Delivery</div>
-                      <div className="text-sm text-cordillera-olive/70 mt-1">
+                    <h3 className="text-xl font-serif text-heritage-800 mb-4">Payment</h3>
+                    <div className="p-5 border border-heritage-800/20 rounded-lg bg-heritage-800/5">
+                      <div className="font-medium text-heritage-800">Cash on Delivery</div>
+                      <div className="text-sm text-heritage-800/70 mt-1">
                         We currently accept Cash on Delivery (COD). You will pay the courier upon receiving your order.
                       </div>
                     </div>
                     <div className="flex justify-between pt-4">
                       <button
                         onClick={() => setCheckoutStep('shipping')}
-                        className="px-6 py-3 border border-cordillera-olive/20 rounded-lg text-cordillera-olive hover:bg-cordillera-olive/5 transition-colors"
+                        className="px-6 py-3 border border-heritage-800/20 rounded-lg text-heritage-800 hover:bg-heritage-800/5 transition-colors"
                       >
                         Back
                       </button>
                       <button
                         onClick={handlePaymentSubmit}
                         disabled={isPlacingOrder}
-                        className={`bg-cordillera-gold text-cordillera-olive px-8 py-3 rounded-lg font-medium transition-colors ${isPlacingOrder ? 'opacity-60 cursor-not-allowed' : 'hover:bg-cordillera-gold/90'}`}
+                        className={`bg-heritage-500 text-heritage-800 px-8 py-3 rounded-lg font-medium transition-colors ${isPlacingOrder ? 'opacity-60 cursor-not-allowed' : 'hover:bg-heritage-500/90'}`}
                       >
                         {isPlacingOrder ? 'Placing…' : 'Place Order'}
                       </button>
@@ -1196,37 +1209,37 @@ const MarketplacePage: React.FC = () => {
                   <div className="space-y-6">
                     <div className="text-center">
                       <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-                        <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-8 h-8 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
-                      <h3 className="text-2xl font-serif text-cordillera-olive mb-2">Order Confirmed!</h3>
-                      <p className="text-cordillera-olive/60">Thank you for your purchase. Your order has been successfully placed.</p>
+                      <h3 className="text-2xl font-serif text-heritage-800 mb-2">Order Confirmed!</h3>
+                      <p className="text-heritage-800/60">Thank you for your purchase. Your order has been successfully placed.</p>
                     </div>
                     
-                    <div className="bg-cordillera-olive/5 rounded-lg p-6">
-                      <h4 className="font-medium text-cordillera-olive mb-4">Order Summary</h4>
+                    <div className="bg-heritage-800/5 rounded-lg p-6">
+                      <h4 className="font-medium text-heritage-800 mb-4">Order Summary</h4>
                       <div className="space-y-3">
                         {confirmationItems.map((item) => (
                           <div key={item.id} className="flex items-center justify-between text-sm">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-cordillera-sage/20 rounded overflow-hidden flex items-center justify-center">
+                              <div className="w-10 h-10 bg-brand-sage/20 rounded overflow-hidden flex items-center justify-center">
                                 {item.image ? (
                                   <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                                 ) : (
-                                  <span className="text-cordillera-olive/60 text-xs">No Image</span>
+                                  <span className="text-heritage-800/60 text-xs">No Image</span>
                                 )}
                               </div>
                               <div>
-                                <div className="font-medium text-cordillera-olive">{item.name}</div>
-                                <div className="text-cordillera-olive/70">Qty: {item.quantity}</div>
+                                <div className="font-medium text-heritage-800">{item.name}</div>
+                                <div className="text-heritage-800/70">Qty: {item.quantity}</div>
                               </div>
                             </div>
-                            <div className="text-cordillera-olive font-medium">₱{(item.price * item.quantity).toLocaleString()}</div>
+                            <div className="text-heritage-800 font-medium">₱{(item.price * item.quantity).toLocaleString()}</div>
                           </div>
                         ))}
                         <div className="border-t pt-3">
-                          <div className="flex justify-between font-medium text-cordillera-olive">
+                          <div className="flex justify-between font-medium text-heritage-800">
                             <span>Total</span>
                             <span>₱{confirmationTotal.toLocaleString()}</span>
                           </div>
@@ -1235,14 +1248,14 @@ const MarketplacePage: React.FC = () => {
                     </div>
 
                     {lastOrderIds && (
-                      <div className="bg-cordillera-olive/5 rounded-lg p-6">
-                        <h4 className="font-medium text-cordillera-olive mb-2">Order Reference</h4>
+                      <div className="bg-heritage-800/5 rounded-lg p-6">
+                        <h4 className="font-medium text-heritage-800 mb-2">Order Reference</h4>
                         <div className="flex flex-wrap gap-2">
                           {lastOrderIds.map((id) => (
                             <Link
                               key={id}
                               to={`/orders/${id}`}
-                              className="text-sm px-3 py-1 rounded-full border border-cordillera-olive/30 text-cordillera-olive hover:bg-cordillera-olive/5"
+                              className="text-sm px-3 py-1 rounded-full border border-heritage-800/30 text-heritage-800 hover:bg-heritage-800/5"
                               title={`View order ${id}`}
                             >
                               #{id}
@@ -1252,9 +1265,9 @@ const MarketplacePage: React.FC = () => {
                       </div>
                     )}
 
-                    <div className="bg-cordillera-olive/5 rounded-lg p-6">
-                      <h4 className="font-medium text-cordillera-olive mb-4">Shipping Details</h4>
-                      <div className="space-y-2 text-sm text-cordillera-olive/80">
+                    <div className="bg-heritage-800/5 rounded-lg p-6">
+                      <h4 className="font-medium text-heritage-800 mb-4">Shipping Details</h4>
+                      <div className="space-y-2 text-sm text-heritage-800/80">
                         <div>{shippingDetails.fullName}</div>
                         <div>{shippingDetails.address}</div>
                         <div>{shippingDetails.city}, {shippingDetails.province} {shippingDetails.postalCode}</div>
@@ -1267,13 +1280,13 @@ const MarketplacePage: React.FC = () => {
                       <div className="flex items-center justify-center gap-3 flex-wrap">
                         <button
                           onClick={handleCheckoutComplete}
-                          className="bg-cordillera-gold text-cordillera-olive px-8 py-3 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
+                          className="bg-heritage-500 text-heritage-800 px-8 py-3 rounded-lg font-medium hover:bg-heritage-500/90 transition-colors"
                         >
                           Continue Shopping
                         </button>
                         <Link
                           to="/orders"
-                          className="px-8 py-3 rounded-lg font-medium border border-cordillera-olive/30 text-cordillera-olive hover:bg-cordillera-olive/5 transition-colors"
+                          className="px-8 py-3 rounded-lg font-medium border border-heritage-800/30 text-heritage-800 hover:bg-heritage-800/5 transition-colors"
                         >
                           View My Orders
                         </Link>

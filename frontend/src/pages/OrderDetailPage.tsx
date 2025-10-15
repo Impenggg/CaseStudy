@@ -71,18 +71,18 @@ const OrderDetailPage: React.FC = () => {
     const base = 'px-3 py-1 rounded-full text-xs font-medium';
     switch (status) {
       case 'pending': return `${base} bg-yellow-100 text-yellow-800`;
-      case 'processing': return `${base} bg-blue-100 text-blue-800`;
+      case 'processing': return `${base} bg-info/10 text-blue-800`;
       case 'shipped': return `${base} bg-indigo-100 text-indigo-800`;
       case 'delivered': return `${base} bg-green-100 text-green-800`;
-      case 'cancelled': return `${base} bg-red-100 text-red-800`;
-      default: return `${base} bg-gray-100 text-gray-700`;
+      case 'cancelled': return `${base} bg-error/10 text-red-800`;
+      default: return `${base} bg-heritage-100 text-heritage-700`;
     }
   };
 
   return (
-    <div className="min-h-screen bg-cordillera-olive/5 py-10">
+    <div className="min-h-screen bg-heritage-800/5 py-10">
       <div className="container mx-auto px-4 max-w-4xl">
-        <div className="mb-6 flex items-center gap-3 text-cordillera-olive">
+        <div className="mb-6 flex items-center gap-3 text-heritage-800">
           <button
             onClick={() => navigate(-1)}
             className="text-sm hover:underline"
@@ -100,9 +100,9 @@ const OrderDetailPage: React.FC = () => {
         <div className="bg-white rounded-xl shadow-sm p-6">
           <div className="flex items-start justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-serif text-cordillera-olive">Order</h1>
+              <h1 className="text-2xl font-serif text-heritage-800">Order</h1>
               {order?.created_at && (
-                <p className="text-sm text-cordillera-olive/70 mt-1">Placed on {new Date(order.created_at).toLocaleString()}</p>
+                <p className="text-sm text-heritage-800/70 mt-1">Placed on {new Date(order.created_at).toLocaleString()}</p>
               )}
             </div>
             {order?.status && (
@@ -111,12 +111,12 @@ const OrderDetailPage: React.FC = () => {
           </div>
 
           {loading && (
-            <div className="text-center py-12 text-cordillera-olive/70">Loading order…</div>
+            <div className="text-center py-12 text-heritage-800/70">Loading order…</div>
           )}
 
           {error && (
             <div className="text-center py-12">
-              <div className="inline-block bg-red-50 text-red-700 px-4 py-2 rounded">{error}</div>
+              <div className="inline-block bg-error/10 text-error-dark px-4 py-2 rounded">{error}</div>
             </div>
           )}
 
@@ -124,7 +124,7 @@ const OrderDetailPage: React.FC = () => {
             <div className="space-y-6">
               {/* Product summary */}
               <div className="flex gap-4 items-start">
-                <div className="w-24 h-24 bg-cordillera-sage/20 rounded overflow-hidden flex items-center justify-center">
+                <div className="w-24 h-24 bg-brand-sage/20 rounded overflow-hidden flex items-center justify-center">
                   {(() => {
                     const raw = (order.product as any)?.image_url || (order.product as any)?.image || null;
                     const src = resolveUrl(raw);
@@ -144,32 +144,32 @@ const OrderDetailPage: React.FC = () => {
                   })()}
                 </div>
                 <div className="flex-1">
-                  <Link to={`/product/${order.product?.id ?? order.product_id}`} className="font-medium text-cordillera-olive hover:underline">
+                  <Link to={`/products/${order.product?.id ?? order.product_id}`} className="font-medium text-heritage-800 hover:underline">
                     {order.product?.name || `Product #${order.product_id}`}
                   </Link>
-                  <div className="text-sm text-cordillera-olive/80 mt-1">
+                  <div className="text-sm text-heritage-800/80 mt-1">
                     Qty: {order.quantity}
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="font-medium text-cordillera-olive">₱{Number(order.total_price ?? 0).toLocaleString()}</div>
+                  <div className="font-medium text-heritage-800">₱{Number(order.total_price ?? 0).toLocaleString()}</div>
                 </div>
               </div>
 
               {/* Shipping and Tracking */}
               <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-cordillera-olive/5 rounded-lg p-4">
-                  <h3 className="font-medium text-cordillera-olive mb-2">Order Info</h3>
-                  <div className="space-y-1 text-sm text-cordillera-olive/80">
+                <div className="bg-heritage-800/5 rounded-lg p-4">
+                  <h3 className="font-medium text-heritage-800 mb-2">Order Info</h3>
+                  <div className="space-y-1 text-sm text-heritage-800/80">
                     <div>Status: <span className={statusBadge(order.status)}>{order.status}</span></div>
                     {order.tracking_number && (
                       <div>Tracking #: {order.tracking_number}</div>
                     )}
                   </div>
                 </div>
-                <div className="bg-cordillera-olive/5 rounded-lg p-4">
-                  <h3 className="font-medium text-cordillera-olive mb-2">Customer</h3>
-                  <div className="space-y-1 text-sm text-cordillera-olive/80">
+                <div className="bg-heritage-800/5 rounded-lg p-4">
+                  <h3 className="font-medium text-heritage-800 mb-2">Customer</h3>
+                  <div className="space-y-1 text-sm text-heritage-800/80">
                     {order.buyer?.name && <div>Name: {order.buyer.name}</div>}
                     {order.buyer?.email && <div>Email: {order.buyer.email}</div>}
                   </div>
@@ -177,8 +177,8 @@ const OrderDetailPage: React.FC = () => {
               </div>
 
               <div className="flex items-center justify-between pt-2">
-                <Link to="/orders" className="text-cordillera-olive hover:underline">Back to My Orders</Link>
-                <Link to="/marketplace" className="text-cordillera-gold hover:text-cordillera-gold/80">Continue Shopping →</Link>
+                <Link to="/orders" className="text-heritage-800 hover:underline">Back to My Orders</Link>
+                <Link to="/marketplace" className="text-heritage-500 hover:text-heritage-500/80">Continue Shopping →</Link>
               </div>
             </div>
           )}

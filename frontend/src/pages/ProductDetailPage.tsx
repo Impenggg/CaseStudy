@@ -5,6 +5,7 @@ import CartModal from '../components/CartModal';
 import { useAuth } from '../contexts/AuthContext';
 import BackLink from '@/components/BackLink';
 import api, { productsAPI, favoritesAPI } from '@/services/api';
+import ImageWithFallback from '../components/ImageWithFallback';
  
 
 interface Product {
@@ -152,7 +153,7 @@ const ProductDetailPage: React.FC = () => {
   }, [product]);
 
   // Ensure we always render a non-empty src with a graceful fallback
-  const fallbackImage = React.useMemo(() => `https://source.unsplash.com/800x800/?${encodeURIComponent(product?.category || 'handicraft')}`,[product?.category]);
+  const fallbackImage = React.useMemo(() => `/api/placeholder/800/800`,[product?.category]);
   const [imageSrc, setImageSrc] = React.useState<string>(displayImage || '');
   useEffect(() => {
     setImageSrc(displayImage || fallbackImage);
@@ -297,30 +298,30 @@ const ProductDetailPage: React.FC = () => {
   }, [product?.id, product?.category]);
 
   if (isLoading) {
-    return <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
-      <div className="text-cordillera-cream">Loading...</div>
+    return <div className="min-h-screen bg-heritage-800 flex items-center justify-center">
+      <div className="text-heritage-100">Loading...</div>
     </div>;
   }
 
   if (loadError === 'not_found' || !product) {
     return (
-      <div className="min-h-screen bg-cordillera-olive flex items-center justify-center">
+      <div className="min-h-screen bg-heritage-800 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-3xl font-serif text-cordillera-cream mb-4">Product Not Found</h1>
-          <button onClick={() => navigate('/marketplace')} className="text-cordillera-gold hover:text-cordillera-gold/80 transition-colors">Back to Marketplace</button>
+          <h1 className="text-3xl font-serif text-heritage-100 mb-4">Product Not Found</h1>
+          <button onClick={() => navigate('/marketplace')} className="text-heritage-500 hover:text-heritage-500/80 transition-colors">Back to Marketplace</button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cordillera-cream">
+    <div className="min-h-screen bg-heritage-100">
       {/* Floating Cart Button (hidden for admin) */}
       {!(user && (user as any).role === 'admin') && (
       <div className="fixed right-6 bottom-6 z-50">
         <button
           onClick={() => setIsCartOpen(true)}
-          className="group relative bg-gradient-to-r from-cordillera-gold to-cordillera-gold/90 text-cordillera-olive px-6 py-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-500 flex items-center gap-3 border-2 border-cordillera-olive/20 hover:border-cordillera-olive transform hover:scale-110 backdrop-blur-sm"
+          className="group relative bg-heritage-500 text-heritage-800 px-6 py-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-500 flex items-center gap-3 border-2 border-heritage-800/20 hover:border-heritage-800 transform hover:scale-110 backdrop-blur-sm"
           aria-label="Open cart"
         >
           <div className="relative">
@@ -328,7 +329,7 @@ const ProductDetailPage: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
             </svg>
             {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse shadow-lg border border-white">
+              <span className="absolute -top-2 -right-2 bg-error text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse shadow-lg border border-white">
                 {cartCount}
               </span>
             )}
@@ -340,8 +341,8 @@ const ProductDetailPage: React.FC = () => {
             </span>
           </div>
           {cartTotal > 0 && (
-            <div className="ml-2 pl-3 border-l border-cordillera-olive/30">
-              <span className="text-sm font-bold text-cordillera-olive">₱{cartTotal.toLocaleString()}</span>
+            <div className="ml-2 pl-3 border-l border-heritage-800/30">
+              <span className="text-sm font-bold text-heritage-800">₱{cartTotal.toLocaleString()}</span>
             </div>
           )}
         </button>
@@ -350,12 +351,12 @@ const ProductDetailPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Breadcrumb */}
         <nav className="mb-8">
-          <div className="flex items-center text-sm text-cordillera-olive/60">
-            <Link to="/" className="hover:text-cordillera-olive">Home</Link>
+          <div className="flex items-center text-sm text-heritage-800/60">
+            <Link to="/" className="hover:text-heritage-800">Home</Link>
             <span className="mx-2">/</span>
-            <Link to="/marketplace" className="hover:text-cordillera-olive">Marketplace</Link>
+            <Link to="/marketplace" className="hover:text-heritage-800">Marketplace</Link>
             <span className="mx-2">/</span>
-            <span className="text-cordillera-olive">{product.name}</span>
+            <span className="text-heritage-800">{product.name}</span>
           </div>
         </nav>
 
@@ -367,10 +368,9 @@ const ProductDetailPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Left: Static product image (no carousel) */}
           <div className="space-y-6">
-            <div className="relative aspect-square overflow-hidden border-2 border-cordillera-gold/30 bg-white shadow-lg">
-              <img
-                src={imageSrc || fallbackImage}
-                onError={() => setImageSrc(fallbackImage)}
+            <div className="relative aspect-square overflow-hidden border-2 border-heritage-500/30 bg-white shadow-lg">
+              <ImageWithFallback
+                src={imageSrc || product.image}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -380,22 +380,22 @@ const ProductDetailPage: React.FC = () => {
           {/* Right: Product info */}
           <div className="space-y-8">
             <div>
-              <h1 className="text-4xl font-serif text-cordillera-cream bg-cordillera-olive px-6 py-3 mb-4">
+              <h1 className="text-4xl font-serif text-heritage-100 bg-heritage-800 px-6 py-3 mb-4">
                 {product.name}
               </h1>
-              <p className="text-lg text-cordillera-olive/70 mb-6 leading-relaxed">
+              <p className="text-lg text-heritage-800/70 mb-6 leading-relaxed">
                 {product.description}
               </p>
               
               <div className="flex items-center justify-between mb-2">
-                <span className="text-3xl font-light text-cordillera-gold">
+                <span className="text-3xl font-light text-heritage-500">
                   ₱{product.price.toLocaleString()}
                 </span>
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={toggleFavorite}
-                    className="group inline-flex items-center justify-center w-10 h-10 rounded-full border border-cordillera-olive/30 hover:border-cordillera-gold transition-colors bg-white"
+                    className="group inline-flex items-center justify-center w-10 h-10 rounded-full border border-heritage-800/30 hover:border-heritage-500 transition-colors bg-white"
                     aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
                     title={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
                   >
@@ -403,14 +403,14 @@ const ProductDetailPage: React.FC = () => {
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
                       fill={isFavorited ? 'currentColor' : 'none'}
-                      className={`w-5 h-5 ${isFavorited ? 'text-red-500' : 'text-cordillera-olive'} group-hover:text-red-500`}
+                      className={`w-5 h-5 ${isFavorited ? 'text-error' : 'text-heritage-800'} group-hover:text-error`}
                       stroke="currentColor"
                       strokeWidth="1.5"
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
                     </svg>
                   </button>
-                  <span className="text-sm uppercase tracking-wider text-cordillera-olive/50 bg-cordillera-sage px-3 py-1">
+                  <span className="text-sm uppercase tracking-wider text-heritage-800/50 bg-brand-sage px-3 py-1">
                     {product.category}
                   </span>
                 </div>
@@ -418,11 +418,11 @@ const ProductDetailPage: React.FC = () => {
               {typeof product.stockQuantity === 'number' && (
                 <div className="mb-6 text-sm">
                   {product.stockQuantity === 0 ? (
-                    <span className="text-red-600 font-medium">Out of stock</span>
+                    <span className="text-error font-medium">Out of stock</span>
                   ) : product.stockQuantity <= 5 ? (
-                    <span className="text-orange-600">Only <span className="font-semibold">{product.stockQuantity}</span> left</span>
+                    <span className="text-warning-dark">Only <span className="font-semibold">{product.stockQuantity}</span> left</span>
                   ) : (
-                    <span className="text-cordillera-olive/70">In stock: <span className="font-medium text-cordillera-olive">{product.stockQuantity}</span></span>
+                    <span className="text-heritage-800/70">In stock: <span className="font-medium text-heritage-800">{product.stockQuantity}</span></span>
                   )}
                 </div>
               )}
@@ -435,7 +435,7 @@ const ProductDetailPage: React.FC = () => {
                   : (user && ((user as any).role === 'artisan' || (user as any).role === 'admin'))
                     ? 'This account type cannot add items to the cart.'
                     : undefined}
-                className={`w-full bg-cordillera-gold text-cordillera-olive py-4 text-lg font-medium hover:bg-cordillera-olive hover:text-cordillera-cream transition-all duration-200 tracking-wide ${((typeof product.stockQuantity === 'number' && product.stockQuantity === 0) || Boolean(user && ((user as any).role === 'artisan' || (user as any).role === 'admin'))) ? 'opacity-50 cursor-not-allowed hover:bg-cordillera-gold' : ''}`}
+                className={`w-full bg-heritage-500 text-heritage-800 py-4 text-lg font-medium hover:bg-heritage-800 hover:text-heritage-100 transition-all duration-200 tracking-wide ${((typeof product.stockQuantity === 'number' && product.stockQuantity === 0) || Boolean(user && ((user as any).role === 'artisan' || (user as any).role === 'admin'))) ? 'opacity-50 cursor-not-allowed hover:bg-heritage-500' : ''}`}
               >
                 Add to Cart
               </button>
@@ -443,7 +443,7 @@ const ProductDetailPage: React.FC = () => {
 
             {/* Tabs for Story, Materials, Care Instructions */}
             <div>
-              <div className="flex border-b border-cordillera-sage">
+              <div className="flex border-b border-brand-sage">
                 {[
                   { key: 'story', label: 'Cultural Story' },
                   { key: 'materials', label: 'Materials' },
@@ -454,8 +454,8 @@ const ProductDetailPage: React.FC = () => {
                     onClick={() => setActiveTab(tab.key)}
                     className={`px-6 py-3 text-sm font-medium transition-colors ${
                       activeTab === tab.key
-                        ? 'text-cordillera-olive border-b-2 border-cordillera-gold'
-                        : 'text-cordillera-olive/60 hover:text-cordillera-olive'
+                        ? 'text-heritage-800 border-b-2 border-heritage-500'
+                        : 'text-heritage-800/60 hover:text-heritage-800'
                     }`}
                   >
                     {tab.label}
@@ -466,10 +466,10 @@ const ProductDetailPage: React.FC = () => {
               <div className="pt-6">
                 {activeTab === 'story' && (
                   <div className="space-y-4">
-                    <p className="text-cordillera-olive/80 leading-relaxed">
+                    <p className="text-heritage-800/80 leading-relaxed">
                       {product.culturalBackground}
                     </p>
-                    <p className="text-sm text-cordillera-gold font-medium">
+                    <p className="text-sm text-heritage-500 font-medium">
                       Crafted by: {product.artisan}
                     </p>
                   </div>
@@ -478,8 +478,8 @@ const ProductDetailPage: React.FC = () => {
                 {activeTab === 'materials' && (
                   <ul className="space-y-2">
                     {product.materials.map((material, index) => (
-                      <li key={index} className="flex items-center text-cordillera-olive/80">
-                        <span className="w-2 h-2 bg-cordillera-gold rounded-full mr-3"></span>
+                      <li key={index} className="flex items-center text-heritage-800/80">
+                        <span className="w-2 h-2 bg-heritage-500 rounded-full mr-3"></span>
                         {material}
                       </li>
                     ))}
@@ -489,8 +489,8 @@ const ProductDetailPage: React.FC = () => {
                 {activeTab === 'care' && (
                   <ul className="space-y-2">
                     {product.careInstructions.map((instruction, index) => (
-                      <li key={index} className="flex items-center text-cordillera-olive/80">
-                        <span className="w-2 h-2 bg-cordillera-gold rounded-full mr-3"></span>
+                      <li key={index} className="flex items-center text-heritage-800/80">
+                        <span className="w-2 h-2 bg-heritage-500 rounded-full mr-3"></span>
                         {instruction}
                       </li>
                     ))}
@@ -503,26 +503,25 @@ const ProductDetailPage: React.FC = () => {
 
         {/* Related Products */}
         <section className="mt-20">
-          <h2 className="text-3xl font-serif text-cordillera-olive mb-8">More from this Collection</h2>
+          <h2 className="text-3xl font-serif text-heritage-800 mb-8">More from this Collection</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {(related.length > 0 ? related : []).map((rp) => (
-              <Link key={rp.id} to={`/product/${rp.id}`} className="group block bg-white shadow-sm hover:shadow-lg transition-all duration-300">
+              <Link key={rp.id} to={`/products/${rp.id}`} className="group block bg-white shadow-sm hover:shadow-lg transition-all duration-300">
                 <div className="aspect-square overflow-hidden">
-                  <img
-                    src={rp.image || `https://source.unsplash.com/600x600/?${encodeURIComponent(product.category)}`}
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = `https://source.unsplash.com/600x600/?${encodeURIComponent(product.category)}`; }}
+                  <ImageWithFallback
+                    src={rp.image}
                     alt={rp.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
                 <div className="p-6">
-                  <h3 className="text-lg font-serif text-cordillera-olive mb-2">{rp.name}</h3>
-                  <span className="text-xl font-light text-cordillera-gold">₱{rp.price.toLocaleString()}</span>
+                  <h3 className="text-lg font-serif text-heritage-800 mb-2">{rp.name}</h3>
+                  <span className="text-xl font-light text-heritage-500">₱{rp.price.toLocaleString()}</span>
                 </div>
               </Link>
             ))}
             {related.length === 0 && (
-              <div className="text-cordillera-olive/60">No related items found.</div>
+              <div className="text-heritage-800/60">No related items found.</div>
             )}
           </div>
         </section>

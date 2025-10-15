@@ -114,11 +114,11 @@ export const UserDashboard = () => {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen bg-cordillera-cream flex items-center justify-center">
+      <div className="min-h-screen bg-heritage-100 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-serif text-cordillera-olive mb-4">Access Denied</h1>
-          <p className="text-cordillera-olive/70 mb-6">Please log in to access your dashboard.</p>
-          <Link to="/login" className="bg-cordillera-gold text-cordillera-olive px-6 py-2 font-medium">
+          <h1 className="text-2xl font-serif text-heritage-800 mb-4">Access Denied</h1>
+          <p className="text-heritage-800/70 mb-6">Please log in to access your dashboard.</p>
+          <Link to="/login" className="bg-heritage-500 text-heritage-800 px-6 py-2 font-medium">
             Sign In
           </Link>
         </div>
@@ -127,15 +127,15 @@ export const UserDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-cordillera-cream py-12">
+    <div className="min-h-screen bg-heritage-100 py-12">
       <div className="max-w-6xl mx-auto px-6">
         {/* Header */}
         <div className="mb-12">
           <div className="mb-6">
-            <h1 className="text-4xl font-serif font-light text-cordillera-olive tracking-wide">
+            <h1 className="text-4xl font-serif font-light text-heritage-800 tracking-wide">
               Welcome, {user.name || 'Member'}
             </h1>
-            <p className="text-cordillera-olive/70 font-light capitalize">
+            <p className="text-heritage-800/70 font-light capitalize">
               {(user.role || 'member')} • Member since {user.created_at ? new Date(user.created_at).getFullYear() : new Date().getFullYear()}
             </p>
           </div>
@@ -146,87 +146,87 @@ export const UserDashboard = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Quick Stats */}
-            <div className="bg-white p-8 border border-cordillera-sage/20">
-              <h2 className="text-2xl font-serif font-light text-cordillera-olive mb-6 tracking-wide">
+            <div className="bg-white p-8 border border-brand-sage/20">
+              <h2 className="text-2xl font-serif font-light text-heritage-800 mb-6 tracking-wide">
                 {isArtisanRole ? 'Your Artisan Stats' : 'Your Activity'}
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {isArtisanRole ? (
                   <>
                     <div className="text-center">
-                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">
+                      <div className="text-3xl font-serif font-light text-heritage-800 mb-2">
                         {loading ? '—' : (stats?.totalSales ?? 0)}
                       </div>
-                      <div className="text-sm text-cordillera-olive/70">Total Sales</div>
+                      <div className="text-sm text-heritage-800/70">Total Sales</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">
+                      <div className="text-3xl font-serif font-light text-heritage-800 mb-2">
                         {loading ? '—' : (stats?.storiesShared ?? 0)}
                       </div>
-                      <div className="text-sm text-cordillera-olive/70">Stories Shared</div>
+                      <div className="text-sm text-heritage-800/70">Stories Shared</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">
+                      <div className="text-3xl font-serif font-light text-heritage-800 mb-2">
                         {loading ? '—' : (stats?.campaignsStarted ?? 0)}
                       </div>
-                      <div className="text-sm text-cordillera-olive/70">Campaigns Started</div>
+                      <div className="text-sm text-heritage-800/70">Campaigns Started</div>
                     </div>
                   </>
                 ) : (
                   <>
                     <div className="text-center">
-                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">
+                      <div className="text-3xl font-serif font-light text-heritage-800 mb-2">
                         {loading ? '—' : (stats?.itemsPurchased ?? 0)}
                       </div>
-                      <div className="text-sm text-cordillera-olive/70">Items Purchased</div>
+                      <div className="text-sm text-heritage-800/70">Items Purchased</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">
+                      <div className="text-3xl font-serif font-light text-heritage-800 mb-2">
                         {loading ? '—' : (stats?.favorites ?? 0)}
                       </div>
-                      <div className="text-sm text-cordillera-olive/70">Favorites</div>
+                      <div className="text-sm text-heritage-800/70">Favorites</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-3xl font-serif font-light text-cordillera-olive mb-2">
+                      <div className="text-3xl font-serif font-light text-heritage-800 mb-2">
                         {loading ? '—' : `₱${(stats?.totalSpent ?? 0).toLocaleString()}`}
                       </div>
-                      <div className="text-sm text-cordillera-olive/70">Total Spent</div>
+                      <div className="text-sm text-heritage-800/70">Total Spent</div>
                     </div>
                   </>
                 )}
               </div>
               {!loading && error && (
-                <div className="mt-4 text-sm text-red-600">{error}</div>
+                <div className="mt-4 text-sm text-error">{error}</div>
               )}
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-white p-8 border border-cordillera-sage/20">
-              <h3 className="text-xl font-serif font-light text-cordillera-olive mb-6 tracking-wide">
+            <div className="bg-white p-8 border border-brand-sage/20">
+              <h3 className="text-xl font-serif font-light text-heritage-800 mb-6 tracking-wide">
                 Recent Activity
               </h3>
               <div className="space-y-4">
                 {loading ? (
                   // Simple loading placeholders
                   <>
-                    <div className="h-12 bg-cordillera-sage/10" />
-                    <div className="h-12 bg-cordillera-sage/10" />
-                    <div className="h-12 bg-cordillera-sage/10" />
+                    <div className="h-12 bg-brand-sage/10" />
+                    <div className="h-12 bg-brand-sage/10" />
+                    <div className="h-12 bg-brand-sage/10" />
                   </>
                 ) : stats?.activity && stats.activity.length > 0 ? (
                   stats.activity.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between py-3 border-b border-cordillera-sage/10">
+                    <div key={item.id} className="flex items-center justify-between py-3 border-b border-brand-sage/10">
                       <div>
-                        <p className="text-cordillera-olive font-light">{item.title}</p>
+                        <p className="text-heritage-800 font-light">{item.title}</p>
                         {item.subtitle && (
-                          <p className="text-sm text-cordillera-olive/60">{item.subtitle}</p>
+                          <p className="text-sm text-heritage-800/60">{item.subtitle}</p>
                         )}
                       </div>
-                      <span className="text-xs text-cordillera-olive/50">{timeAgo(item.at)}</span>
+                      <span className="text-xs text-heritage-800/50">{timeAgo(item.at)}</span>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-cordillera-olive/60">No recent activity yet.</p>
+                  <p className="text-sm text-heritage-800/60">No recent activity yet.</p>
                 )}
               </div>
             </div>
@@ -235,25 +235,25 @@ export const UserDashboard = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Quick Actions */}
-            <div className="bg-white p-6 border border-cordillera-sage/20">
-              <h3 className="text-lg font-serif font-light text-cordillera-olive mb-4 tracking-wide">
+            <div className="bg-white p-6 border border-brand-sage/20">
+              <h3 className="text-lg font-serif font-light text-heritage-800 mb-4 tracking-wide">
                 Quick Actions
               </h3>
               <div className="space-y-3">
                 {user.role === 'artisan' ? (
                   <>
                     <Link to="/create-product">
-                      <button className="w-full bg-cordillera-gold text-cordillera-olive py-2 px-4 text-sm font-medium tracking-wide hover:bg-cordillera-gold/90 transition-colors">
+                      <button className="w-full bg-heritage-500 text-heritage-800 py-2 px-4 text-sm font-medium tracking-wide hover:bg-heritage-500/90 transition-colors">
                         Add New Product
                       </button>
                     </Link>
                     <Link to="/submit-story">
-                      <button className="w-full border border-cordillera-olive text-cordillera-olive py-2 px-4 text-sm font-light tracking-wide hover:bg-cordillera-olive hover:text-cordillera-cream transition-colors">
+                      <button className="w-full border border-heritage-800 text-heritage-800 py-2 px-4 text-sm font-light tracking-wide hover:bg-heritage-800 hover:text-heritage-100 transition-colors">
                         Share Your Story
                       </button>
                     </Link>
                     <Link to="/create-campaign">
-                      <button className="w-full border border-cordillera-olive text-cordillera-olive py-2 px-4 text-sm font-light tracking-wide hover:bg-cordillera-olive hover:text-cordillera-cream transition-colors">
+                      <button className="w-full border border-heritage-800 text-heritage-800 py-2 px-4 text-sm font-light tracking-wide hover:bg-heritage-800 hover:text-heritage-100 transition-colors">
                         Submit Campaign
                       </button>
                     </Link>
@@ -261,14 +261,14 @@ export const UserDashboard = () => {
                 ) : (
                   <>
                     <Link to="/marketplace">
-                      <button className="w-full bg-cordillera-gold text-cordillera-olive py-2 px-4 text-sm font-medium tracking-wide hover:bg-cordillera-gold/90 transition-colors">
+                      <button className="w-full bg-heritage-500 text-heritage-800 py-2 px-4 text-sm font-medium tracking-wide hover:bg-heritage-500/90 transition-colors">
                         Browse Products
                       </button>
                     </Link>
-                    <button className="w-full border border-cordillera-olive text-cordillera-olive py-2 px-4 text-sm font-light tracking-wide hover:bg-cordillera-olive hover:text-cordillera-cream transition-colors">
+                    <button className="w-full border border-heritage-800 text-heritage-800 py-2 px-4 text-sm font-light tracking-wide hover:bg-heritage-800 hover:text-heritage-100 transition-colors">
                       View Orders
                     </button>
-                    <button className="w-full border border-cordillera-olive text-cordillera-olive py-2 px-4 text-sm font-light tracking-wide hover:bg-cordillera-olive hover:text-cordillera-cream transition-colors">
+                    <button className="w-full border border-heritage-800 text-heritage-800 py-2 px-4 text-sm font-light tracking-wide hover:bg-heritage-800 hover:text-heritage-100 transition-colors">
                       Manage Favorites
                     </button>
                   </>
@@ -277,37 +277,37 @@ export const UserDashboard = () => {
             </div>
 
             {/* Community Stats */}
-            <div className="bg-cordillera-olive p-6 text-cordillera-cream">
+            <div className="bg-heritage-800 p-6 text-heritage-100">
               <h3 className="text-lg font-serif font-light mb-4 tracking-wide">
                 Community Impact
               </h3>
               {isArtisanRole ? (
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-cordillera-cream/80">Total Revenue</span>
+                    <span className="text-heritage-100/80">Total Revenue</span>
                     <span className="font-medium">{loading ? '—' : `₱${(stats?.community?.totalRevenue ?? 0).toLocaleString()}`}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-cordillera-cream/80">Stories Viewed</span>
+                    <span className="text-heritage-100/80">Stories Viewed</span>
                     <span className="font-medium">{loading ? '—' : (stats?.community?.storiesViewed ?? 0)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-cordillera-cream/80">Funds Raised</span>
+                    <span className="text-heritage-100/80">Funds Raised</span>
                     <span className="font-medium">{loading ? '—' : `₱${(stats?.community?.fundsRaised ?? 0).toLocaleString()}`}</span>
                   </div>
                 </div>
               ) : (
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-cordillera-cream/80">Pending Orders</span>
+                    <span className="text-heritage-100/80">Pending Orders</span>
                     <span className="font-medium">{loading ? '—' : (stats?.community?.pendingOrders ?? 0)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-cordillera-cream/80">Stories Viewed</span>
+                    <span className="text-heritage-100/80">Stories Viewed</span>
                     <span className="font-medium">{loading ? '—' : (stats?.community?.storiesViewed ?? 0)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-cordillera-cream/80">Total Campaigns Supported</span>
+                    <span className="text-heritage-100/80">Total Campaigns Supported</span>
                     <span className="font-medium">{loading ? '—' : (stats?.community?.totalCampaignsSupported ?? 0)}</span>
                   </div>
                 </div>

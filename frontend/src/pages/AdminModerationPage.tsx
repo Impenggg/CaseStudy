@@ -114,17 +114,17 @@ const AdminModerationPage: React.FC = () => {
   )
 
   return (
-    <div className="min-h-screen bg-cordillera-olive/10 py-8">
+    <div className="min-h-screen bg-heritage-800/10 py-8">
       <div className="max-w-6xl mx-auto px-4">
-        <h1 className="text-2xl font-serif text-cordillera-olive mb-2">{title}</h1>
-        <p className="text-cordillera-olive/70 mb-6">Approve or reject submitted content. Only approved items appear on customer/artisan UIs.</p>
+        <h1 className="text-2xl font-serif text-heritage-800 mb-2">{title}</h1>
+        <p className="text-heritage-800/70 mb-6">Approve or reject submitted content. Only approved items appear on customer/artisan UIs.</p>
         {Toolbar}
 
         {loading && (
           <div className="p-6 bg-white border">Loading...</div>
         )}
         {error && (
-          <div className="p-4 bg-red-100 text-red-700 border border-red-300 mb-4">{error}</div>
+          <div className="p-4 bg-error/10 text-error-dark border border-error/30 mb-4">{error}</div>
         )}
 
         {!loading && !error && (
@@ -136,7 +136,7 @@ const AdminModerationPage: React.FC = () => {
               <div className="col-span-2">Actions</div>
             </div>
             {items.length === 0 && (
-              <div className="px-4 py-6 text-gray-600">No items.</div>
+              <div className="px-4 py-6 text-heritage-700">No items.</div>
             )}
             {items.map((it: any) => (
               <div key={it.id} className="grid grid-cols-12 gap-2 px-4 py-3 items-center">
@@ -144,35 +144,35 @@ const AdminModerationPage: React.FC = () => {
                   {type === 'products' && (
                     <div>
                       <div className="font-semibold">{it.name}</div>
-                      <div className="text-gray-600 line-clamp-1">{it.description}</div>
+                      <div className="text-heritage-700 line-clamp-1">{it.description}</div>
                     </div>
                   )}
                   {type === 'stories' && (
                     <div>
                       <div className="font-semibold">{it.title}</div>
-                      <div className="text-gray-600 line-clamp-1">{it.excerpt}</div>
+                      <div className="text-heritage-700 line-clamp-1">{it.excerpt}</div>
                     </div>
                   )}
                   {type === 'campaigns' && (
                     <div>
                       <div className="font-semibold">{it.title}</div>
-                      <div className="text-gray-600">Goal: {it.goal_amount}</div>
+                      <div className="text-heritage-700">Goal: {it.goal_amount}</div>
                     </div>
                   )}
                   {type === 'media-posts' && (
                     <div className="flex items-center gap-3">
                       {it.image_url && <img src={it.image_url} className="w-12 h-12 object-cover" alt=""/>}
-                      <div className="text-gray-700 line-clamp-1">{it.caption || 'No caption'}</div>
+                      <div className="text-heritage-700 line-clamp-1">{it.caption || 'No caption'}</div>
                     </div>
                   )}
                   {type === 'media-comments' && (
-                    <div className="text-gray-700 line-clamp-2">{it.body}</div>
+                    <div className="text-heritage-700 line-clamp-2">{it.body}</div>
                   )}
                 </div>
-                <div className="col-span-2 text-sm text-gray-700">{(it.user?.name) || (it.author?.name) || (it.organizer?.name) || (it.seller?.name) || '-'}</div>
-                <div className="col-span-2 text-sm text-gray-600">{new Date(it.created_at).toLocaleString()}</div>
+                <div className="col-span-2 text-sm text-heritage-700">{(it.user?.name) || (it.author?.name) || (it.organizer?.name) || (it.seller?.name) || '-'}</div>
+                <div className="col-span-2 text-sm text-heritage-700">{new Date(it.created_at).toLocaleString()}</div>
                 <div className="col-span-2 flex gap-2">
-                  <button onClick={() => openReviewModal(it)} className="px-3 py-1 bg-blue-600 text-white text-sm hover:bg-blue-700">Review</button>
+                  <button onClick={() => openReviewModal(it)} className="px-3 py-1 bg-info text-white text-sm hover:bg-blue-600 rounded">Review</button>
                 </div>
               </div>
             ))}
@@ -180,7 +180,7 @@ const AdminModerationPage: React.FC = () => {
         )}
 
         <div className="flex items-center justify-between mt-4">
-          <div className="text-sm text-gray-700">
+          <div className="text-sm text-heritage-700">
             {pagination && (
               <span>Page {pagination.current_page} of {pagination.total_pages} • {pagination.total_count} items</span>
             )}
@@ -200,7 +200,7 @@ const AdminModerationPage: React.FC = () => {
               <div className="p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold text-gray-900">Review {typeLabels[type].slice(0, -1)}</h2>
-                <button onClick={closeReviewModal} className="text-gray-400 hover:text-gray-600">
+                <button onClick={closeReviewModal} className="text-gray-400 hover:text-heritage-700">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -213,20 +213,20 @@ const AdminModerationPage: React.FC = () => {
                   <h3 className="font-medium text-gray-900 mb-4">Creator Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <span className="text-sm font-medium text-gray-500">Creator Name</span>
+                      <span className="text-sm font-medium text-heritage-600">Creator Name</span>
                       <p className="text-gray-900">{(reviewModal.item.user?.name) || (reviewModal.item.author?.name) || (reviewModal.item.organizer?.name) || (reviewModal.item.seller?.name) || 'Unknown'}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-500">Created Date</span>
+                      <span className="text-sm font-medium text-heritage-600">Created Date</span>
                       <p className="text-gray-900">{new Date(reviewModal.item.created_at).toLocaleString()}</p>
                     </div>
                     <div>
-                      <span className="text-sm font-medium text-gray-500">Status</span>
+                      <span className="text-sm font-medium text-heritage-600">Status</span>
                       <div className="mt-1">
                         <span className={`px-3 py-1 text-sm rounded-full ${
                           reviewModal.item.moderation_status === 'approved' ? 'bg-green-100 text-green-800' :
                           reviewModal.item.moderation_status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-red-100 text-red-800'
+                          'bg-error/10 text-red-800'
                         }`}>
                           {reviewModal.item.moderation_status || 'pending'}
                         </span>
@@ -258,15 +258,15 @@ const AdminModerationPage: React.FC = () => {
                         <div className="space-y-4">
                           <div>
                             <h4 className="text-2xl font-bold text-gray-900 mb-2">{reviewModal.item.name}</h4>
-                            <p className="text-3xl font-bold text-green-600">₱{Number(reviewModal.item.price).toFixed(2)}</p>
+                            <p className="text-3xl font-bold text-success">₱{Number(reviewModal.item.price).toFixed(2)}</p>
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <span className="text-sm font-medium text-gray-500">Category</span>
+                              <span className="text-sm font-medium text-heritage-600">Category</span>
                               <p className="text-gray-900">{reviewModal.item.category}</p>
                             </div>
                             <div>
-                              <span className="text-sm font-medium text-gray-500">Stock</span>
+                              <span className="text-sm font-medium text-heritage-600">Stock</span>
                               <p className="text-gray-900">{reviewModal.item.stock_quantity}</p>
                             </div>
                           </div>
@@ -276,14 +276,14 @@ const AdminModerationPage: React.FC = () => {
                         <div>
                           <h5 className="font-medium text-gray-900 mb-2">Description</h5>
                           <div className="bg-gray-50 p-4 rounded-lg">
-                            <p className="text-gray-700">{reviewModal.item.description}</p>
+                            <p className="text-heritage-700">{reviewModal.item.description}</p>
                           </div>
                         </div>
                         {reviewModal.item.cultural_background && (
                           <div>
                             <h5 className="font-medium text-gray-900 mb-2">Cultural Background</h5>
                             <div className="bg-gray-50 p-4 rounded-lg">
-                              <p className="text-gray-700">{reviewModal.item.cultural_background}</p>
+                              <p className="text-heritage-700">{reviewModal.item.cultural_background}</p>
                             </div>
                           </div>
                         )}
@@ -294,7 +294,7 @@ const AdminModerationPage: React.FC = () => {
                             <div>
                               <h5 className="font-medium text-gray-900 mb-2">Materials</h5>
                               <div className="bg-gray-50 p-4 rounded-lg">
-                                <p className="text-gray-700">{reviewModal.item.materials.join(', ')}</p>
+                                <p className="text-heritage-700">{reviewModal.item.materials.join(', ')}</p>
                               </div>
                             </div>
                           )}
@@ -302,7 +302,7 @@ const AdminModerationPage: React.FC = () => {
                             <div>
                               <h5 className="font-medium text-gray-900 mb-2">Care Instructions</h5>
                               <div className="bg-gray-50 p-4 rounded-lg">
-                                <p className="text-gray-700">{reviewModal.item.care_instructions}</p>
+                                <p className="text-heritage-700">{reviewModal.item.care_instructions}</p>
                               </div>
                             </div>
                           )}
@@ -333,11 +333,11 @@ const AdminModerationPage: React.FC = () => {
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <span className="text-sm font-medium text-gray-500">Category</span>
+                              <span className="text-sm font-medium text-heritage-600">Category</span>
                               <p className="text-gray-900">{reviewModal.item.category}</p>
                             </div>
                             <div>
-                              <span className="text-sm font-medium text-gray-500">Reading Time</span>
+                              <span className="text-sm font-medium text-heritage-600">Reading Time</span>
                               <p className="text-gray-900">{reviewModal.item.reading_time} min</p>
                             </div>
                           </div>
@@ -347,14 +347,14 @@ const AdminModerationPage: React.FC = () => {
                         <div>
                           <h5 className="font-medium text-gray-900 mb-2">Excerpt</h5>
                           <div className="bg-gray-50 p-4 rounded-lg">
-                            <p className="text-gray-700">{reviewModal.item.excerpt}</p>
+                            <p className="text-heritage-700">{reviewModal.item.excerpt}</p>
                           </div>
                         </div>
                       )}
                       <div>
                         <h5 className="font-medium text-gray-900 mb-2">Content</h5>
                         <div className="bg-gray-50 p-6 rounded-lg max-h-80 overflow-y-auto">
-                          <div className="text-gray-700 whitespace-pre-wrap">{reviewModal.item.content}</div>
+                          <div className="text-heritage-700 whitespace-pre-wrap">{reviewModal.item.content}</div>
                         </div>
                       </div>
                     </div>
@@ -376,14 +376,14 @@ const AdminModerationPage: React.FC = () => {
                         )}
                         <div className="flex-1 text-center md:text-left">
                           <h4 className="text-xl font-semibold text-gray-900 mb-2">{reviewModal.item.title}</h4>
-                          <p className="text-2xl font-bold text-blue-600 mb-2">Goal: ₱{Number(reviewModal.item.goal_amount).toLocaleString()}</p>
-                          <p className="text-sm text-gray-600 mb-1">Category: {reviewModal.item.category}</p>
-                          <p className="text-sm text-gray-600">End Date: {new Date(reviewModal.item.end_date).toLocaleDateString()}</p>
+                          <p className="text-2xl font-bold text-info-dark mb-2">Goal: ₱{Number(reviewModal.item.goal_amount).toLocaleString()}</p>
+                          <p className="text-sm text-heritage-700 mb-1">Category: {reviewModal.item.category}</p>
+                          <p className="text-sm text-heritage-700">End Date: {new Date(reviewModal.item.end_date).toLocaleDateString()}</p>
                         </div>
                       </div>
                       <div>
                         <h5 className="font-medium text-gray-900">Description</h5>
-                        <div className="text-gray-700 mt-1 max-h-64 overflow-y-auto whitespace-pre-wrap">{reviewModal.item.description}</div>
+                        <div className="text-heritage-700 mt-1 max-h-64 overflow-y-auto whitespace-pre-wrap">{reviewModal.item.description}</div>
                       </div>
                     </div>
                   )}
@@ -404,7 +404,7 @@ const AdminModerationPage: React.FC = () => {
                       {reviewModal.item.caption && (
                         <div className="text-center">
                           <h5 className="font-medium text-gray-900 mb-2">Caption</h5>
-                          <p className="text-gray-700">{reviewModal.item.caption}</p>
+                          <p className="text-heritage-700">{reviewModal.item.caption}</p>
                         </div>
                       )}
                     </div>
@@ -414,7 +414,7 @@ const AdminModerationPage: React.FC = () => {
                     <div className="space-y-3 text-center">
                       <div>
                         <h5 className="font-medium text-gray-900 mb-2">Comment</h5>
-                        <p className="text-gray-700 bg-gray-50 p-4 rounded-lg inline-block max-w-2xl">{reviewModal.item.body}</p>
+                        <p className="text-heritage-700 bg-gray-50 p-4 rounded-lg inline-block max-w-2xl">{reviewModal.item.body}</p>
                       </div>
                     </div>
                   )}
@@ -422,25 +422,25 @@ const AdminModerationPage: React.FC = () => {
 
                 {/* Rejection Reason (if rejected) */}
                 {reviewModal.item.moderation_status === 'rejected' && reviewModal.item.rejection_reason && (
-                  <div className="bg-red-50 p-4 rounded-lg">
+                  <div className="bg-error/10 p-4 rounded-lg">
                     <h3 className="font-medium text-red-900 mb-2">Rejection Reason</h3>
-                    <p className="text-sm text-red-700">{reviewModal.item.rejection_reason}</p>
+                    <p className="text-sm text-error-dark">{reviewModal.item.rejection_reason}</p>
                   </div>
                 )}
               </div>
 
               {/* Action Buttons */}
               <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-                <button onClick={closeReviewModal} className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded">
+                <button onClick={closeReviewModal} className="px-4 py-2 text-heritage-700 bg-heritage-100 hover:bg-heritage-200 rounded">
                   Close
                 </button>
                 {status !== 'approved' && (
-                  <button onClick={() => approve(reviewModal.item.id)} className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded">
+                  <button onClick={() => approve(reviewModal.item.id)} className="px-4 py-2 bg-success text-white hover:bg-green-600 rounded">
                     Approve
                   </button>
                 )}
                 {status !== 'rejected' && (
-                  <button onClick={() => reject(reviewModal.item.id)} className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded">
+                  <button onClick={() => reject(reviewModal.item.id)} className="px-4 py-2 bg-error text-white hover:bg-red-600 rounded">
                     Reject
                   </button>
                 )}

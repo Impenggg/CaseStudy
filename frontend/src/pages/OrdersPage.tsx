@@ -27,7 +27,7 @@ const OrdersPage: React.FC = () => {
     if (u.startsWith('http://') || u.startsWith('https://')) return u
     return `${API_ORIGIN}/${u.replace(/^\/?/, '')}`
   }
-  const PLACEHOLDER_IMG = 'https://via.placeholder.com/64?text=%20'
+  const PLACEHOLDER_IMG = '/api/placeholder/64/64'
 
   useEffect(() => {
     requireAuth()
@@ -58,32 +58,32 @@ const OrdersPage: React.FC = () => {
     const base = 'px-2 py-0.5 rounded-full text-[11px] font-medium'
     switch (status) {
       case 'pending': return `${base} bg-yellow-100 text-yellow-800`
-      case 'processing': return `${base} bg-blue-100 text-blue-800`
+      case 'processing': return `${base} bg-info/10 text-blue-800`
       case 'shipped': return `${base} bg-indigo-100 text-indigo-800`
       case 'delivered': return `${base} bg-green-100 text-green-800`
-      case 'cancelled': return `${base} bg-red-100 text-red-800`
-      default: return `${base} bg-gray-100 text-gray-700`
+      case 'cancelled': return `${base} bg-error/10 text-red-800`
+      default: return `${base} bg-heritage-100 text-heritage-700`
     }
   }
 
   return (
-    <div className="min-h-[60vh] px-4 py-10 max-w-5xl mx-auto text-cordillera-cream">
+    <div className="min-h-[60vh] px-4 py-10 max-w-5xl mx-auto text-heritage-100">
       <div className="mb-4">
-        <Link to="/" className="inline-block bg-cordillera-gold text-cordillera-olive px-4 py-1.5 rounded hover:bg-cordillera-gold/90 transition-colors">← Back to Home</Link>
+        <Link to="/" className="inline-block bg-heritage-500 text-heritage-800 px-4 py-1.5 rounded hover:bg-heritage-500/90 transition-colors">← Back to Home</Link>
       </div>
       <h1 className="text-3xl font-serif mb-6">Orders & Purchase History</h1>
 
       {loading && (
-        <div className="rounded-lg border border-cordillera-gold/30 bg-cordillera-olive/40 p-6">Loading orders…</div>
+        <div className="rounded-lg border border-heritage-500/30 bg-heritage-800/40 p-6">Loading orders…</div>
       )}
 
       {error && (
-        <div className="rounded-lg border border-red-400/40 bg-red-900/30 p-6 text-red-100">{error}</div>
+        <div className="rounded-lg border border-error/50/40 bg-red-900/30 p-6 text-red-100">{error}</div>
       )}
 
       {!loading && !error && orders.length === 0 && (
-        <div className="rounded-lg border border-cordillera-gold/30 bg-cordillera-olive/40 p-6">
-          <p className="text-cordillera-cream/80">You have no orders yet.</p>
+        <div className="rounded-lg border border-heritage-500/30 bg-heritage-800/40 p-6">
+          <p className="text-heritage-100/80">You have no orders yet.</p>
         </div>
       )}
 
@@ -95,10 +95,10 @@ const OrdersPage: React.FC = () => {
               <Link
                 key={o.id}
                 to={`/orders/${o.id}`}
-                className="block bg-cordillera-olive/40 hover:bg-cordillera-olive/50 transition-colors rounded-lg border border-cordillera-gold/30 p-4"
+                className="block bg-heritage-800/40 hover:bg-heritage-800/50 transition-colors rounded-lg border border-heritage-500/30 p-4"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 bg-cordillera-sage/20 rounded overflow-hidden flex items-center justify-center">
+                  <div className="w-16 h-16 bg-brand-sage/20 rounded overflow-hidden flex items-center justify-center">
                     {(() => {
                       const raw = (o.product as any)?.image_url || (o.product as any)?.image || null
                       const src = resolveUrl(raw)
@@ -120,9 +120,9 @@ const OrdersPage: React.FC = () => {
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <div className="font-medium">{o.product?.name || `Order`}</div>
-                      <div className="text-cordillera-gold">₱{Number(total).toLocaleString()}</div>
+                      <div className="text-heritage-500">₱{Number(total).toLocaleString()}</div>
                     </div>
-                    <div className="text-sm text-cordillera-cream/70 mt-1 flex items-center gap-2">
+                    <div className="text-sm text-heritage-100/70 mt-1 flex items-center gap-2">
                       <span>Qty: {o.quantity}</span>
                       {o.status && <span className={statusBadge(o.status)}>{o.status}</span>}
                       {o.created_at && <span className="ml-auto">{new Date(o.created_at).toLocaleString()}</span>}

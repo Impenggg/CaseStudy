@@ -34,18 +34,18 @@ const VerifySuccessPage: React.FC = () => {
     : 'Thanks for verifying your email. Your account is now active.';
 
   return (
-    <div className="min-h-screen bg-cordillera-olive flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-lg w-full text-center bg-cordillera-cream/5 border border-cordillera-gold/20 p-10 space-y-5">
-        <h1 className="text-3xl font-serif font-light text-cordillera-cream tracking-wide">{title}</h1>
-        <p className="text-cordillera-cream/90">{desc}</p>
+    <div className="min-h-screen bg-heritage-800 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-lg w-full text-center bg-heritage-100/5 border border-heritage-500/20 p-10 space-y-5">
+        <h1 className="text-3xl font-serif font-light text-heritage-100 tracking-wide">{title}</h1>
+        <p className="text-heritage-100/90">{desc}</p>
         <div className="flex items-center justify-center gap-3">
           <button
             onClick={goNext}
-            className="px-5 py-2 bg-cordillera-gold text-cordillera-olive hover:bg-cordillera-gold/90"
+            className="px-5 py-2 bg-heritage-500 text-heritage-800 hover:bg-heritage-500/90"
           >
             Continue
           </button>
-          <Link to="/" className="text-cordillera-gold hover:text-cordillera-gold/80 text-sm">Return Home</Link>
+          <Link to="/" className="text-heritage-500 hover:text-heritage-500/80 text-sm">Return Home</Link>
         </div>
       </div>
     </div>

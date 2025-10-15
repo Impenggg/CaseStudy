@@ -10,7 +10,7 @@ interface SectionProps {
 const Section: React.FC<SectionProps> = ({ 
   children, 
   className = '', 
-  bgColor = 'bg-cordillera-cream',
+  bgColor = 'bg-heritage-100',
   containerWidth = 'max-w-7xl'
 }) => {
   return (

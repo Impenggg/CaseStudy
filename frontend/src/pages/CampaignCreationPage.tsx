@@ -90,27 +90,27 @@ const CampaignCreationPage: React.FC = () => {
 
   if (showSuccess) {
     return (
-      <div className="min-h-screen bg-cordillera-cream flex items-center justify-center">
+      <div className="min-h-screen bg-heritage-100 flex items-center justify-center">
         <div className="max-w-md mx-auto text-center">
           <div className="w-16 h-16 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h1 className="text-2xl font-serif text-cordillera-olive mb-4">Campaign Created Successfully!</h1>
-          <p className="text-cordillera-olive/70 mb-8">
+          <h1 className="text-2xl font-serif text-heritage-800 mb-4">Campaign Created Successfully!</h1>
+          <p className="text-heritage-800/70 mb-8">
             Your campaign has been submitted for review. We'll contact you soon to discuss next steps.
           </p>
           <div className="space-y-3">
             <Link
               to="/my-campaigns"
-              className="block w-full bg-cordillera-gold text-cordillera-olive py-3 px-6 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors"
+              className="block w-full bg-heritage-500 text-heritage-800 py-3 px-6 rounded-lg font-medium hover:bg-heritage-500/90 transition-colors"
             >
               Go to My Campaigns
             </Link>
             <button
               onClick={() => setShowSuccess(false)}
-              className="block w-full border border-cordillera-olive/20 text-cordillera-olive py-3 px-6 rounded-lg font-medium hover:bg-cordillera-olive/5 transition-colors"
+              className="block w-full border border-heritage-800/20 text-heritage-800 py-3 px-6 rounded-lg font-medium hover:bg-heritage-800/5 transition-colors"
             >
               Create Another Campaign
             </button>
@@ -121,14 +121,14 @@ const CampaignCreationPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-cordillera-cream">
+    <div className="min-h-screen bg-heritage-100">
       {/* Breadcrumb */}
-      <div className="bg-cordillera-olive py-4">
+      <div className="bg-heritage-800 py-4">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-2 text-cordillera-cream">
-            <Link to="/stories" className="hover:text-cordillera-gold transition-colors">Stories</Link>
+          <div className="flex items-center space-x-2 text-heritage-100">
+            <Link to="/stories" className="hover:text-heritage-500 transition-colors">Stories</Link>
             <span>/</span>
-            <span className="text-cordillera-cream/60">Create Campaign</span>
+            <span className="text-heritage-100/60">Create Campaign</span>
           </div>
         </div>
       </div>
@@ -141,10 +141,10 @@ const CampaignCreationPage: React.FC = () => {
       {/* Header */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
         <div className="text-center">
-          <h1 className="text-4xl md:text-5xl font-serif text-cordillera-olive mb-6">
+          <h1 className="text-4xl md:text-5xl font-serif text-heritage-800 mb-6">
             Start Your Campaign
           </h1>
-          <p className="text-xl text-cordillera-olive/70 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-heritage-800/70 max-w-2xl mx-auto leading-relaxed">
             Launch a fundraising campaign to support Cordillera weaving heritage projects 
             and rally community support for preserving our cultural traditions.
           </p>
@@ -156,11 +156,11 @@ const CampaignCreationPage: React.FC = () => {
         <div className="bg-white rounded-lg shadow-lg p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {errorMsg && (
-              <div className="p-3 rounded bg-red-50 text-red-700 border border-red-200">{errorMsg}</div>
+              <div className="p-3 rounded bg-error/10 text-error-dark border border-error/30">{errorMsg}</div>
             )}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-cordillera-olive mb-2">
+                <label className="block text-sm font-medium text-heritage-800 mb-2">
                   Campaign Title *
                 </label>
                 <input
@@ -169,13 +169,13 @@ const CampaignCreationPage: React.FC = () => {
                   value={formData.title}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                   placeholder="Enter your campaign title"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-cordillera-olive mb-2">
+                <label className="block text-sm font-medium text-heritage-800 mb-2">
                   Category *
                 </label>
                 <select
@@ -183,7 +183,7 @@ const CampaignCreationPage: React.FC = () => {
                   value={formData.category}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                 >
                   <option value="">Select a category</option>
                   {categories.map(category => (
@@ -194,7 +194,7 @@ const CampaignCreationPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-cordillera-olive mb-2">
+              <label className="block text-sm font-medium text-heritage-800 mb-2">
                 Campaign Description *
               </label>
               <textarea
@@ -203,14 +203,14 @@ const CampaignCreationPage: React.FC = () => {
                 onChange={handleInputChange}
                 required
                 rows={6}
-                className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                 placeholder="Describe your campaign goals, impact, and how the funds will be used..."
               />
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-cordillera-olive mb-2">
+                <label className="block text-sm font-medium text-heritage-800 mb-2">
                   Organizer Name *
                 </label>
                 <input
@@ -219,13 +219,13 @@ const CampaignCreationPage: React.FC = () => {
                   value={formData.organizer}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                   placeholder="Enter organizer name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-cordillera-olive mb-2">
+                <label className="block text-sm font-medium text-heritage-800 mb-2">
                   Email *
                 </label>
                 <input
@@ -234,7 +234,7 @@ const CampaignCreationPage: React.FC = () => {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                   placeholder="Enter your email"
                 />
               </div>
@@ -242,7 +242,7 @@ const CampaignCreationPage: React.FC = () => {
 
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-cordillera-olive mb-2">
+                <label className="block text-sm font-medium text-heritage-800 mb-2">
                   Phone Number
                 </label>
                 <input
@@ -250,13 +250,13 @@ const CampaignCreationPage: React.FC = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                   placeholder="Enter phone number"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-cordillera-olive mb-2">
+                <label className="block text-sm font-medium text-heritage-800 mb-2">
                   Goal Amount (₱) *
                 </label>
                 <input
@@ -267,7 +267,7 @@ const CampaignCreationPage: React.FC = () => {
                   required
                   min="1000"
                   step="1000"
-                  className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                   placeholder="Enter goal amount"
                 />
               </div>
@@ -275,7 +275,7 @@ const CampaignCreationPage: React.FC = () => {
 
             <div className="grid md:grid-cols-1 gap-6">
               <div>
-                <label className="block text-sm font-medium text-cordillera-olive mb-2">
+                <label className="block text-sm font-medium text-heritage-800 mb-2">
                   End Date *
                 </label>
                 <input
@@ -285,14 +285,14 @@ const CampaignCreationPage: React.FC = () => {
                   onChange={handleInputChange}
                   required
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-3 border border-cordillera-olive/20 rounded-lg focus:ring-2 focus:ring-cordillera-gold focus:border-transparent"
+                  className="w-full px-4 py-3 border border-heritage-800/20 rounded-lg focus:ring-2 focus:ring-heritage-500 focus:border-transparent"
                 />
               </div>
             </div>
 
-            <div className="bg-cordillera-sage/20 rounded-lg p-6">
-              <h3 className="text-lg font-medium text-cordillera-olive mb-3">Campaign Guidelines</h3>
-              <ul className="text-sm text-cordillera-olive/70 space-y-2">
+            <div className="bg-brand-sage/20 rounded-lg p-6">
+              <h3 className="text-lg font-medium text-heritage-800 mb-3">Campaign Guidelines</h3>
+              <ul className="text-sm text-heritage-800/70 space-y-2">
                 <li>• Campaigns must support Cordillera weaving heritage preservation</li>
                 <li>• Provide clear goals and how funds will be used</li>
                 <li>• Set realistic funding goals and timelines</li>
@@ -304,14 +304,14 @@ const CampaignCreationPage: React.FC = () => {
             <div className="flex gap-4 pt-6">
               <Link
                 to="/stories"
-                className="flex-1 px-6 py-3 border border-cordillera-olive/20 rounded-lg text-cordillera-olive hover:bg-cordillera-olive/5 transition-colors text-center"
+                className="flex-1 px-6 py-3 border border-heritage-800/20 rounded-lg text-heritage-800 hover:bg-heritage-800/5 transition-colors text-center"
               >
                 Cancel
               </Link>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 bg-cordillera-gold text-cordillera-olive py-3 px-6 rounded-lg font-medium hover:bg-cordillera-gold/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-heritage-500 text-heritage-800 py-3 px-6 rounded-lg font-medium hover:bg-heritage-500/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">

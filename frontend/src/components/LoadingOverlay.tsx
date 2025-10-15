@@ -8,10 +8,10 @@ interface LoadingOverlayProps {
 const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, message }) => {
   if (!show) return null
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-cordillera-olive/80 backdrop-blur-sm">
-      <div className="flex flex-col items-center gap-4 text-cordillera-cream">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-heritage-800/80 backdrop-blur-sm">
+      <div className="flex flex-col items-center gap-4 text-heritage-100">
         <svg
-          className="animate-spin h-10 w-10 text-cordillera-gold"
+          className="animate-spin h-10 w-10 text-heritage-500"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -22,7 +22,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, message }) => {
         </svg>
         <div className="text-center">
           <p className="text-lg font-medium">{message || 'Please wait...'}</p>
-          <p className="text-sm text-cordillera-cream/80">Just a moment while we process your request</p>
+          <p className="text-sm text-heritage-100/80">Just a moment while we process your request</p>
         </div>
       </div>
     </div>
