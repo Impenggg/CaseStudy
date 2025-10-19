@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { prefetchRoute } from '../lib/prefetchRoutes';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import EnhancedCartModal from './EnhancedCartModal';
@@ -96,6 +97,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     after:transition-all after:duration-200 after:rounded-full
                     ${isActive(link.to) ? '' : 'hover:after:w-4/5'}
                   `}
+                  onMouseEnter={() => prefetchRoute(link.to)}
+                  onFocus={() => prefetchRoute(link.to)}
+                  onTouchStart={() => prefetchRoute(link.to)}
                 >
                   {link.label}
                 </Link>
@@ -285,6 +289,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 to="/"
                 className={`block px-3 py-2 transition-colors ${isActive('/') ? 'text-cordillera-gold' : 'text-cordillera-cream/90 hover:text-cordillera-gold'}`}
                 onClick={() => setIsMobileMenuOpen(false)}
+                onMouseEnter={() => prefetchRoute('/')}
+                onFocus={() => prefetchRoute('/')}
+                onTouchStart={() => prefetchRoute('/')}
               >
                 Home
               </Link>
@@ -292,6 +299,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 to="/marketplace"
                 className={`block px-3 py-2 transition-colors ${isActive('/marketplace') ? 'text-cordillera-gold' : 'text-cordillera-cream/90 hover:text-cordillera-gold'}`}
                 onClick={() => setIsMobileMenuOpen(false)}
+                onMouseEnter={() => prefetchRoute('/marketplace')}
+                onFocus={() => prefetchRoute('/marketplace')}
+                onTouchStart={() => prefetchRoute('/marketplace')}
               >
                 Marketplace
               </Link>
@@ -299,6 +309,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 to="/stories"
                 className={`block px-3 py-2 transition-colors ${isActive('/stories') ? 'text-cordillera-gold' : 'text-cordillera-cream/90 hover:text-cordillera-gold'}`}
                 onClick={() => setIsMobileMenuOpen(false)}
+                onMouseEnter={() => prefetchRoute('/stories')}
+                onFocus={() => prefetchRoute('/stories')}
+                onTouchStart={() => prefetchRoute('/stories')}
               >
                 Stories
               </Link>
@@ -306,6 +319,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 to="/campaigns"
                 className={`block px-3 py-2 transition-colors ${isActive('/campaigns') ? 'text-cordillera-gold' : 'text-cordillera-cream/90 hover:text-cordillera-gold'}`}
                 onClick={() => setIsMobileMenuOpen(false)}
+                onMouseEnter={() => prefetchRoute('/campaigns')}
+                onFocus={() => prefetchRoute('/campaigns')}
+                onTouchStart={() => prefetchRoute('/campaigns')}
               >
                 Campaigns
               </Link>
