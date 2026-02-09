@@ -77,26 +77,23 @@ Railway exposes MySQL as a separate service. Reference its variables like `${{My
 
 ---
 
-## 5. Run migrations on deploy (Pre-Deploy Command)
+## 5. Build and start commands (avoid “secret APP_KEY: not found”)
 
-So the database is migrated every time you deploy:
+Railway does **not** pass service variables (like `APP_KEY`) to the **build** step. If the build runs `php artisan` or composer scripts that need Laravel, you get **“secret APP_KEY: not found”**. Use this setup so the build does not need `APP_KEY`:
 
-1. In the **Laravel service**, go to **Settings**.
-2. Find **Deploy** → **Pre-Deploy Command** (or **Build** section depending on UI).
-3. Set **Pre-Deploy Command** to either:
-
-   **Option A (inline):**
+1. **Pre-Deploy Command:** leave **empty** (do not run migrate or config:cache here).
+2. **Build:** In **Settings** → **Build**, set **Custom Build Command** (if available) to:
    ```bash
-   composer install --no-dev --optimize-autoloader && php artisan migrate --force && php artisan config:cache
+   composer install --no-dev --optimize-autoloader --no-scripts
    ```
-
-   **Option B (script in repo):**  
-   If you prefer using the script in `backend/railway/init-app.sh`:
+   (`--no-scripts` avoids Laravel bootstrap during build.)
+3. **Start:** In **Settings** → **Deploy** (or **Start**), set **Custom Start Command** to:
    ```bash
-   chmod +x railway/init-app.sh && ./railway/init-app.sh
+   sh railway/start.sh
    ```
+   The script `backend/railway/start.sh` runs `migrate`, `config:cache`, then starts PHP-FPM (variables are available at runtime).
 
-4. Save.
+If your Railway UI does not have a Custom Build Command, leave the build as default and only set the **Custom Start Command** above; if the build still fails with “secret APP_KEY: not found”, the builder may be requesting `APP_KEY`—in that case, try creating a new service or contacting Railway support.
 
 ---
 
